@@ -28,3 +28,6 @@ news-site/
 │
 ├── middleware/
 │   └── authMiddleware.js
+
+
+The project should be synced in local pc with github app and then uploaded to the server with fillezilla.
