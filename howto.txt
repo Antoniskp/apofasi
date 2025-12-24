@@ -8,7 +8,7 @@ JWT (API) or Sessions (EJS pages)
 bcrypt for passwords
 Role-based auth (admin / editor)
 
-📁 Project Structure
+📁 Early Project Structure
 news-site/
 │
 ├── server.js
