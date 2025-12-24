@@ -1,0 +1,30 @@
+According to chatgpt
+
+✅ Recommended Stack for You
+If you're building a news website:
+Express.js
+MongoDB
+JWT (API) or Sessions (EJS pages)
+bcrypt for passwords
+Role-based auth (admin / editor)
+
+📁 Project Structure
+news-site/
+│
+├── server.js
+├── package.json
+├── .env
+│
+├── config/
+│   └── db.js
+│
+├── models/
+│   ├── User.js
+│   └── Article.js
+│
+├── routes/
+│   ├── auth.js
+│   └── articles.js
+│
+├── middleware/
+│   └── authMiddleware.js
