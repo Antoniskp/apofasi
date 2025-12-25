@@ -1,0 +1,20 @@
+Συνταξιοδοτικό
+Η κεφαλαιοποιητική σύνταξη είναι ένα σύστημα όπου οι εισφορές του εργαζόμενου συσσωρεύονται σε έναν ατομικό λογαριασμό και επενδύονται, δημιουργώντας ένα κεφάλαιο που θα καθορίσει το ύψος της σύνταξης, σε αντίθεση με το διανεμητικό σύστημα (όπου οι εισφορές νέων χρηματοδοτούν τις συντάξεις των παλαιότερων). Αυτό το σύστημα, που εφαρμόζεται σε χώρες όπως η Σουηδία σε πυλώνες επικουρικής και επαγγελματικής ασφάλισης, προσφέρει ευελιξία επιλογής επενδυτικών επιλογών, αλλά ενέχει και τον κίνδυνο της αγοράς. 
+Βασικά χαρακτηριστικά
+Ατομικός λογαριασμός: Κάθε ασφαλισμένος έχει τον δικό του λογαριασμό όπου πιστώνονται οι εισφορές του.
+Επενδυτική απόδοση: Το κεφάλαιο αυξάνεται μέσω επενδύσεων, κάτι που σημαίνει ότι η τελική σύνταξη εξαρτάται από την απόδοση των επενδύσεων.
+Κίνδυνος αγοράς: Υπάρχει έκθεση σε κινδύνους της αγοράς, καθώς οι αποδόσεις δεν είναι εγγυημένες.
+Ευελιξία: Συχνά επιτρέπει στον ασφαλισμένο να επιλέγει την ηλικία συνταξιοδότησης (εντός πλαισίου).
+Μορφή καταβολής: Το συσσωρευμένο κεφάλαιο μπορεί να καταβάλλεται ως εφάπαξ ποσό ή ως μηνιαία σύνταξη (π.χ. το 25% εφάπαξ και το υπόλοιπο ως μηνιαία). 
+Πού εφαρμόζεται
+Στη Σουηδία αποτελεί βασικό στοιχείο του συνταξιοδοτικού συστήματος, ειδικά στον 1ο και 2ο πυλώνα (επαγγελματική ασφάλιση), ενώ υπάρχει και προαιρετικός 3ος πυλώνας. 
+Σύγκριση με διανεμητικό σύστημα
+Διανεμητικό: Βασίζεται στην αλληλεγγύη των γενεών (οι νέοι πληρώνουν τους συνταξιούχους), με εγγυημένες συντάξεις (θεωρητικά) αλλά επιβαρύνεται από τη γήρανση του πληθυσμού.
+Κεφαλαιοποιητικό: Βασίζεται στην ατομική συσσώρευση κεφαλαίου και επενδυτική απόδοση, με ευθύνη του ατομικού ασφαλισμένου για τους κινδύνους και τα οφέλη. 
+
+
+When a government uses pension money for other purposes, it is often described using terms like:
+Appropriation or reprogramming of funds: This refers to the legislative authorization to direct government funds for specified purposes, which can include moving money from a pension fund's surplus into a general revenue fund.
+Siphoning off: This informal term is used by critics, such as public sector unions, to describe the act of the government transferring pension funds into its general account and using the money as it pleases, which they may consider a "theft of workers' deferred wages".
+Transferring to the general/consolidated revenue fund: This is a more formal, bureaucratic description of the action, where a surplus from a dedicated fund is moved into the government's primary operating fund. 
+The specific terminology often depends on whether the government is managing a fully funded scheme (where assets are legally restricted) or an unfunded/pay-as-you-go scheme (which pays current retirees from current tax revenues). In the case of public sector defined benefit plans, where the government guarantees the benefits regardless of fund performance and thus assumes all the risk, it may claim the right to any surplus. 
