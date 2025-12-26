@@ -2,11 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const demoStory = {
-  title: "Example: Parliament debates new measures",
+  title: "Παράδειγμα: Η Βουλή συζητά νέα μέτρα",
   sources: ["Kathimerini", "Naftemporiki", "ERT", "Demo Source"],
-  updated: "Updated 15 minutes ago",
-  question: "Do you support the proposed measures?",
-  options: ["Yes", "No", "Not sure"],
+  updated: "Ενημερώθηκε πριν 15 λεπτά",
+  question: "Υποστηρίζετε τα προτεινόμενα μέτρα;",
+  options: ["Ναι", "Όχι", "Δεν είμαι σίγουρος/η"],
   totalVotes: 412
 };
 
@@ -15,59 +15,54 @@ const Home = () => {
     <div className="home">
       <section className="hero">
         <div className="hero-inner">
-          <div className="hero-kicker">Greece-first • Web-first • Public sentiment layer</div>
+          <div className="hero-kicker">Πρώτα η Ελλάδα • Πρώτα ο Ιστός • Επίπεδο δημόσιου αισθήματος</div>
 
-          <h1>Apofasi: news clustered across sources, with a poll under every story.</h1>
+          <h1>Apofasi: ειδήσεις ομαδοποιημένες από πολλές πηγές, με μια ψηφοφορία κάτω από κάθε ιστορία.</h1>
 
           <p className="hero-sub">
-            Read what happened, compare how different outlets cover it, and vote to show how people feel —
-            in real time. Built for Greece.
+            Διαβάστε τι συνέβη, συγκρίνετε πώς το καλύπτουν διαφορετικά μέσα και ψηφίστε για να δείξετε πώς
+            νιώθει ο κόσμος — σε πραγματικό χρόνο. Φτιαγμένο για την Ελλάδα.
           </p>
 
           <div className="hero-buttons">
             <Link to="/news" className="btn">
-              Explore News (soon)
+              Δείτε τις Ειδήσεις (σύντομα)
             </Link>
             <Link to="/polls" className="btn btn-outline">
-              Explore Polls (soon)
+              Δείτε τις Ψηφοφορίες (σύντομα)
             </Link>
           </div>
 
           <p className="hero-disclaimer">
-            Transparency: Platform polls are indicative and not statistically representative.
+            Διαφάνεια: Οι ψηφοφορίες της πλατφόρμας είναι ενδεικτικές και δεν είναι στατιστικά
+            αντιπροσωπευτικές.
           </p>
         </div>
       </section>
 
       <section className="section">
-        <h2 className="section-title">How it works</h2>
+        <h2 className="section-title">Πώς λειτουργεί</h2>
 
         <div className="grid-3">
           <div className="card">
-            <h3>1) Aggregate</h3>
-            <p>
-              We collect headlines from multiple Greek and international sources and normalize them into a clean feed.
-            </p>
+            <h3>1) Συγκέντρωση</h3>
+            <p>Συγκεντρώνουμε τίτλους από πολλές ελληνικές και διεθνείς πηγές και τους κανονικοποιούμε σε ένα καθαρό feed.</p>
           </div>
 
           <div className="card">
-            <h3>2) Cluster</h3>
-            <p>
-              Similar articles are grouped into one “story cluster” so you can see coverage across outlets in one place.
-            </p>
+            <h3>2) Ομαδοποίηση</h3>
+            <p>Παρόμοια άρθρα ομαδοποιούνται σε μία «ομάδα ιστορίας» ώστε να βλέπετε την κάλυψη από όλα τα μέσα σε ένα μέρος.</p>
           </div>
 
           <div className="card">
-            <h3>3) Poll</h3>
-            <p>
-              Every story gets a simple poll. Vote once, see results instantly, and track sentiment over time.
-            </p>
+            <h3>3) Ψηφοφορία</h3>
+            <p>Κάθε ιστορία έχει μια απλή ψηφοφορία. Ψηφίστε μία φορά, δείτε τα αποτελέσματα αμέσως και παρακολουθήστε την τάση με τον χρόνο.</p>
           </div>
         </div>
       </section>
 
       <section className="section">
-        <h2 className="section-title">Demo (what you will see)</h2>
+        <h2 className="section-title">Επίδειξη (τι θα δείτε)</h2>
 
         <div className="story">
           <div className="story-header">
@@ -75,11 +70,11 @@ const Home = () => {
               <div className="story-title">{demoStory.title}</div>
               <div className="story-meta">{demoStory.updated}</div>
             </div>
-            <div className="pill">Cluster</div>
+            <div className="pill">Ομάδα</div>
           </div>
 
           <div className="story-sources">
-            <div className="label">Sources covering this story:</div>
+            <div className="label">Πηγές που καλύπτουν αυτή την ιστορία:</div>
             <div className="chips">
               {demoStory.sources.map((s) => (
                 <span key={s} className="chip">
@@ -90,7 +85,7 @@ const Home = () => {
           </div>
 
           <div className="poll">
-            <div className="label">Poll</div>
+            <div className="label">Ψηφοφορία</div>
             <div className="poll-q">{demoStory.question}</div>
 
             <div className="poll-options">
@@ -102,48 +97,48 @@ const Home = () => {
             </div>
 
             <div className="poll-foot">
-              <span>Total votes: {demoStory.totalVotes}</span>
-              <span className="muted">Results shown after voting (MVP rule)</span>
+              <span>Σύνολο ψήφων: {demoStory.totalVotes}</span>
+              <span className="muted">Τα αποτελέσματα εμφανίζονται μετά την ψήφο (κανόνας MVP)</span>
             </div>
           </div>
         </div>
 
         <div className="cta-row">
           <a className="btn" href="#roadmap">
-            What’s next
+            Τι ακολουθεί
           </a>
           <a className="btn btn-outline" href="https://github.com/Antoniskp/apofasi" target="_blank" rel="noreferrer">
-            View project on GitHub
+            Δείτε το project στο GitHub
           </a>
         </div>
       </section>
 
       <section id="roadmap" className="section">
-        <h2 className="section-title">Roadmap (MVP)</h2>
+        <h2 className="section-title">Οδικός χάρτης (MVP)</h2>
 
         <div className="grid-2">
           <div className="card">
-            <h3>Phase 1</h3>
+            <h3>Φάση 1</h3>
             <ul className="list">
-              <li>RSS ingestion for Greek sources</li>
-              <li>Story clustering</li>
-              <li>Story page + poll widget</li>
+              <li>Εισαγωγή RSS για ελληνικές πηγές</li>
+              <li>Ομαδοποίηση ιστοριών</li>
+              <li>Σελίδα ιστορίας + widget ψηφοφορίας</li>
             </ul>
           </div>
 
           <div className="card">
-            <h3>Phase 2</h3>
+            <h3>Φάση 2</h3>
             <ul className="list">
-              <li>User accounts (optional verification)</li>
-              <li>Poll integrity controls (rate limits, risk scoring)</li>
-              <li>Topic pages (Politics, Economy, Society, Sports)</li>
+              <li>Λογαριασμοί χρηστών (προαιρετική επαλήθευση)</li>
+              <li>Έλεγχοι ακεραιότητας ψηφοφορίας (περιορισμοί ρυθμού, αξιολόγηση ρίσκου)</li>
+              <li>Σελίδες θεματικών (Πολιτική, Οικονομία, Κοινωνία, Αθλητισμός)</li>
             </ul>
           </div>
         </div>
       </section>
 
       <footer className="footer">
-        © {new Date().getFullYear()} Apofasi. Built for Greece.
+        © {new Date().getFullYear()} Apofasi. Φτιαγμένο για την Ελλάδα.
       </footer>
     </div>
   );
