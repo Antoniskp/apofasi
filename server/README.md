@@ -1,0 +1,66 @@
+# Server setup for social login
+
+This backend is an Express + Passport server that issues session cookies after Google or Facebook OAuth.
+Follow these steps to get it running locally and configure the providers correctly.
+
+Need a quick reference for the database? See [`DB_SCHEMA.md`](./DB_SCHEMA.md).
+
+## 1) Install dependencies and start MongoDB
+
+```bash
+cd server
+npm install
+# make sure MongoDB is running and reachable at the URI you plan to use
+```
+
+## 2) Create a `.env` file
+
+Copy the `.env.example` file and fill in the blanks:
+
+```bash
+cp .env.example .env
+```
+
+Key fields you must set:
+- `MONGO_URI`: connection string for MongoDB (e.g., `mongodb://localhost:27017/apofasi`).
+- `SESSION_SECRET`: long random string for signing the session cookie.
+- `CLIENT_ORIGIN`: the base URL of the frontend that will initiate OAuth and receive redirects (e.g., `http://localhost:5173`).
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: from the Google Cloud OAuth client.
+- `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET`: from your Facebook app.
+- Callback URLs must match what you register with the providers; the defaults assume a local server on port 5000.
+
+> Tip: If you leave the provider credentials empty, the server keeps social login disabled and responds with HTTP 503 for those
+> routes until keys are added. This lets you ship the rest of the stack without enabling OAuth yet.
+
+## 3) Configure OAuth providers
+
+### Google
+1. In the Google Cloud console, create an OAuth 2.0 Client ID (type: Web application).
+2. Add the following Authorized redirect URI (adjust port if needed):
+   - `http://localhost:5000/auth/google/callback`
+3. Enable the **People API** if your project requires it for profile data.
+
+### Facebook
+1. In the Meta for Developers dashboard, create an app and add the **Facebook Login** product.
+2. Under **Valid OAuth Redirect URIs**, add:
+   - `http://localhost:5000/auth/facebook/callback`
+3. Make sure **email** is included in the permissions; the server already requests it.
+
+## 4) Run the server
+
+Use the provided scripts:
+```bash
+# from the server directory
+npm run dev   # watches for changes (development)
+npm start     # production-style start
+```
+
+The server will expose these endpoints:
+- `GET /auth/google` → starts Google OAuth.
+- `GET /auth/facebook` → starts Facebook OAuth.
+- `GET /auth/status` → returns whether the user is authenticated and the basic profile data.
+- `GET /auth/logout` → clears the session.
+
+## 5) Frontend coordination
+
+Set `VITE_API_BASE_URL` in the client to point to this server (e.g., `http://localhost:5000`) and make sure `CLIENT_ORIGIN` matches the URL the browser uses to load the frontend. The session cookie is issued with `SameSite=None` when `NODE_ENV=production`, so configure HTTPS and trust proxy appropriately in that environment.
