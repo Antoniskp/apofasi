@@ -4,6 +4,7 @@ import Home from "./pages/Home.jsx";
 import News from "./pages/News.jsx";
 import Polls from "./pages/Polls.jsx";
 import AuthStatus from "./pages/AuthStatus.jsx";
+import Mission from "./pages/Mission.jsx";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <main className="page-main">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/mission" element={<Mission />} />
             <Route path="/news" element={<News />} />
             <Route path="/polls" element={<Polls />} />
             <Route path="/auth/success" element={<AuthStatus type="success" />} />
