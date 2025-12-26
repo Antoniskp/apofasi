@@ -6,6 +6,13 @@
 Application for news, education and polls.
 The idea is creating the core of a super application which will support news, education, polls and collective decision making.
 
+## Deploying the client build
+
+Use the `./deploy_client.sh` helper to compile the Vite client and populate
+`client/dist`, which the server serves in production. The script checks for
+unresolved merge conflicts before running so you get a clear message instead of
+Git errors during deployment.
+
 ## Social login (Google & Facebook)
 
 The backend supports OAuth login with Google and Facebook. Social login is disabled by default and only turns on when you provide
