@@ -107,12 +107,76 @@ body {
   transform: translateY(-1px);
 }
 
+.menu-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .menu-meta {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   color: #1f2937;
   font-weight: 700;
+}
+
+.menu-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border: 1px solid rgba(17, 24, 39, 0.15);
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.75);
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.menu-auth-btn:hover {
+  transform: translateY(-1px);
+  background: #fff7db;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.12);
+}
+
+.menu-auth-btn.primary {
+  background: #1f2937;
+  color: #ffd447;
+  border-color: #111827;
+}
+
+.menu-auth-btn.primary:hover {
+  background: #111827;
+  color: #facc15;
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.2);
+}
+
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(17, 24, 39, 0.18);
+  background: rgba(255, 255, 255, 0.75);
+  color: #111827;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
 }
 
 .menu-badge {
@@ -575,6 +639,46 @@ button:focus-visible {
 @media (max-width: 680px) {
   .hero {
     padding: 72px 20px 60px;
+  }
+
+  .menu-top {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .menu-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .menu-actions {
+    order: 2;
+  }
+
+  .menu-meta {
+    order: 1;
+  }
+
+  .menu-links {
+    display: none;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .menu-links.open {
+    display: flex;
+  }
+
+  .menu-link {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
   }
 
   .story-header {

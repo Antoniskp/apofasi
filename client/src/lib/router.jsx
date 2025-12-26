@@ -63,3 +63,8 @@ export function Link({ to, children, ...rest }) {
     </a>
   );
 }
+
+export function useLocation() {
+  const { path } = useContext(RouterContext);
+  return { pathname: path };
+}

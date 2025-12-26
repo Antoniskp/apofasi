@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const topMenu = [
   { label: "Αρχική", to: "/" },
@@ -21,6 +22,10 @@ const bottomMenu = [
 ];
 
 export default function MenuBars() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const closeMenu = () => setIsOpen(false);
+
   return (
     <div className="menu-shell">
       <div className="menu-top">
@@ -31,17 +36,38 @@ export default function MenuBars() {
           </Link>
         </div>
 
-        <nav className="menu-links" aria-label="Top navigation">
+        <button
+          type="button"
+          className="menu-toggle"
+          aria-label="Εναλλαγή μενού"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((prev) => !prev)}
+        >
+          ☰
+        </button>
+
+        <nav className={`menu-links ${isOpen ? "open" : ""}`} aria-label="Top navigation">
           {topMenu.map((item) => (
-            <Link key={item.label} to={item.to} className="menu-link">
+            <Link key={item.label} to={item.to} className="menu-link" onClick={closeMenu}>
               {item.label}
             </Link>
           ))}
         </nav>
 
-        <div className="menu-meta">
-          <span className="menu-badge">Beta</span>
-          <span className="menu-clock">24/7 ενημέρωση</span>
+        <div className="menu-right">
+          <div className="menu-actions">
+            <a href="#auth" className="menu-auth-btn primary">
+              Σύνδεση
+            </a>
+            <a href="#auth" className="menu-auth-btn">
+              Εγγραφή
+            </a>
+          </div>
+
+          <div className="menu-meta">
+            <span className="menu-badge">Beta</span>
+            <span className="menu-clock">24/7 ενημέρωση</span>
+          </div>
         </div>
       </div>
 

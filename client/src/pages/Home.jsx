@@ -62,6 +62,10 @@ const Home = () => {
         </div>
       </section>
 
+      <section id="auth" className="section">
+        <AuthButtons />
+      </section>
+
       <section className="section">
         <AuthButtons />
       </section>
