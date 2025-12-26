@@ -7,6 +7,7 @@ import AuthStatus from "./pages/AuthStatus.jsx";
 import Mission from "./pages/Mission.jsx";
 import Auth from "./pages/Auth.jsx";
 
+
 function App() {
   return (
     <BrowserRouter>
