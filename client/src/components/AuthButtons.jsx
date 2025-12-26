@@ -28,10 +28,16 @@ export default function AuthButtons() {
 
   const loadStatus = async () => {
     setStatus((prev) => ({ ...prev, loading: true }));
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/status`, {
         credentials: "include"
       });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
       const data = await response.json();
       setStatus({
         loading: false,
@@ -43,7 +49,10 @@ export default function AuthButtons() {
       setStatus({
         loading: false,
         user: null,
-        error: "Αποτυχία ελέγχου κατάστασης",
+        error:
+          API_BASE_URL
+            ? "Αποτυχία ελέγχου κατάστασης. Ελέγξτε ότι ο server τρέχει."
+            : "Ορίστε το VITE_API_BASE_URL για να ενεργοποιήσετε τα κουμπιά σύνδεσης.",
         providers: {}
       });
     }
