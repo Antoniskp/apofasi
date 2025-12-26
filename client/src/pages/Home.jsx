@@ -32,6 +32,9 @@ const Home = () => {
             <Link to="/polls" className="btn btn-outline">
               Δείτε τις Ψηφοφορίες (σύντομα)
             </Link>
+            <Link to="/mission" className="btn btn-subtle">
+              Μάθετε τι επιδιώκουμε
+            </Link>
           </div>
 
           <p className="hero-disclaimer">
