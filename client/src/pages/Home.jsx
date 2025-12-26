@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import AuthButtons from "../components/AuthButtons.jsx";
 
 const demoStory = {
   title: "Παράδειγμα: Η Βουλή συζητά νέα μέτρα",
@@ -59,6 +60,10 @@ const Home = () => {
             <p>Κάθε ιστορία έχει μια απλή ψηφοφορία. Ψηφίστε μία φορά, δείτε τα αποτελέσματα αμέσως και παρακολουθήστε την τάση με τον χρόνο.</p>
           </div>
         </div>
+      </section>
+
+      <section className="section">
+        <AuthButtons />
       </section>
 
       <section className="section">

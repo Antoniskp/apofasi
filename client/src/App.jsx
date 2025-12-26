@@ -3,6 +3,7 @@ import MenuBars from "./components/MenuBars.jsx";
 import Home from "./pages/Home.jsx";
 import News from "./pages/News.jsx";
 import Polls from "./pages/Polls.jsx";
+import AuthStatus from "./pages/AuthStatus.jsx";
 
 function App() {
   return (
@@ -14,6 +15,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/news" element={<News />} />
             <Route path="/polls" element={<Polls />} />
+            <Route path="/auth/success" element={<AuthStatus type="success" />} />
+            <Route path="/auth/error" element={<AuthStatus type="error" />} />
           </Routes>
         </main>
       </div>
