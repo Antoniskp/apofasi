@@ -3,6 +3,7 @@ import { useState } from "react";
 
 const topMenu = [
   { label: "Αρχική", to: "/" },
+  { label: "Τι επιδιώκουμε", to: "/mission" },
   { label: "Ειδήσεις", to: "/news" },
   { label: "Ψηφοφορίες", to: "/polls" },
   { label: "LIVE", to: "/news" },
