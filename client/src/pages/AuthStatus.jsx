@@ -17,7 +17,7 @@ const messages = {
 };
 
 export default function AuthStatus({ type = "success" }) {
-  const [status, setStatus] = useState({ loading: true, user: null });
+  const [status, setStatus] = useState({ loading: true, user: null, error: null });
   const location = useLocation();
   const copy = messages[type] || messages.success;
 
@@ -27,10 +27,19 @@ export default function AuthStatus({ type = "success" }) {
         const response = await fetch(`${API_BASE_URL}/auth/status`, {
           credentials: "include"
         });
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
         const data = await response.json();
-        setStatus({ loading: false, user: data.user });
+        setStatus({ loading: false, user: data.user, error: null });
       } catch (error) {
-        setStatus({ loading: false, user: null });
+        setStatus({
+          loading: false,
+          user: null,
+          error: API_BASE_URL ? "Δεν ήταν δυνατή η ανάκτηση συνεδρίας." : "Ρυθμίστε το VITE_API_BASE_URL."
+        });
       }
     };
 
@@ -56,7 +65,9 @@ export default function AuthStatus({ type = "success" }) {
         </div>
       )}
 
-      {!status.loading && !status.user && (
+      {!status.loading && status.error && <p className="error-text">{status.error}</p>}
+
+      {!status.loading && !status.user && !status.error && (
         <p className="error-text">Δεν εντοπίστηκε ενεργή συνεδρία.</p>
       )}
 
