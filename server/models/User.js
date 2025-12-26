@@ -2,21 +2,36 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    provider: {
+      type: String,
+      enum: ["local", "google", "facebook"],
+      default: "local"
+    },
+    providerId: {
+      type: String,
+      sparse: true
+    },
+    displayName: {
+      type: String,
+      trim: true
+    },
     username: {
       type: String,
-      required: true,
+      trim: true,
       unique: true,
-      trim: true
+      sparse: true
     },
     email: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
       lowercase: true
     },
     password: {
-      type: String,
-      required: true
+      type: String
+    },
+    avatar: {
+      type: String
     },
     role: {
       type: String,
@@ -26,5 +41,7 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.index({ provider: 1, providerId: 1 }, { unique: true, sparse: true });
 
 export default mongoose.model("User", userSchema);
