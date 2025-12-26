@@ -312,6 +312,18 @@ button:focus-visible {
   transform: translateY(-1px);
 }
 
+.btn-subtle {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #0f172a;
+  box-shadow: none;
+}
+
+.btn-subtle:hover {
+  background: #111827;
+  color: #f1f5f9;
+}
+
 .hero-disclaimer {
   margin-top: 14px;
   font-size: 0.95rem;

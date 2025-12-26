@@ -57,12 +57,12 @@ export default function MenuBars() {
 
         <div className="menu-right">
           <div className="menu-actions">
-            <a href="#auth" className="menu-auth-btn primary">
+            <Link to="/auth" className="menu-auth-btn primary" onClick={closeMenu}>
               Σύνδεση
-            </a>
-            <a href="#auth" className="menu-auth-btn">
+            </Link>
+            <Link to="/auth" className="menu-auth-btn" onClick={closeMenu}>
               Εγγραφή
-            </a>
+            </Link>
           </div>
 
           <div className="menu-meta">
