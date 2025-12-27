@@ -109,7 +109,7 @@ app.get("/auth/logout", (req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
-const clientBuildPath = path.join(__dirname, "../client/dist");
+const clientBuildPath = path.join(__dirname, "client/dist");
 const clientIndexPath = path.join(clientBuildPath, "index.html");
 const hasClientBuild = fs.existsSync(clientIndexPath);
 
@@ -127,7 +127,7 @@ if (hasClientBuild) {
   });
 } else if (process.env.NODE_ENV === "production") {
   console.warn(
-    "Client build not found at ../client/dist. Mission and other routes will return 404s."
+    "Client build not found at client/dist. Mission and other routes will return 404s."
   );
 }
 
