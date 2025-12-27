@@ -128,10 +128,6 @@ export default function Contribute() {
           ))}
         </div>
       </section>
-
-      <footer className="footer">
-        Ευχαριστούμε που εξετάζετε να στηρίξετε το Apofasi. Κάθε συμμετοχή κάνει την ενημέρωση καλύτερη.
-      </footer>
     </div>
   );
 }
