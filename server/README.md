@@ -15,16 +15,22 @@ npm install
 
 ## 2) Create a `.env` file
 
-Copy the `.env.example` file and fill in the blanks:
+Copy the provided `.env.example` file and fill in the blanks:
 
 ```bash
 cp .env.example .env
 ```
 
+The example already contains sensible defaults:
+- Mongo runs locally at `mongodb://localhost:27017/apofasi`.
+- The client is expected at `http://localhost:5173`.
+- OAuth callbacks point to `http://localhost:5000/auth/{provider}/callback`.
+- `PORT=5000` and `NODE_ENV=development` are set for local usage.
+
 Key fields you must set:
-- `MONGO_URI`: connection string for MongoDB (e.g., `mongodb://localhost:27017/apofasi`).
+- `MONGO_URI`: connection string for MongoDB.
 - `SESSION_SECRET`: long random string for signing the session cookie.
-- `CLIENT_ORIGIN`: the base URL of the frontend that will initiate OAuth and receive redirects (e.g., `http://localhost:5173`).
+- `CLIENT_ORIGIN`: the base URL of the frontend that will initiate OAuth and receive redirects.
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: from the Google Cloud OAuth client.
 - `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET`: from your Facebook app.
 - Callback URLs must match what you register with the providers; the defaults assume a local server on port 5000.
