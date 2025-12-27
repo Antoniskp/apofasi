@@ -30,33 +30,56 @@ export default function MenuBars() {
   return (
     <div className="menu-shell">
       <div className="menu-top">
-        <div className="menu-brand">
-          <span className="brand-mark">ap</span>
-          <Link to="/" className="brand-wordmark">
-            Apofasi
-          </Link>
-        </div>
+        <div className="menu-top-inner">
+          <div className="menu-left">
+            <div className="menu-brand">
+              <span className="brand-mark">ap</span>
+              <Link to="/" className="brand-wordmark">
+                Apofasi
+              </Link>
+            </div>
 
-        <button
-          type="button"
-          className="menu-toggle"
-          aria-label="Εναλλαγή μενού"
-          aria-expanded={isOpen}
-          onClick={() => setIsOpen((prev) => !prev)}
-        >
-          ☰
-        </button>
+            <button
+              type="button"
+              className="menu-toggle"
+              aria-label="Εναλλαγή μενού"
+              aria-expanded={isOpen}
+              onClick={() => setIsOpen((prev) => !prev)}
+            >
+              ☰
+            </button>
+          </div>
 
-        <nav className={`menu-links ${isOpen ? "open" : ""}`} aria-label="Top navigation">
-          {topMenu.map((item) => (
-            <Link key={item.label} to={item.to} className="menu-link" onClick={closeMenu}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+          <nav className={`menu-links ${isOpen ? "open" : ""}`} aria-label="Top navigation">
+            {topMenu.map((item) => (
+              <Link key={item.label} to={item.to} className="menu-link" onClick={closeMenu}>
+                {item.label}
+              </Link>
+            ))}
 
-        <div className="menu-right">
-          <div className="menu-actions">
+            <div className="menu-actions menu-actions-mobile">
+              <Link to="/auth" className="menu-auth-btn primary" onClick={closeMenu}>
+                <span className="menu-auth-icon" aria-hidden>
+                  🔐
+                </span>
+                <span>Σύνδεση</span>
+              </Link>
+              <Link to="/register" className="menu-auth-btn" onClick={closeMenu}>
+                <span className="menu-auth-icon" aria-hidden>
+                  ✏️
+                </span>
+                <span>Εγγραφή</span>
+              </Link>
+              <Link to="/profile" className="menu-auth-btn" onClick={closeMenu}>
+                <span className="menu-auth-icon" aria-hidden>
+                  👤
+                </span>
+                <span>Προφίλ</span>
+              </Link>
+            </div>
+          </nav>
+
+          <div className="menu-actions menu-actions-desktop">
             <Link to="/auth" className="menu-auth-btn primary" onClick={closeMenu}>
               <span className="menu-auth-icon" aria-hidden>
                 🔐
@@ -76,20 +99,23 @@ export default function MenuBars() {
               <span>Προφίλ</span>
             </Link>
           </div>
-
-          <div className="menu-meta">
-            <span className="menu-badge">Beta</span>
-            <span className="menu-clock">24/7 ενημέρωση</span>
-          </div>
         </div>
       </div>
 
       <div className="menu-bottom" aria-label="Categories">
-        {bottomMenu.map((item) => (
-          <span key={item} className="menu-pill">
-            {item}
-          </span>
-        ))}
+        <div className="menu-bottom-inner">
+          <div className="menu-bottom-meta">
+            <span className="menu-badge">Beta</span>
+            <span className="menu-clock">24/7 ενημέρωση</span>
+          </div>
+          <div className="menu-bottom-list">
+            {bottomMenu.map((item) => (
+              <span key={item} className="menu-pill">
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
