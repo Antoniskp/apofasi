@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import AuthButtons from "../components/AuthButtons.jsx";
 
 const demoStory = {
   title: "Παράδειγμα: Η Βουλή συζητά νέα μέτρα",
@@ -65,12 +64,73 @@ const Home = () => {
         </div>
       </section>
 
-      <section id="auth" className="section">
-        <AuthButtons />
+      <section className="section">
+        <h2 className="section-title">Γιατί έχει σημασία</h2>
+
+        <div className="grid-3">
+          <div className="card">
+            <h3>Διαφάνεια στην ενημέρωση</h3>
+            <p>
+              Βλέπετε πώς καλύπτει κάθε μέσο την ίδια είδηση, ώστε να σχηματίζετε άποψη
+              χωρίς θόρυβο ή αλγόριθμους που κρύβουν πληροφορίες.
+            </p>
+          </div>
+
+          <div className="card">
+            <h3>Συμμετοχή των πολιτών</h3>
+            <p>
+              Οι ψηφοφορίες κάτω από κάθε ιστορία καταγράφουν το δημόσιο αίσθημα σε
+              πραγματικό χρόνο, ενισχύοντας τη φωνή των αναγνωστών.
+            </p>
+          </div>
+
+          <div className="card">
+            <h3>Δημόσιο καλό, ανοιχτός κώδικας</h3>
+            <p>
+              Το project είναι ανοιχτού κώδικα και χτισμένο για την Ελλάδα. Μπορείτε να
+              δείτε τι φτιάχνουμε και να προτείνετε βελτιώσεις.
+            </p>
+          </div>
+        </div>
       </section>
 
       <section className="section">
-        <AuthButtons />
+        <h2 className="section-title">Τι μπορείτε να κάνετε σήμερα</h2>
+
+        <div className="grid-3">
+          <div className="card">
+            <h3>Διαβάστε την αποστολή</h3>
+            <p>
+              Μάθετε γιατί ξεκινήσαμε την «Απόφαση» και πώς θέλουμε να στηρίξουμε την
+              ενημέρωση στην Ελλάδα.
+            </p>
+            <Link className="btn btn-subtle" to="/mission">
+              Δείτε την αποστολή
+            </Link>
+          </div>
+
+          <div className="card">
+            <h3>Ζητήστε χαρακτηριστικά</h3>
+            <p>
+              Έχετε ιδέα για την εμπειρία χρήστη ή για τη συλλογή ειδήσεων; Πείτε μας τι
+              θα ήταν πιο χρήσιμο για εσάς.
+            </p>
+            <Link className="btn btn-subtle" to="/news">
+              Μοιραστείτε ανάγκες
+            </Link>
+          </div>
+
+          <div className="card">
+            <h3>Συμβάλετε στον κώδικα</h3>
+            <p>
+              Αν ασχολείστε με web, data ή σχεδιασμό, ρίξτε μια ματιά στον κώδικα στο
+              GitHub και βοηθήστε να πάμε στο επόμενο βήμα.
+            </p>
+            <a className="btn btn-outline" href="https://github.com/Antoniskp/apofasi" target="_blank" rel="noreferrer">
+              Συμμετοχή στο GitHub
+            </a>
+          </div>
+        </div>
       </section>
 
       <section className="section">
