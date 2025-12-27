@@ -10,8 +10,11 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
 }
 
 # Fail if there are unmerged files
-if git diff --name-only --diff-filter=U | grep -q .; then
+unmerged_files=$(git diff --name-only --diff-filter=U || true)
+if [[ -n "${unmerged_files}" ]]; then
   echo "ERROR: Unmerged files detected. Resolve conflicts before deploying."
+  echo "Files:"
+  echo "${unmerged_files}"
   exit 1
 fi
 
