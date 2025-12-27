@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 import cors from "cors";
 import session from "express-session";
 import passport from "passport";
@@ -16,9 +17,7 @@ const app = express();
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 const oauthProviders = {
   google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
-  facebook: Boolean(
-    process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET
-  )
+  facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET)
 };
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
@@ -58,11 +57,8 @@ app.get("/auth/status", (req, res) => {
 
 const ensureProviderConfigured = (provider) => (req, res, next) => {
   if (!oauthProviders[provider]) {
-    return res
-      .status(503)
-      .json({ message: `${provider} login is not configured yet.` });
+    return res.status(503).json({ message: `${provider} login is not configured yet.` });
   }
-
   return next();
 };
 
@@ -108,12 +104,21 @@ app.get("/auth/logout", (req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const __dirname = path.resolve();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const clientBuildPath = path.join(__dirname, "../client/dist");
 const clientIndexPath = path.join(clientBuildPath, "index.html");
+const hasClientBuild = fs.existsSync(clientIndexPath);
 
+if (!hasClientBuild) {
+  app.get("/", (req, res) => {
+    res.send("API running...");
+  });
+}
+
+if (hasClientBuild) {
   app.use(express.static(clientBuildPath));
 
   app.get("*", (req, res) => {
@@ -121,12 +126,8 @@ const clientIndexPath = path.join(clientBuildPath, "index.html");
   });
 } else if (process.env.NODE_ENV === "production") {
   console.warn(
-
-    "Client build not found at ../client/dist. Mission and other routes will return 404s."
-
+    `Client build not found at ${clientBuildPath}. Mission and other routes will return 404s.`
   );
 }
 
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
