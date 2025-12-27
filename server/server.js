@@ -17,9 +17,7 @@ const app = express();
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 const oauthProviders = {
   google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
-  facebook: Boolean(
-    process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET
-  )
+  facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET)
 };
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
@@ -59,11 +57,8 @@ app.get("/auth/status", (req, res) => {
 
 const ensureProviderConfigured = (provider) => (req, res, next) => {
   if (!oauthProviders[provider]) {
-    return res
-      .status(503)
-      .json({ message: `${provider} login is not configured yet.` });
+    return res.status(503).json({ message: `${provider} login is not configured yet.` });
   }
-
   return next();
 };
 
@@ -109,8 +104,10 @@ app.get("/auth/logout", (req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 const clientBuildPath = path.join(__dirname, "../client/dist");
 const clientIndexPath = path.join(clientBuildPath, "index.html");
 const hasClientBuild = fs.existsSync(clientIndexPath);
@@ -133,6 +130,4 @@ if (hasClientBuild) {
   );
 }
 
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
