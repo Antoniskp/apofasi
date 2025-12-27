@@ -7,7 +7,7 @@ const topMenu = [
   { label: "Ειδήσεις", to: "/news" },
   { label: "Ψηφοφορίες", to: "/polls" },
   { label: "LIVE", to: "/news" },
-  { label: "Podcasts", to: "/news" }
+  { label: "Συνεισφέρετε", to: "/contribute" }
 ];
 
 const bottomMenu = [
@@ -58,10 +58,16 @@ export default function MenuBars() {
         <div className="menu-right">
           <div className="menu-actions">
             <Link to="/auth" className="menu-auth-btn primary" onClick={closeMenu}>
-              Σύνδεση
+              <span className="menu-auth-icon" aria-hidden>
+                🔐
+              </span>
+              <span>Σύνδεση</span>
             </Link>
             <Link to="/auth" className="menu-auth-btn" onClick={closeMenu}>
-              Εγγραφή
+              <span className="menu-auth-icon" aria-hidden>
+                ✏️
+              </span>
+              <span>Εγγραφή</span>
             </Link>
           </div>
 

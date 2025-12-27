@@ -6,6 +6,7 @@ import Polls from "./pages/Polls.jsx";
 import AuthStatus from "./pages/AuthStatus.jsx";
 import Mission from "./pages/Mission.jsx";
 import Auth from "./pages/Auth.jsx";
+import Contribute from "./pages/Contribute.jsx";
 
 
 const withLayout = (page) => (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/mission" element={withLayout(<Mission />)} />
         <Route path="/news" element={withLayout(<News />)} />
         <Route path="/polls" element={withLayout(<Polls />)} />
+        <Route path="/contribute" element={withLayout(<Contribute />)} />
         <Route path="/auth" element={withLayout(<Auth />)} />
         <Route path="/auth/success" element={withLayout(<AuthStatus type="success" />)} />
         <Route path="/auth/error" element={withLayout(<AuthStatus type="error" />)} />
