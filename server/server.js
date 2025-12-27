@@ -40,10 +40,6 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/", (req, res) => {
-  res.send("API running...");
-});
-
 app.get("/auth/status", (req, res) => {
   res.json({
     authenticated: Boolean(req.user),
@@ -113,10 +109,11 @@ app.get("/auth/logout", (req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
+
+
 const clientBuildPath = path.join(__dirname, "../client/dist");
 const clientIndexPath = path.join(clientBuildPath, "index.html");
 
-if (fs.existsSync(clientIndexPath)) {
   app.use(express.static(clientBuildPath));
 
   app.get("*", (req, res) => {
@@ -124,7 +121,9 @@ if (fs.existsSync(clientIndexPath)) {
   });
 } else if (process.env.NODE_ENV === "production") {
   console.warn(
+
     "Client build not found at ../client/dist. Mission and other routes will return 404s."
+
   );
 }
 
