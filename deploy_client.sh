@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 echo "== Apofasi deploy started =="
 
@@ -15,10 +15,19 @@ if git diff --name-only --diff-filter=U | grep -q .; then
   exit 1
 fi
 
-# Always sync server to GitHub main
+# Fail if there are uncommitted changes that would block a pull
+if [[ -n "$(git status --porcelain)" ]]; then
+  echo "ERROR: Working tree is not clean. Commit, stash, or discard changes before deploying."
+  git status --short
+  exit 1
+fi
+
+# Sync with remote without creating merge commits
 echo "== Syncing with origin/main =="
-git fetch origin
-git reset --hard origin/main
+if ! git pull --ff-only origin main; then
+  echo "ERROR: Unable to fast-forward to origin/main. Please resolve the issue (rebase or merge) and retry."
+  exit 1
+fi
 
 # Build client
 echo "== Building client =="
