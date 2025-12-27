@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MenuBars from "./components/MenuBars.jsx";
+import Footer from "./components/Footer.jsx";
 import Home from "./pages/Home.jsx";
 import News from "./pages/News.jsx";
 import Polls from "./pages/Polls.jsx";
@@ -9,12 +10,18 @@ import Auth from "./pages/Auth.jsx";
 import Contribute from "./pages/Contribute.jsx";
 import Register from "./pages/Register.jsx";
 import Profile from "./pages/Profile.jsx";
+import Contact from "./pages/Contact.jsx";
+import About from "./pages/About.jsx";
+import Social from "./pages/Social.jsx";
+import Recommendations from "./pages/Recommendations.jsx";
+import TopChoices from "./pages/TopChoices.jsx";
 
 
 const withLayout = (page) => (
   <div className="page-shell">
     <MenuBars />
     <main className="page-main">{page}</main>
+    <Footer />
   </div>
 );
 
@@ -27,6 +34,11 @@ function App() {
         <Route path="/news" element={withLayout(<News />)} />
         <Route path="/polls" element={withLayout(<Polls />)} />
         <Route path="/contribute" element={withLayout(<Contribute />)} />
+        <Route path="/contact" element={withLayout(<Contact />)} />
+        <Route path="/about" element={withLayout(<About />)} />
+        <Route path="/social" element={withLayout(<Social />)} />
+        <Route path="/recommendations" element={withLayout(<Recommendations />)} />
+        <Route path="/top-choices" element={withLayout(<TopChoices />)} />
         <Route path="/auth" element={withLayout(<Auth />)} />
         <Route path="/register" element={withLayout(<Register />)} />
         <Route path="/profile" element={withLayout(<Profile />)} />

@@ -21,7 +21,7 @@ Need to add a local user quickly? Use the seed helper (prompts for email and pas
 npm run seed:user
 # or, from this directory
 npm --prefix server run seed:user
-```
+
 
 It hashes the provided password with the same algorithm used by the server and skips creation when the email already exists.
 
