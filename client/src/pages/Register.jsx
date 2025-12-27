@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL, getAuthStatus, loginUser, registerUser } from "../lib/api.js";
+import { useNavigate } from "../lib/router.jsx";
 
 export default function Register() {
   const [registerForm, setRegisterForm] = useState({ displayName: "", email: "", password: "" });
@@ -8,6 +9,7 @@ export default function Register() {
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const loadStatus = async () => {
     setStatus((prev) => ({ ...prev, loading: true }));
@@ -37,10 +39,11 @@ export default function Register() {
     setFeedback("");
 
     try {
-      await registerUser(registerForm);
+      const data = await registerUser(registerForm);
+      setStatus({ loading: false, user: data.user });
       setFeedback("Η εγγραφή ολοκληρώθηκε! Συνδεθήκατε αυτόματα.");
       setRegisterForm({ displayName: "", email: "", password: "" });
-      await loadStatus();
+      navigate("/profile");
     } catch (err) {
       setError(err.message || "Η εγγραφή απέτυχε. Δοκιμάστε ξανά.");
     } finally {

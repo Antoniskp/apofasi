@@ -68,3 +68,8 @@ export function useLocation() {
   const { path } = useContext(RouterContext);
   return { pathname: path };
 }
+
+export function useNavigate() {
+  const { navigate } = useContext(RouterContext);
+  return navigate;
+}

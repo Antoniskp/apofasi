@@ -14,6 +14,14 @@ mongosh < db/init.mongodb.js
 The script creates the `users`, `polls`, and `news` collections and applies the
 unique/sparse indexes expected by the models.
 
+Need to add a local user quickly? Use the seed helper (prompts for email and password):
+
+```bash
+npm run seed:user
+```
+
+It hashes the provided password with the same algorithm used by the server and skips creation when the email already exists.
+
 Need a quick reference for the database? See [`DB_SCHEMA.md`](./DB_SCHEMA.md).
 
 ## 1) Install dependencies and start MongoDB
