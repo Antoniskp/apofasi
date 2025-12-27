@@ -208,10 +208,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      <footer className="footer">
-        © {new Date().getFullYear()} Apofasi. Φτιαγμένο για την Ελλάδα.
-      </footer>
     </div>
   );
 };
