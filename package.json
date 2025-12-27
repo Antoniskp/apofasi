@@ -1,0 +1,7 @@
+{
+  "name": "apofasi",
+  "private": true,
+  "scripts": {
+    "seed:user": "npm --prefix server run seed:user"
+  }
+}
