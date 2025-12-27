@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import cors from "cors";
 import session from "express-session";
 import passport from "passport";
@@ -38,10 +40,6 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-
-app.get("/", (req, res) => {
-  res.send("API running...");
-});
 
 app.get("/auth/status", (req, res) => {
   res.json({
@@ -111,14 +109,28 @@ app.get("/auth/logout", (req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientBuildPath = path.join(__dirname, "../client/dist");
+const clientIndexPath = path.join(clientBuildPath, "index.html");
+const hasClientBuild = fs.existsSync(clientIndexPath);
 
-if (process.env.NODE_ENV === "production") {
-  const __dirname = path.resolve();
-  app.use(express.static(path.join(__dirname, "../client/dist")));
+if (!hasClientBuild) {
+  app.get("/", (req, res) => {
+    res.send("API running...");
+  });
+}
+
+if (hasClientBuild) {
+  app.use(express.static(clientBuildPath));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+    res.sendFile(clientIndexPath);
   });
+} else if (process.env.NODE_ENV === "production") {
+  console.warn(
+    `Client build not found at ${clientBuildPath}. Mission and other routes will return 404s.`
+  );
 }
 
 app.listen(PORT, () =>
