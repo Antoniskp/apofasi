@@ -14,6 +14,13 @@ unresolved merge conflicts before running so you get a clear message instead of
 Git errors during deployment. It also detects in-progress merges or rebases and
 points you to the commands needed to resolve or abort them prior to deploying.
 
+If Git reports conflicts in this file or the script, do not leave the conflict
+markers (`<<<<<<<`, `=======`, `>>>>>>>`) in place or delete both versions of
+the text. Pick the wording you want (or combine both sides), remove the marker
+lines, and save the final text. For the deploy helper description above, keep a
+single sentence that mentions both merge-conflict checks and merge/rebase
+detection.
+
 ## Social login (Google & Facebook)
 
 The backend supports OAuth login with Google and Facebook. Social login is disabled by default and only turns on when you provide
