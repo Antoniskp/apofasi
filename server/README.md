@@ -3,6 +3,17 @@
 This backend is an Express + Passport server that issues session cookies after Google or Facebook OAuth.
 Follow these steps to get it running locally and configure the providers correctly.
 
+## Database bootstrap
+
+If you want MongoDB collections and indexes pre-created, run the provided script:
+
+```bash
+mongosh < db/init.mongodb.js
+```
+
+The script creates the `users`, `polls`, and `news` collections and applies the
+unique/sparse indexes expected by the models.
+
 Need a quick reference for the database? See [`DB_SCHEMA.md`](./DB_SCHEMA.md).
 
 ## 1) Install dependencies and start MongoDB
