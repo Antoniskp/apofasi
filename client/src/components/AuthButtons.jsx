@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+import { API_BASE_URL, getAuthStatus, logoutUser } from "../lib/api.js";
 
 const providers = [
   {
@@ -30,15 +29,7 @@ export default function AuthButtons() {
     setStatus((prev) => ({ ...prev, loading: true }));
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/status`, {
-        credentials: "include"
-      });
-
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await getAuthStatus();
       setStatus({
         loading: false,
         user: data.user,
@@ -51,7 +42,7 @@ export default function AuthButtons() {
         user: null,
         error:
           API_BASE_URL
-            ? "Αποτυχία ελέγχου κατάστασης. Ελέγξτε ότι ο server τρέχει."
+            ? error.message || "Αποτυχία ελέγχου κατάστασης. Ελέγξτε ότι ο server τρέχει."
             : "Ορίστε το VITE_API_BASE_URL για να ενεργοποιήσετε τα κουμπιά σύνδεσης.",
         providers: {}
       });
@@ -65,9 +56,7 @@ export default function AuthButtons() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        credentials: "include"
-      });
+      await logoutUser();
       await loadStatus();
     } finally {
       setIsLoggingOut(false);

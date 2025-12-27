@@ -3,11 +3,13 @@ import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import crypto from "crypto";
 import cors from "cors";
 import session from "express-session";
 import passport from "passport";
 import connectDB from "./config/db.js";
 import configurePassport from "./config/passport.js";
+import User from "./models/User.js";
 
 dotenv.config();
 connectDB();
@@ -28,6 +30,35 @@ const corsOptions = {
 const oauthProviders = {
   google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
   facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET)
+};
+
+const sanitizeUser = (user) =>
+  user
+    ? {
+        id: user.id,
+        displayName: user.displayName,
+        email: user.email,
+        provider: user.provider,
+        avatar: user.avatar,
+        username: user.username
+      }
+    : null;
+
+const hashPassword = (password) => {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const derivedKey = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${derivedKey}`;
+};
+
+const verifyPassword = (password, storedValue) => {
+  const [salt, key] = storedValue.split(":");
+  if (!salt || !key) return false;
+  const derivedKey = crypto.scryptSync(password, salt, 64);
+  try {
+    return crypto.timingSafeEqual(Buffer.from(key, "hex"), derivedKey);
+  } catch {
+    return false;
+  }
 };
 
 app.use(cors(corsOptions));
@@ -54,15 +85,7 @@ app.get("/auth/status", (req, res) => {
   res.json({
     authenticated: Boolean(req.user),
     providers: oauthProviders,
-    user: req.user
-      ? {
-          id: req.user.id,
-          displayName: req.user.displayName,
-          email: req.user.email,
-          provider: req.user.provider,
-          avatar: req.user.avatar
-        }
-      : null
+    user: sanitizeUser(req.user)
   });
 });
 
@@ -72,6 +95,89 @@ const ensureProviderConfigured = (provider) => (req, res, next) => {
   }
   return next();
 };
+
+const ensureAuthenticated = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Απαιτείται σύνδεση." });
+  }
+  return next();
+};
+
+app.post("/auth/register", async (req, res) => {
+  const { email, password, displayName } = req.body || {};
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Απαιτούνται email και κωδικός." });
+  }
+
+  const normalizedEmail = String(email).toLowerCase().trim();
+  const trimmedName = displayName?.trim();
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    return res.status(400).json({ message: "Μη έγκυρο email." });
+  }
+
+  if (String(password).length < 8) {
+    return res.status(400).json({ message: "Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες." });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      return res.status(409).json({ message: "Το email χρησιμοποιείται ήδη." });
+    }
+
+    const newUser = await User.create({
+      provider: "local",
+      email: normalizedEmail,
+      password: hashPassword(password),
+      displayName: trimmedName || normalizedEmail.split("@")[0]
+    });
+
+    req.login(newUser, (error) => {
+      if (error) {
+        return res.status(500).json({ message: "Η δημιουργία συνεδρίας απέτυχε." });
+      }
+      return res.status(201).json({ user: sanitizeUser(newUser) });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Κάτι πήγε στραβά. Προσπαθήστε ξανά." });
+  }
+});
+
+app.post("/auth/login", async (req, res) => {
+  const { email, password } = req.body || {};
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Απαιτούνται email και κωδικός." });
+  }
+
+  try {
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user || !user.password) {
+      return res.status(401).json({ message: "Λανθασμένα στοιχεία σύνδεσης." });
+    }
+
+    if (!verifyPassword(password, user.password)) {
+      return res.status(401).json({ message: "Λανθασμένα στοιχεία σύνδεσης." });
+    }
+
+    req.login(user, (error) => {
+      if (error) {
+        return res.status(500).json({ message: "Η δημιουργία συνεδρίας απέτυχε." });
+      }
+      return res.json({ user: sanitizeUser(user) });
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Κάτι πήγε στραβά. Προσπαθήστε ξανά." });
+  }
+});
+
+app.get("/auth/profile", ensureAuthenticated, (req, res) => {
+  res.json({ user: sanitizeUser(req.user) });
+});
 
 app.get(
   "/auth/google",
