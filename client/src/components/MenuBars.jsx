@@ -63,11 +63,17 @@ export default function MenuBars() {
               </span>
               <span>Σύνδεση</span>
             </Link>
-            <Link to="/auth" className="menu-auth-btn" onClick={closeMenu}>
+            <Link to="/register" className="menu-auth-btn" onClick={closeMenu}>
               <span className="menu-auth-icon" aria-hidden>
                 ✏️
               </span>
               <span>Εγγραφή</span>
+            </Link>
+            <Link to="/profile" className="menu-auth-btn" onClick={closeMenu}>
+              <span className="menu-auth-icon" aria-hidden>
+                👤
+              </span>
+              <span>Προφίλ</span>
             </Link>
           </div>
 
