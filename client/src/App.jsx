@@ -8,23 +8,25 @@ import Mission from "./pages/Mission.jsx";
 import Auth from "./pages/Auth.jsx";
 
 
+const withLayout = (page) => (
+  <div className="page-shell">
+    <MenuBars />
+    <main className="page-main">{page}</main>
+  </div>
+);
+
 function App() {
   return (
     <BrowserRouter>
-      <div className="page-shell">
-        <MenuBars />
-        <main className="page-main">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/mission" element={<Mission />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/polls" element={<Polls />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/auth/success" element={<AuthStatus type="success" />} />
-            <Route path="/auth/error" element={<AuthStatus type="error" />} />
-          </Routes>
-        </main>
-      </div>
+      <Routes>
+        <Route path="/" element={withLayout(<Home />)} />
+        <Route path="/mission" element={withLayout(<Mission />)} />
+        <Route path="/news" element={withLayout(<News />)} />
+        <Route path="/polls" element={withLayout(<Polls />)} />
+        <Route path="/auth" element={withLayout(<Auth />)} />
+        <Route path="/auth/success" element={withLayout(<AuthStatus type="success" />)} />
+        <Route path="/auth/error" element={withLayout(<AuthStatus type="error" />)} />
+      </Routes>
     </BrowserRouter>
   );
 }
