@@ -10,8 +10,9 @@ The idea is creating the core of a super application which will support news, ed
 
 Use the `./deploy_client.sh` helper to compile the Vite client and populate
 `client/dist`, which the server serves in production. The script checks for
-unresolved merge conflicts before running so you get a clear message with steps
-to resolve them instead of Git errors during deployment.
+unresolved merge conflicts or in-progress merges/rebases before running so you
+get a clear message with steps to resolve or abort them instead of Git errors
+during deployment.
 
 ## Social login (Google & Facebook)
 
