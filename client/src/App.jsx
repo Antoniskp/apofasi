@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MenuBars from "./components/MenuBars.jsx";
 import Footer from "./components/Footer.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 import Home from "./pages/Home.jsx";
 import News from "./pages/News.jsx";
 import Polls from "./pages/Polls.jsx";
@@ -29,6 +30,7 @@ const withLayout = (page) => (
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={withLayout(<Home />)} />
         <Route path="/mission" element={withLayout(<Mission />)} />
