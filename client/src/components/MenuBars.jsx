@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 const topMenu = [
@@ -26,6 +26,7 @@ const bottomMenu = [
 
 export default function MenuBars() {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   const closeMenu = () => setIsOpen(false);
 
@@ -54,7 +55,12 @@ export default function MenuBars() {
 
           <nav className={`menu-links ${isOpen ? "open" : ""}`} aria-label="Top navigation">
             {topMenu.map((item) => (
-              <Link key={item.label} to={item.to} className="menu-link" onClick={closeMenu}>
+              <Link
+                key={item.label}
+                to={item.to}
+                className={`menu-link${location.pathname === item.to ? " active" : ""}`}
+                onClick={closeMenu}
+              >
                 {item.label}
               </Link>
             ))}
@@ -104,19 +110,24 @@ export default function MenuBars() {
         </div>
       </div>
 
-      <div className="menu-bottom" aria-label="Categories">
-        <div className="menu-bottom-inner">
-          <div className="menu-bottom-list">
-            {bottomMenu.map((item) => (
-              item.to ? (
-                <Link key={item.label} to={item.to} className="menu-pill" onClick={closeMenu}>
-                  {item.label}
-                </Link>
-              ) : (
-                <span key={item.label} className="menu-pill">
-                  {item.label}
-                </span>
-              )
+          <div className="menu-bottom" aria-label="Categories">
+            <div className="menu-bottom-inner">
+              <div className="menu-bottom-list">
+                {bottomMenu.map((item) => (
+                  item.to ? (
+                    <Link
+                      key={item.label}
+                      to={item.to}
+                      className={`menu-pill${location.pathname === item.to ? " active" : ""}`}
+                      onClick={closeMenu}
+                    >
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <span key={item.label} className="menu-pill">
+                      {item.label}
+                    </span>
+                  )
             ))}
           </div>
         </div>
