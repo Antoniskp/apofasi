@@ -38,6 +38,42 @@ const technologies = [
   }
 ];
 
+const delivered = [
+  {
+    title: "Σχεδιασμός και ροή εργασίας",
+    description:
+      "Καθορίσαμε pipeline με AI ιδέες, GitHub reviews και αυτόματα builds ώστε κάθε αλλαγή να είναι διαφανής και ελεγμένη."
+  },
+  {
+    title: "Βασική στοίβα εφαρμογής",
+    description:
+      "Στήσαμε React frontend, Express backend και ενσωματώσαμε OAuth στο server ώστε να μπορούμε να ενεργοποιήσουμε κοινωνικά logins."
+  },
+  {
+    title: "Ετοιμότητα για ανάπτυξη",
+    description:
+      "Διαθέσιμα scripts για build & deploy, μαζί με τεκμηρίωση περιβάλλοντος (.env) και διαδικασία ελέγχου ποιότητας."
+  }
+];
+
+const upcoming = [
+  {
+    title: "Σύνδεση DB και ενεργοποίηση auth",
+    description:
+      "Συνδέουμε τον server στη MongoDB και ενεργοποιούμε την αυθεντικοποίηση χρηστών ώστε να λειτουργεί το sign-in."
+  },
+  {
+    title: "Υλοποίηση ρόλων χρηστών",
+    description:
+      "Προσθέτουμε ρόλους (π.χ. admin, editor, member) με διαφορετικά δικαιώματα πρόσβασης."
+  },
+  {
+    title: "Δομές για news και polls",
+    description:
+      "Ορίζουμε τα μοντέλα και τα endpoints για άρθρα και ψηφοφορίες ώστε το περιεχόμενο να αποθηκεύεται και να εμφανίζεται σωστά."
+  }
+];
+
 export default function HowWeDoIt() {
   return (
     <div className="page">
@@ -106,6 +142,32 @@ export default function HowWeDoIt() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="grid-2">
+          <div className="card">
+            <h2>Τι έχουμε ολοκληρώσει</h2>
+            <ul className="feature-list">
+              {delivered.map((item) => (
+                <li key={item.title}>
+                  <strong>{item.title}:</strong> {item.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="card">
+            <h2>Τι έρχεται, με σειρά</h2>
+            <ol className="feature-list">
+              {upcoming.map((item) => (
+                <li key={item.title}>
+                  <strong>{item.title}:</strong> {item.description}
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </section>
