@@ -18,6 +18,15 @@ const footerSections = [
     ]
   },
   {
+    title: "Εκπαίδευση",
+    description:
+      "Πόροι για να ενισχύσετε τις γνώσεις σας γύρω από την ενημέρωση και τη συμμετοχή.",
+    links: [
+      { label: "Σεμινάρια & workshops", to: "/education" },
+      { label: "Οδηγοί επιμόρφωσης", to: "/education/guides" }
+    ]
+  },
+  {
     title: "Social",
     description: "Ακολουθήστε τα κανάλια ενημέρωσης και τις κοινότητές μας.",
     links: [
@@ -48,6 +57,16 @@ export default function Footer() {
             <h2>Καλύτερες αποφάσεις, μαζί.</h2>
             <p className="muted">
               Ειδήσεις, ψηφοφορίες και εργαλεία για να χτίσουμε μια ενημερωμένη κοινότητα.
+            </p>
+          </div>
+        </div>
+
+        <div className="footer-highlight" aria-label="Platform status">
+          <div className="footer-badge">Beta</div>
+          <div>
+            <p className="eyebrow">24/7 ενημέρωση</p>
+            <p className="muted">
+              Η πλατφόρμα βρίσκεται σε beta λειτουργία με συνεχή ανανεώσεις περιεχομένου.
             </p>
           </div>
         </div>
