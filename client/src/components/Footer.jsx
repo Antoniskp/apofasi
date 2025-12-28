@@ -5,25 +5,25 @@ const footerSections = [
     title: "Επικοινωνία",
     description: "Μιλήστε με την ομάδα για συνεργασίες, προτάσεις ή βοήθεια.",
     links: [
-      { label: "Φόρμα επικοινωνίας", to: "/contact" },
-      { label: "Υποστήριξη", to: "/contact" }
+      { label: "Φόρμα επικοινωνίας", to: "/contact#contact-form" },
+      { label: "Υποστήριξη", to: "/contact#support" }
     ]
   },
   {
     title: "Σχετικά",
     description: "Μάθετε περισσότερα για την αποστολή και τον τρόπο δουλειάς μας.",
     links: [
-      { label: "Η ιστορία μας", to: "/about" },
-      { label: "Διαφάνεια", to: "/about" }
+      { label: "Αποστολή", to: "/mission" },
+      { label: "Η ιστορία μας", to: "/about" }
     ]
   },
   {
-    title: "Εκπαίδευση",
+    title: "Πόροι",
     description:
-      "Πόροι για να ενισχύσετε τις γνώσεις σας γύρω από την ενημέρωση και τη συμμετοχή.",
+      "Κατανοήστε τη διαδικασία μας και βρείτε τρόπους να βοηθήσετε την κοινότητα.",
     links: [
-      { label: "Σεμινάρια & workshops", to: "/education" },
-      { label: "Οδηγοί επιμόρφωσης", to: "/education/guides" }
+      { label: "Πώς δουλεύουμε", to: "/how-we-do-it" },
+      { label: "Συνεισφέρετε", to: "/contribute" }
     ]
   },
   {
