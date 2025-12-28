@@ -5,14 +5,14 @@ const providers = [
   {
     id: "google",
     label: "Σύνδεση με Google",
-    description: "Χρησιμοποιήστε τον Google λογαριασμό σας",
-    className: "auth-btn google"
+    className: "auth-btn google",
+    iconClass: "fa-brands fa-google"
   },
   {
     id: "facebook",
     label: "Σύνδεση με Facebook",
-    description: "Χρησιμοποιήστε τον Facebook λογαριασμό σας",
-    className: "auth-btn facebook"
+    className: "auth-btn facebook",
+    iconClass: "fa-brands fa-facebook-f"
   }
 ];
 
@@ -93,18 +93,18 @@ export default function AuthButtons() {
               type="button"
               className={provider.className}
               disabled={!isEnabled}
+              aria-label={provider.label}
+              title={isEnabled ? provider.label : "Θα είναι διαθέσιμο όταν ενεργοποιηθούν τα κλειδιά."}
               onClick={() => {
                 if (isEnabled) {
                   window.location.href = `${API_BASE_URL}/auth/${provider.id}`;
                 }
               }}
             >
-              <span className="auth-btn-label">{provider.label}</span>
-              <span className="auth-btn-desc">
-                {isEnabled
-                  ? provider.description
-                  : "Θα είναι διαθέσιμο όταν ενεργοποιηθούν τα κλειδιά."}
+              <span className="auth-btn-icon" aria-hidden>
+                <i className={provider.iconClass}></i>
               </span>
+              <span className="sr-only">{provider.label}</span>
             </button>
           );
         })}
