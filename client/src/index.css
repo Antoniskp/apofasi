@@ -825,6 +825,116 @@ button:focus-visible {
   font-weight: 600;
 }
 
+.contact-page {
+  background: radial-gradient(circle at 20% 10%, rgba(34, 55, 90, 0.04), transparent 38%), var(--page-bg);
+}
+
+.contact-section {
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.contact-grid {
+  align-items: stretch;
+}
+
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contact-card.secondary {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #0b172a;
+}
+
+.contact-card.secondary p,
+.contact-card.secondary .muted,
+.contact-card.secondary .contact-meta {
+  color: #e2e8f0;
+}
+
+.contact-meta {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--ink-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contact-card.secondary .pill.subtle {
+  background: rgba(255, 255, 255, 0.14);
+  color: #facc15;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.contact-actions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-items: start;
+}
+
+.social-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.social-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--ink-strong);
+  text-decoration: none;
+  min-width: 170px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.social-btn:hover {
+  transform: translateY(-1px);
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+}
+
+.social-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--accent-strong);
+  font-size: 1rem;
+}
+
+.social-label {
+  font-weight: 700;
+}
+
 .contribute-page {
   background: radial-gradient(circle at 18% 16%, rgba(34, 55, 90, 0.06), transparent 32%),
     radial-gradient(circle at 82% 12%, rgba(34, 55, 90, 0.04), transparent 30%),

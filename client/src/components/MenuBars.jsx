@@ -7,7 +7,8 @@ const topMenu = [
   { label: "Ειδήσεις", to: "/news" },
   { label: "Ψηφοφορίες", to: "/polls" },
   { label: "LIVE", to: "/news" },
-  { label: "Συνεισφέρετε", to: "/contribute" }
+  { label: "Συνεισφέρετε", to: "/contribute" },
+  { label: "Επικοινωνία", to: "/contact" }
 ];
 
 const bottomMenu = [
