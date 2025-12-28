@@ -32,6 +32,16 @@ const waysToSupport = [
     }
   },
   {
+    title: "Οικονομική υποστήριξη",
+    detail:
+      "Θέλετε να ενισχύσετε την ομάδα με χρήματα ή crypto; Μπορούμε να προχωρήσουμε με δωρεά ή να σχεδιάσουμε μαζί ένα sponsorship για τη λειτουργία της πλατφόρμας.",
+    action: {
+      label: "Συνεννόηση με την ομάδα",
+      href: "mailto:team@apofasi.news",
+      external: true
+    }
+  },
+  {
     title: "Συνεισφορά κώδικα",
     detail: "Υλοποιήστε βελτιώσεις στην προσβασιμότητα, το UI, ή το API. Τα pull requests με καθαρό documentation είναι ευπρόσδεκτα.",
     action: {
@@ -83,6 +93,37 @@ export default function Contribute() {
               <p>{area.description}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <h2 className="section-title">Οικονομική συμβολή</h2>
+        <div className="grid-2">
+          <div className="card highlight">
+            <h3>Ενίσχυση με χρήματα ή crypto</h3>
+            <p>
+              Υποστηρίξτε την ανεξάρτητη λειτουργία της πλατφόρμας με οικονομική συνεισφορά σε ευρώ ή crypto. Θα σας
+              καθοδηγήσουμε στα διαθέσιμα κανάλια ώστε η ενίσχυση να ολοκληρωθεί με ασφάλεια και διαφάνεια.
+            </p>
+            <div className="cta-row">
+              <a className="btn btn-outline" href="mailto:team@apofasi.news">
+                Στείλτε email για οδηγίες
+              </a>
+            </div>
+          </div>
+          <div className="card highlight">
+            <h3>Χρηματοδότηση λειτουργιών</h3>
+            <p>
+              Θέλετε να χρηματοδοτήσετε μια συγκεκριμένη δυνατότητα ή κάλυψη θεματικής ενότητας; Μιλήστε μαζί μας για
+              να ορίσουμε το αποτέλεσμα, το χρονοδιάγραμμα και τη χρήση των πόρων, ώστε η προσφορά σας να φέρει το
+              μέγιστο αντίκτυπο.
+            </p>
+            <div className="cta-row">
+              <a className="btn btn-outline" href="mailto:team@apofasi.news?subject=Funding%20a%20feature">
+                Καθορισμός έργου
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
