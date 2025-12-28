@@ -422,6 +422,48 @@ button:focus-visible {
   text-align: left;
 }
 
+.card.muted-border {
+  border-color: #d7deeb;
+  box-shadow: none;
+}
+
+.feature-list {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 12px;
+  color: var(--ink-muted);
+}
+
+.feature-list strong {
+  color: var(--ink-strong);
+}
+
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.stack-card {
+  background: var(--accent-soft);
+  border: 1px solid #d7deeb;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.stack-card .eyebrow {
+  margin: 0 0 6px;
+}
+
+.stack-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-muted);
+  display: grid;
+  gap: 6px;
+}
+
 .card h3 {
   margin: 0 0 8px;
   color: var(--ink-strong);
