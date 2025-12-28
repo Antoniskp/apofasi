@@ -106,10 +106,6 @@ export default function MenuBars() {
 
       <div className="menu-bottom" aria-label="Categories">
         <div className="menu-bottom-inner">
-          <div className="menu-bottom-meta">
-            <span className="menu-badge">Beta</span>
-            <span className="menu-clock">24/7 ενημέρωση</span>
-          </div>
           <div className="menu-bottom-list">
             {bottomMenu.map((item) => (
               item.to ? (
