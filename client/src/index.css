@@ -58,7 +58,7 @@ body {
 }
 
 .menu-top {
-  padding: 8px 18px;
+  padding: 6px 14px;
   background: #0b172a;
   border-bottom: 1px solid #0f1f38;
 }
@@ -67,7 +67,7 @@ body {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -75,13 +75,13 @@ body {
 .menu-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .menu-brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-weight: 800;
   letter-spacing: 0.01em;
 }
@@ -90,9 +90,9 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
   background: #1f2937;
   color: #ffd447;
   text-transform: lowercase;
@@ -100,14 +100,14 @@ body {
 }
 
 .brand-wordmark {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #facc15;
 }
 
 .menu-links {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
   justify-content: center;
   flex-wrap: wrap;
@@ -117,11 +117,11 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 10px;
-  border-radius: 10px;
+  padding: 5px 9px;
+  border-radius: 9px;
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.83rem;
+  font-size: 0.8rem;
   letter-spacing: 0.04em;
   color: #e2e8f0;
   transition: background 120ms ease, transform 120ms ease, color 120ms ease, border-color 120ms ease;
@@ -138,7 +138,7 @@ body {
 .menu-actions {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .menu-actions-desktop {
@@ -156,11 +156,11 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 7px 11px;
-  border-radius: 9px;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 8px;
   font-weight: 700;
-  font-size: 0.94rem;
+  font-size: 0.9rem;
   letter-spacing: 0.01em;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #0f172a;
@@ -196,9 +196,9 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   background: rgba(255, 255, 255, 0.1);
   color: #f8fafc;
@@ -215,9 +215,9 @@ body {
 .menu-badge {
   background: #1f2937;
   color: #ffd447;
-  padding: 6px 10px;
+  padding: 5px 9px;
   border-radius: 999px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   letter-spacing: 0.02em;
 }
 
@@ -227,7 +227,7 @@ body {
 }
 
 .menu-bottom {
-  padding: 10px 16px;
+  padding: 8px 14px;
   background: linear-gradient(90deg, #0f172a 0%, #152441 100%);
   color: #e2e8f0;
   border-bottom: 1px solid #1e293b;
@@ -236,7 +236,7 @@ body {
 .menu-bottom-inner {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -244,17 +244,17 @@ body {
 .menu-bottom-list {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   overflow-x: auto;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 
 .menu-bottom-meta {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 10px;
-  border-radius: 12px;
+  gap: 10px;
+  padding: 5px 8px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -262,12 +262,12 @@ body {
 .menu-pill {
   display: inline-flex;
   align-items: center;
-  padding: 6px 10px;
-  border-radius: 10px;
+  padding: 5px 9px;
+  border-radius: 9px;
   background: rgba(226, 232, 240, 0.08);
   border: 1px solid rgba(226, 232, 240, 0.16);
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   white-space: nowrap;
   cursor: default;
 }
@@ -1003,7 +1003,7 @@ button:focus-visible {
   .menu-top-inner {
     grid-template-columns: 1fr;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
   }
 
   .menu-left {
@@ -1015,8 +1015,8 @@ button:focus-visible {
     display: none;
     width: 100%;
     justify-content: flex-start;
-    gap: 8px;
-    margin-top: 6px;
+    gap: 6px;
+    margin-top: 4px;
     flex-wrap: wrap;
   }
 
@@ -1039,7 +1039,7 @@ button:focus-visible {
   }
 
   .menu-link {
-    padding: 8px 12px;
+    padding: 7px 11px;
     font-size: 0.85rem;
   }
 
@@ -1050,7 +1050,7 @@ button:focus-visible {
   .menu-bottom-inner {
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
   }
 
   .menu-bottom-list {
