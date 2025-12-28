@@ -5,7 +5,7 @@ Follow these steps to get it running locally and configure the providers correct
 
 ## Database bootstrap
 
-If you want MongoDB collections and indexes pre-created, run the provided script:
+The server targets MongoDB at `mongodb://localhost:27017/apofasi` by default (configurable via `MONGO_URI`). Start a local `mongod` with that URI or point the variable to your deployment. If you want MongoDB collections and indexes pre-created, run the provided script:
 
 ```bash
 mongosh < db/init.mongodb.js
@@ -13,6 +13,8 @@ mongosh < db/init.mongodb.js
 
 The script creates the `users`, `polls`, and `news` collections and applies the
 unique/sparse indexes expected by the models.
+
+> File checklist: `server/db/init.mongodb.js` seeds collections and indexes; `.env` stores credentials and URLs; `client/dist` is served in production, so keep it in place when running `npm start`.
 
 Need to add a local user quickly? Use the seed helper (prompts for email and password):
 
