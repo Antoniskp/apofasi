@@ -1,7 +1,6 @@
 # apofasi
-Θέλουμε να φτιάξουμε μια εφαρμογή άμεσης δημοκρατίας τώρα που το είπε και ο φειδίας.
-Εδώ μέσω κοινότητας είναι εύκολο να αναπτυχθεί και να ελεγθεί η αξιοπιστία του κώδικα.
-Αν από τους 10 οι 6 θέλουν να σκοτώνονται θα σκοτώνονται και οι 10 μέχρι να μείνουν 6-7.
+For the moment this application which is live at http://176.126.202.242 is made entirely from ai(chatGPT paid version) with the instructions of a developer. In hopes that it becomes more of a community project. The scope of the app is to educate, inform  and help the community express and find better solutions.
+
 
 Application for news, education and polls.
 The idea is creating the core of a super application which will support news, education, polls and collective decision making.
