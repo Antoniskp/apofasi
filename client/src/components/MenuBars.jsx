@@ -5,23 +5,23 @@ const topMenu = [
   { label: "Αρχική", to: "/" },
   { label: "Τι επιδιώκουμε", to: "/mission" },
   { label: "Πώς δουλεύουμε", to: "/how-we-do-it" },
-  { label: "Ειδήσεις", to: "/news" },
-  { label: "Ψηφοφορίες", to: "/polls" },
-  { label: "LIVE", to: "/news" },
   { label: "Συνεισφέρετε", to: "/contribute" },
   { label: "Επικοινωνία", to: "/contact" }
 ];
 
 const bottomMenu = [
-  "Πολιτική",
-  "Οικονομία",
-  "Κοινωνία",
-  "Κόσμος",
-  "Αθλητικά",
-  "Lifestyle",
-  "Auto/Moto",
-  "Science",
-  "Opinions"
+  { label: "Ειδήσεις", to: "/news" },
+  { label: "Ψηφοφορίες", to: "/polls" },
+  { label: "LIVE", to: "/news" },
+  { label: "Πολιτική" },
+  { label: "Οικονομία" },
+  { label: "Κοινωνία" },
+  { label: "Κόσμος" },
+  { label: "Αθλητικά" },
+  { label: "Lifestyle" },
+  { label: "Auto/Moto" },
+  { label: "Science" },
+  { label: "Opinions" }
 ];
 
 export default function MenuBars() {
@@ -112,9 +112,15 @@ export default function MenuBars() {
           </div>
           <div className="menu-bottom-list">
             {bottomMenu.map((item) => (
-              <span key={item} className="menu-pill">
-                {item}
-              </span>
+              item.to ? (
+                <Link key={item.label} to={item.to} className="menu-pill" onClick={closeMenu}>
+                  {item.label}
+                </Link>
+              ) : (
+                <span key={item.label} className="menu-pill">
+                  {item.label}
+                </span>
+              )
             ))}
           </div>
         </div>
