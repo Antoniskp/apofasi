@@ -9,6 +9,7 @@ export default function Register() {
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const apiConfigured = Boolean(API_BASE_URL);
   const navigate = useNavigate();
 
   const loadStatus = async () => {
@@ -39,6 +40,10 @@ export default function Register() {
     setFeedback("");
 
     try {
+      if (!apiConfigured) {
+        throw new Error("Δεν έχει ρυθμιστεί το VITE_API_BASE_URL για το API.");
+      }
+
       const data = await registerUser(registerForm);
       setStatus({ loading: false, user: data.user });
       setFeedback("Η εγγραφή ολοκληρώθηκε! Συνδεθήκατε αυτόματα.");
@@ -58,6 +63,10 @@ export default function Register() {
     setFeedback("");
 
     try {
+      if (!apiConfigured) {
+        throw new Error("Δεν έχει ρυθμιστεί το VITE_API_BASE_URL για το API.");
+      }
+
       await loginUser(loginForm);
       setFeedback("Επιτυχής σύνδεση.");
       await loadStatus();
@@ -118,10 +127,15 @@ export default function Register() {
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
               />
             </label>
-            <button type="submit" className="btn" disabled={submitting}>
+            <button type="submit" className="btn" disabled={submitting || !apiConfigured}>
               {submitting ? "Αποστολή..." : "Εγγραφή"}
             </button>
           </form>
+          {!apiConfigured && (
+            <p className="error-text">
+              Ορίστε το VITE_API_BASE_URL για να ενεργοποιηθεί η εγγραφή χρήστη.
+            </p>
+          )}
         </div>
 
         <div className="card form-card">
@@ -149,10 +163,15 @@ export default function Register() {
                 onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
               />
             </label>
-            <button type="submit" className="btn btn-outline" disabled={submitting}>
+            <button type="submit" className="btn btn-outline" disabled={submitting || !apiConfigured}>
               {submitting ? "Σύνδεση..." : "Σύνδεση"}
             </button>
           </form>
+          {!apiConfigured && (
+            <p className="error-text">
+              Ρυθμίστε το VITE_API_BASE_URL για να επιτρέψετε τη σύνδεση λογαριασμού.
+            </p>
+          )}
           <div className="muted small">
             <p>Δεν χρησιμοποιούμε τρίτους παρόχους για τη σύνδεση με email.</p>
           </div>
