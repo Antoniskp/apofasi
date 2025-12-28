@@ -28,6 +28,7 @@ const corsOptions = {
   },
   credentials: true
 };
+const shouldLogRequests = process.env.REQUEST_LOGGING === "true";
 const oauthProviders = {
   google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
   facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET)
@@ -64,7 +65,28 @@ const verifyPassword = (password, storedValue) => {
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
+app.options("/auth/*", cors(corsOptions));
+app.options("/api/auth/*", cors(corsOptions));
 app.use(express.json());
+
+if (shouldLogRequests) {
+  app.use((req, res, next) => {
+    const safeBody =
+      req.method !== "GET" && req.body
+        ? {
+            ...req.body,
+            password: req.body.password ? "<redacted>" : undefined
+          }
+        : undefined;
+
+    console.log(
+      `[auth-debug] ${req.method} ${req.originalUrl} (origin: ${req.headers.origin || "n/a"})`,
+      safeBody ? { body: safeBody } : {}
+    );
+
+    next();
+  });
+}
 app.set("trust proxy", 1);
 app.use(
   session({
