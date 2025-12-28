@@ -2,11 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 const topMenu = [
-  { label: "Αρχική", to: "/" },
-  { label: "Τι επιδιώκουμε", to: "/mission" },
-  { label: "Πώς δουλεύουμε", to: "/how-we-do-it" },
-  { label: "Συνεισφέρετε", to: "/contribute" },
-  { label: "Επικοινωνία", to: "/contact" }
+  { label: "Αρχική", to: "/", icon: "fa-house" },
+  { label: "Τι επιδιώκουμε", to: "/mission", icon: "fa-bullseye" },
+  { label: "Πώς δουλεύουμε", to: "/how-we-do-it", icon: "fa-diagram-project" },
+  { label: "Συνεισφέρετε", to: "/contribute", icon: "fa-handshake-simple" },
+  { label: "Επικοινωνία", to: "/contact", icon: "fa-envelope-open-text" }
 ];
 
 const bottomMenu = [
@@ -36,7 +36,9 @@ export default function MenuBars() {
         <div className="menu-top-inner">
           <div className="menu-left">
             <div className="menu-brand">
-              <span className="brand-mark">ap</span>
+              <span className="brand-mark" aria-hidden>
+                <i className="fa-solid fa-scale-balanced" />
+              </span>
               <Link to="/" className="brand-wordmark">
                 Apofasi
               </Link>
@@ -49,7 +51,10 @@ export default function MenuBars() {
               aria-expanded={isOpen}
               onClick={() => setIsOpen((prev) => !prev)}
             >
-              ☰
+              <i
+                className={`fa-solid ${isOpen ? "fa-xmark" : "fa-bars"}`}
+                aria-hidden
+              />
             </button>
           </div>
 
@@ -61,6 +66,7 @@ export default function MenuBars() {
                 className={`menu-link${location.pathname === item.to ? " active" : ""}`}
                 onClick={closeMenu}
               >
+                <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
                 {item.label}
               </Link>
             ))}
@@ -73,7 +79,7 @@ export default function MenuBars() {
                 onClick={closeMenu}
               >
                 <span className="menu-auth-icon" aria-hidden>
-                  🔐
+                  <i className="fa-solid fa-right-to-bracket" />
                 </span>
                 <span className="sr-only">Σύνδεση</span>
               </Link>
@@ -84,7 +90,7 @@ export default function MenuBars() {
                 onClick={closeMenu}
               >
                 <span className="menu-auth-icon" aria-hidden>
-                  ✏️
+                  <i className="fa-solid fa-user-plus" />
                 </span>
                 <span className="sr-only">Εγγραφή</span>
               </Link>
@@ -95,7 +101,7 @@ export default function MenuBars() {
                 onClick={closeMenu}
               >
                 <span className="menu-auth-icon" aria-hidden>
-                  👤
+                  <i className="fa-solid fa-circle-user" />
                 </span>
                 <span className="sr-only">Προφίλ</span>
               </Link>
@@ -110,7 +116,7 @@ export default function MenuBars() {
               onClick={closeMenu}
             >
               <span className="menu-auth-icon" aria-hidden>
-                🔐
+                <i className="fa-solid fa-right-to-bracket" />
               </span>
               <span className="sr-only">Σύνδεση</span>
             </Link>
@@ -121,7 +127,7 @@ export default function MenuBars() {
               onClick={closeMenu}
             >
               <span className="menu-auth-icon" aria-hidden>
-                ✏️
+                <i className="fa-solid fa-user-plus" />
               </span>
               <span className="sr-only">Εγγραφή</span>
             </Link>
@@ -132,7 +138,7 @@ export default function MenuBars() {
               onClick={closeMenu}
             >
               <span className="menu-auth-icon" aria-hidden>
-                👤
+                <i className="fa-solid fa-circle-user" />
               </span>
               <span className="sr-only">Προφίλ</span>
             </Link>

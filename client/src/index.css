@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css');
 
 :root {
   --page-bg: #f5f7fb;
@@ -104,6 +105,10 @@ body {
   color: #facc15;
 }
 
+.brand-mark i {
+  font-size: 0.95rem;
+}
+
 .menu-links {
   display: flex;
   align-items: center;
@@ -128,6 +133,12 @@ body {
   border: 1px solid transparent;
 }
 
+.menu-link-icon {
+  margin-right: 6px;
+  font-size: 0.95rem;
+  color: #cbd5e1;
+}
+
 .menu-link:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
@@ -135,11 +146,19 @@ body {
   transform: translateY(-1px);
 }
 
+.menu-link:hover .menu-link-icon {
+  color: #fff;
+}
+
 .menu-link.active {
   background: #facc15;
   color: #0f172a;
   border-color: #fbbf24;
   box-shadow: 0 8px 18px rgba(250, 204, 21, 0.25);
+}
+
+.menu-link.active .menu-link-icon {
+  color: #0f172a;
 }
 
 .menu-actions {
@@ -163,7 +182,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  gap: 6px;
   width: 42px;
   height: 42px;
   padding: 0;
@@ -197,6 +216,9 @@ body {
 }
 
 .menu-auth-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.05rem;
   line-height: 1;
 }
