@@ -66,68 +66,98 @@ export default function MenuBars() {
             ))}
 
             <div className="menu-actions menu-actions-mobile">
-              <Link to="/auth" className="menu-auth-btn primary" onClick={closeMenu}>
+              <Link
+                to="/auth"
+                className="menu-auth-btn primary"
+                aria-label="Σύνδεση"
+                onClick={closeMenu}
+              >
                 <span className="menu-auth-icon" aria-hidden>
                   🔐
                 </span>
-                <span>Σύνδεση</span>
+                <span className="sr-only">Σύνδεση</span>
               </Link>
-              <Link to="/register" className="menu-auth-btn" onClick={closeMenu}>
+              <Link
+                to="/register"
+                className="menu-auth-btn"
+                aria-label="Εγγραφή"
+                onClick={closeMenu}
+              >
                 <span className="menu-auth-icon" aria-hidden>
                   ✏️
                 </span>
-                <span>Εγγραφή</span>
+                <span className="sr-only">Εγγραφή</span>
               </Link>
-              <Link to="/profile" className="menu-auth-btn" onClick={closeMenu}>
+              <Link
+                to="/profile"
+                className="menu-auth-btn"
+                aria-label="Προφίλ"
+                onClick={closeMenu}
+              >
                 <span className="menu-auth-icon" aria-hidden>
                   👤
                 </span>
-                <span>Προφίλ</span>
+                <span className="sr-only">Προφίλ</span>
               </Link>
             </div>
           </nav>
 
           <div className="menu-actions menu-actions-desktop">
-            <Link to="/auth" className="menu-auth-btn primary" onClick={closeMenu}>
+            <Link
+              to="/auth"
+              className="menu-auth-btn primary"
+              aria-label="Σύνδεση"
+              onClick={closeMenu}
+            >
               <span className="menu-auth-icon" aria-hidden>
                 🔐
               </span>
-              <span>Σύνδεση</span>
+              <span className="sr-only">Σύνδεση</span>
             </Link>
-            <Link to="/register" className="menu-auth-btn" onClick={closeMenu}>
+            <Link
+              to="/register"
+              className="menu-auth-btn"
+              aria-label="Εγγραφή"
+              onClick={closeMenu}
+            >
               <span className="menu-auth-icon" aria-hidden>
                 ✏️
               </span>
-              <span>Εγγραφή</span>
+              <span className="sr-only">Εγγραφή</span>
             </Link>
-            <Link to="/profile" className="menu-auth-btn" onClick={closeMenu}>
+            <Link
+              to="/profile"
+              className="menu-auth-btn"
+              aria-label="Προφίλ"
+              onClick={closeMenu}
+            >
               <span className="menu-auth-icon" aria-hidden>
                 👤
               </span>
-              <span>Προφίλ</span>
+              <span className="sr-only">Προφίλ</span>
             </Link>
           </div>
         </div>
       </div>
 
-          <div className="menu-bottom" aria-label="Categories">
-            <div className="menu-bottom-inner">
-              <div className="menu-bottom-list">
-                {bottomMenu.map((item) => (
-                  item.to ? (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      className={`menu-pill${location.pathname === item.to ? " active" : ""}`}
-                      onClick={closeMenu}
-                    >
-                      {item.label}
-                    </Link>
-                  ) : (
-                    <span key={item.label} className="menu-pill">
-                      {item.label}
-                    </span>
-                  )
+      <div className="menu-bottom" aria-label="Categories">
+        <div className="menu-bottom-inner">
+          <div className="menu-bottom-list">
+            {bottomMenu.map((item) => (
+              item.to ? (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  className={`menu-pill${location.pathname === item.to ? " active" : ""}`}
+                  onClick={closeMenu}
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <span key={item.label} className="menu-pill">
+                  {item.label}
+                </span>
+              )
             ))}
           </div>
         </div>
