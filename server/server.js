@@ -16,6 +16,7 @@ connectDB();
 configurePassport();
 
 const app = express();
+const authRouter = express.Router();
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 const allowedOrigins = CLIENT_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean);
 const corsOptions = {
@@ -27,6 +28,7 @@ const corsOptions = {
   },
   credentials: true
 };
+const shouldLogRequests = process.env.REQUEST_LOGGING === "true";
 const oauthProviders = {
   google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
   facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET)
@@ -63,7 +65,28 @@ const verifyPassword = (password, storedValue) => {
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
+app.options("/auth/*", cors(corsOptions));
+app.options("/api/auth/*", cors(corsOptions));
 app.use(express.json());
+
+if (shouldLogRequests) {
+  app.use((req, res, next) => {
+    const safeBody =
+      req.method !== "GET" && req.body
+        ? {
+            ...req.body,
+            password: req.body.password ? "<redacted>" : undefined
+          }
+        : undefined;
+
+    console.log(
+      `[auth-debug] ${req.method} ${req.originalUrl} (origin: ${req.headers.origin || "n/a"})`,
+      safeBody ? { body: safeBody } : {}
+    );
+
+    next();
+  });
+}
 app.set("trust proxy", 1);
 app.use(
   session({
@@ -81,7 +104,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/auth/status", (req, res) => {
+authRouter.get("/status", (req, res) => {
   res.json({
     authenticated: Boolean(req.user),
     providers: oauthProviders,
@@ -103,7 +126,7 @@ const ensureAuthenticated = (req, res, next) => {
   return next();
 };
 
-app.post("/auth/register", async (req, res) => {
+authRouter.post("/register", async (req, res) => {
   const { email, password, displayName } = req.body || {};
 
   if (!email || !password) {
@@ -145,7 +168,7 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
-app.post("/auth/login", async (req, res) => {
+authRouter.post("/login", async (req, res) => {
   const { email, password } = req.body || {};
 
   if (!email || !password) {
@@ -175,18 +198,18 @@ app.post("/auth/login", async (req, res) => {
   }
 });
 
-app.get("/auth/profile", ensureAuthenticated, (req, res) => {
+authRouter.get("/profile", ensureAuthenticated, (req, res) => {
   res.json({ user: sanitizeUser(req.user) });
 });
 
-app.get(
-  "/auth/google",
+authRouter.get(
+  "/google",
   ensureProviderConfigured("google"),
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-app.get(
-  "/auth/google/callback",
+authRouter.get(
+  "/google/callback",
   ensureProviderConfigured("google"),
   passport.authenticate("google", {
     failureRedirect: `${CLIENT_ORIGIN}/auth/error`
@@ -196,14 +219,14 @@ app.get(
   }
 );
 
-app.get(
-  "/auth/facebook",
+authRouter.get(
+  "/facebook",
   ensureProviderConfigured("facebook"),
   passport.authenticate("facebook", { scope: ["email"] })
 );
 
-app.get(
-  "/auth/facebook/callback",
+authRouter.get(
+  "/facebook/callback",
   ensureProviderConfigured("facebook"),
   passport.authenticate("facebook", {
     failureRedirect: `${CLIENT_ORIGIN}/auth/error`
@@ -213,12 +236,15 @@ app.get(
   }
 );
 
-app.get("/auth/logout", (req, res, next) => {
+authRouter.get("/logout", (req, res, next) => {
   req.logout((error) => {
     if (error) return next(error);
     res.json({ message: "Logged out" });
   });
 });
+
+app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
 
 const PORT = process.env.PORT || 5000;
 

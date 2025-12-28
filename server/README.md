@@ -91,6 +91,14 @@ The server will expose these endpoints:
 - `GET /auth/status` → returns whether the user is authenticated and the basic profile data.
 - `GET /auth/logout` → clears the session.
 
+### Debugging auth requests
+
+- Set `REQUEST_LOGGING=true` in your `.env` to print each auth request method, path, origin, and a redacted body in the server
+  logs. This helps confirm whether the client is calling `/auth/*` or `/api/auth/*` and what data reaches the backend.
+- If your deployment sits behind a proxy that filters HTTP verbs, verify that `OPTIONS` requests to `/auth/register` or
+  `/api/auth/register` are allowed. The server now responds to explicit preflight checks on those paths so you can test with a
+  simple `curl -i -X OPTIONS https://<your-host>/api/auth/register`.
+
 ## 5) Frontend coordination
 
 Set `VITE_API_BASE_URL` in the client to point to this server (e.g., `http://localhost:5000`) and make sure `CLIENT_ORIGIN` matches the URL the browser uses to load the frontend. The session cookie is issued with `SameSite=None` when `NODE_ENV=production`, so configure HTTPS and trust proxy appropriately in that environment.
