@@ -164,6 +164,7 @@ authRouter.post("/register", async (req, res) => {
       return res.status(201).json({ user: sanitizeUser(newUser) });
     });
   } catch (error) {
+    console.error("[register-error]", error);
     return res.status(500).json({ message: "Κάτι πήγε στραβά. Προσπαθήστε ξανά." });
   }
 });
