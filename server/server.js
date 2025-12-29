@@ -152,6 +152,7 @@ authRouter.post("/register", async (req, res) => {
 
     const newUser = await User.create({
       provider: "local",
+      providerId: normalizedEmail,
       email: normalizedEmail,
       password: hashPassword(password),
       displayName: trimmedName || normalizedEmail.split("@")[0]
