@@ -1,12 +1,14 @@
-import express from "express";
-import dotenv from "dotenv";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
-import crypto from "crypto";
+import * as Sentry from "@sentry/node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import cors from "cors";
+import crypto from "crypto";
+import dotenv from "dotenv";
+import express from "express";
 import session from "express-session";
+import fs from "fs";
 import passport from "passport";
+import path from "path";
+import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import configurePassport from "./config/passport.js";
 import User from "./models/User.js";
@@ -15,10 +17,25 @@ dotenv.config();
 connectDB();
 configurePassport();
 
+// Sentry.io - used for error tracking
+Sentry.init({
+  dsn: process.env.SENTRY_DSN, // You get this from your Sentry project settings
+  integrations: [nodeProfilingIntegration()],
+  // Performance Monitoring
+  tracesSampleRate: 1.0, // Capture 100% of transactions in dev; lower this in production
+  profilesSampleRate: 1.0,
+  sendDefaultPii: true,
+  // debug: true, // log in the terminal console sentry service logs
+});
+
 const app = express();
+// The Sentry request handler must be the first middleware on the app
+Sentry.setupExpressErrorHandler(app);
 const authRouter = express.Router();
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
-const allowedOrigins = CLIENT_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean);
+const allowedOrigins = CLIENT_ORIGIN.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -26,12 +43,12 @@ const corsOptions = {
     }
     return callback(new Error("Not allowed by CORS"));
   },
-  credentials: true
+  credentials: true,
 };
 const shouldLogRequests = process.env.REQUEST_LOGGING === "true";
 const oauthProviders = {
   google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
-  facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET)
+  facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET),
 };
 
 const sanitizeUser = (user) =>
@@ -42,7 +59,7 @@ const sanitizeUser = (user) =>
         email: user.email,
         provider: user.provider,
         avatar: user.avatar,
-        username: user.username
+        username: user.username,
       }
     : null;
 
@@ -75,7 +92,7 @@ if (shouldLogRequests) {
       req.method !== "GET" && req.body
         ? {
             ...req.body,
-            password: req.body.password ? "<redacted>" : undefined
+            password: req.body.password ? "<redacted>" : undefined,
           }
         : undefined;
 
@@ -97,8 +114,8 @@ app.use(
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7
-    }
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
   })
 );
 app.use(passport.initialize());
@@ -108,7 +125,7 @@ authRouter.get("/status", (req, res) => {
   res.json({
     authenticated: Boolean(req.user),
     providers: oauthProviders,
-    user: sanitizeUser(req.user)
+    user: sanitizeUser(req.user),
   });
 });
 
@@ -155,7 +172,7 @@ authRouter.post("/register", async (req, res) => {
       providerId: normalizedEmail,
       email: normalizedEmail,
       password: hashPassword(password),
-      displayName: trimmedName || normalizedEmail.split("@")[0]
+      displayName: trimmedName || normalizedEmail.split("@")[0],
     });
 
     req.login(newUser, (error) => {
@@ -214,7 +231,7 @@ authRouter.get(
   "/google/callback",
   ensureProviderConfigured("google"),
   passport.authenticate("google", {
-    failureRedirect: `${CLIENT_ORIGIN}/auth/error`
+    failureRedirect: `${CLIENT_ORIGIN}/auth/error`,
   }),
   (req, res) => {
     res.redirect(`${CLIENT_ORIGIN}/auth/success`);
@@ -231,7 +248,7 @@ authRouter.get(
   "/facebook/callback",
   ensureProviderConfigured("facebook"),
   passport.authenticate("facebook", {
-    failureRedirect: `${CLIENT_ORIGIN}/auth/error`
+    failureRedirect: `${CLIENT_ORIGIN}/auth/error`,
   }),
   (req, res) => {
     res.redirect(`${CLIENT_ORIGIN}/auth/success`);
@@ -247,6 +264,10 @@ authRouter.get("/logout", (req, res, next) => {
 
 app.use("/auth", authRouter);
 app.use("/api/auth", authRouter);
+
+authRouter.get("/debug-sentry", function mainHandler(req, res) {
+  throw new Error("Sentry Test Error!");
+});
 
 const PORT = process.env.PORT || 5000;
 
@@ -270,9 +291,18 @@ if (hasClientBuild) {
     res.sendFile(clientIndexPath);
   });
 } else if (process.env.NODE_ENV === "production") {
-  console.warn(
-    `Client build not found at ${clientBuildPath}. Mission and other routes will return 404s.`
-  );
+  console.warn(`Client build not found at ${clientBuildPath}. Mission and other routes will return 404s.`);
 }
+
+// The Sentry error handler must be before any other error middleware
+// and after all controllers
+app.use(Sentry.expressErrorHandler());
+
+app.use(function onError(err, req, res, next) {
+  // The error id is attached to `res.sentry` to be returned
+  // and optionally displayed to the user for support.
+  res.statusCode = 500;
+  res.end(res.sentry + "\n");
+});
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
