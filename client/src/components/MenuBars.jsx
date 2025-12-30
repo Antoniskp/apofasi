@@ -52,6 +52,7 @@ export default function MenuBars() {
   };
 
   const isAuthenticated = Boolean(authStatus.user);
+  const isAdmin = authStatus.user?.role === "admin";
 
   return (
     <div className="menu-shell">
@@ -108,6 +109,19 @@ export default function MenuBars() {
                     </span>
                     <span className="sr-only">Αποσύνδεση</span>
                   </button>
+                  {isAdmin && (
+                    <Link
+                      to="/admin/users"
+                      className="menu-auth-btn"
+                      aria-label="Διαχείριση χρηστών"
+                      onClick={closeMenu}
+                    >
+                      <span className="menu-auth-icon" aria-hidden>
+                        <i className="fa-solid fa-user-shield" />
+                      </span>
+                      <span className="sr-only">Διαχείριση χρηστών</span>
+                    </Link>
+                  )}
                   <Link
                     to="/profile"
                     className="menu-auth-btn"
@@ -174,6 +188,19 @@ export default function MenuBars() {
                   </span>
                   <span className="sr-only">Αποσύνδεση</span>
                 </button>
+                {isAdmin && (
+                  <Link
+                    to="/admin/users"
+                    className="menu-auth-btn"
+                    aria-label="Διαχείριση χρηστών"
+                    onClick={closeMenu}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-user-shield" />
+                    </span>
+                    <span className="sr-only">Διαχείριση χρηστών</span>
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   className="menu-auth-btn"
