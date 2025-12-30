@@ -1,6 +1,6 @@
 # apofasi
-For the moment this application which is live at http://176.126.202.242 is made entirely from ai(chatGPT paid version) with the instructions of a developer. In hopes that it becomes more of a community project. The scope of the app is to educate, inform  and help the community express and find better solutions.
 
+For the moment this application which is live at http://176.126.202.242 is made entirely from ai(chatGPT paid version) with the instructions of a developer. In hopes that it becomes more of a community project. The scope of the app is to educate, inform and help the community express and find better solutions.
 
 Application for news, education and polls.
 The idea is creating the core of a super application which will support news, education, polls and collective decision making.
@@ -17,7 +17,7 @@ Follow these steps to bring up the full stack (database + server + client):
 
 ## Deploying the client build
 
-Use the `./deploy_client_and_server.sh` helper to compile the Vite client and populate
+Use the `./deploy.sh` helper to compile the Vite client and populate
 `client/dist`, which the server serves in production. The script checks for
 unresolved merge conflicts before running so you get a clear message instead of
 Git errors during deployment.
@@ -25,10 +25,12 @@ Git errors during deployment.
 ## Deploying the server build
 
 The node.js service is managed by systemctl.
+
 - Check service status by running the command `sudo systemctl status apofasi.service`
-- Edit managed service config with `sudo nano /etc/systemd/system/apofasi.service`  
+- Edit managed service config with `sudo nano /etc/systemd/system/apofasi.service`
 
 To deploy new code for the server application:
+
 - `cd server`
 - `npm i`
 - `sudo systemctl restart apofasi.service`
@@ -62,7 +64,25 @@ For a step-by-step server setup guide (including provider dashboard steps and ho
 3. get the DSN (link) from the sentry.io platform
 4. paste it in the server > .env > SENTRY_DSN=
 
-### CORS 
+### CORS
 
 Add the ip or domain of the machine serving the application in the CLIENT_ORIGIN env variable.  
 For example, when a domain (e.g., apofasi.gr) will be used im the deployment, update the variable in the directory `server > .env`, as such `CLIENT_ORIGIN=http://localhost:5173,http://176.126.202.242,https://apofasi.gr,https:www.apofasi.gr`
+
+### CI/CD - Github Actions - automate deployment
+
+To avoid having to manually connect to the VPS with ssh everytime to deploy new changes, we are utilising a Github Actions Workflow. The config can be found in `.github/workflows/deploy.yml`
+In order for this file to run correctly, secret env variables have been added in the github platform.  
+These can be found (need to be added) in the repo's  
+`settings > secrets and variables > actions > secrets > repository secrets`  
+and  
+`settings > secrets and variables > actions > variables > repository variables`
+
+The variables under **secrets** are:
+
+- USERNAME : ssh username (e.g., root OR <USERNAME>)
+- PASSWORD : ssh password
+
+The variables under **variables** are:
+
+- HOST : define the VPS' IP (e.g., 176.126.202.242)
