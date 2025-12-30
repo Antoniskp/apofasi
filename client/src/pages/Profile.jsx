@@ -6,6 +6,15 @@ export default function Profile() {
   const [status, setStatus] = useState({ loading: true, user: null, error: null });
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const optionalFields = [
+    { key: "firstName", label: "Όνομα", placeholder: "Δεν έχει προστεθεί ακόμα." },
+    { key: "lastName", label: "Επώνυμο", placeholder: "Προσθέστε το επώνυμό σας." },
+    { key: "username", label: "Username", placeholder: "Επιλέξτε ένα όνομα χρήστη όταν είναι διαθέσιμο." },
+    { key: "mobile", label: "Κινητό", placeholder: "Μπορείτε να δηλώσετε ένα κινητό για ειδοποιήσεις." },
+    { key: "country", label: "Χώρα", placeholder: "Προσθέστε τη χώρα διαμονής σας." },
+    { key: "occupation", label: "Επάγγελμα", placeholder: "Προαιρετική επαγγελματική πληροφορία." }
+  ];
+
   const loadProfile = async () => {
     setStatus((prev) => ({ ...prev, loading: true }));
 
@@ -40,6 +49,19 @@ export default function Profile() {
 
   const { loading, user, error } = status;
 
+  const renderOptionalField = (field) => {
+    const value = user?.[field.key];
+    return (
+      <div key={field.key} className={`profile-field ${value ? "" : "profile-field-empty"}`}>
+        <div className="profile-field-header">
+          <p className="label">{field.label}</p>
+          {!value && <span className="tag">Προαιρετικό</span>}
+        </div>
+        <p className={`profile-field-value ${value ? "" : "muted"}`}>{value || field.placeholder}</p>
+      </div>
+    );
+  };
+
   return (
     <div className="section narrow">
       <p className="pill">Προφίλ</p>
@@ -50,65 +72,65 @@ export default function Profile() {
         {loading && <p className="muted">Φόρτωση προφίλ...</p>}
 
         {!loading && user && (
-          <div className="stack">
+          <div className="stack profile-stack">
+            <div className="profile-header">
               <div className="auth-user">
                 {user.avatar && <img src={user.avatar} alt="Προφίλ" className="auth-avatar" />}
                 <div>
                   <div className="auth-user-name">{user.displayName || "Χρήστης"}</div>
                   {(user.firstName || user.lastName) && (
-                    <div className="muted">
-                      {[user.firstName, user.lastName].filter(Boolean).join(" ")}
-                    </div>
+                    <div className="muted">{[user.firstName, user.lastName].filter(Boolean).join(" ")}</div>
                   )}
                   {user.email && <div className="muted">{user.email}</div>}
-                  <div className="pill subtle">Πάροχος: {user.provider}</div>
+                  <div className="pill subtle">Σύνδεση μέσω {user.provider}</div>
                 </div>
               </div>
 
-            <div className="info-grid">
-              <div>
-                <p className="label">User ID</p>
-                <p className="muted small">{user.id}</p>
+              <div className="profile-meta">
+                <p className="label">Κατάσταση συνεδρίας</p>
+                <p className="pill positive">Συνδεδεμένος/η</p>
+                <p className="muted small">
+                  Δείτε τα στοιχεία που έχουμε για εσάς και συμπληρώστε τα προαιρετικά πεδία όταν γίνουν διαθέσιμα.
+                </p>
               </div>
-              {user.firstName && (
-                <div>
-                  <p className="label">Όνομα</p>
-                  <p className="muted small">{user.firstName}</p>
-                </div>
-              )}
-              {user.lastName && (
-                <div>
-                  <p className="label">Επώνυμο</p>
-                  <p className="muted small">{user.lastName}</p>
-                </div>
-              )}
-              {user.username && (
-                <div>
-                  <p className="label">Username</p>
-                  <p className="muted small">{user.username}</p>
-                </div>
-              )}
-              {user.mobile && (
-                <div>
-                  <p className="label">Κινητό</p>
-                  <p className="muted small">{user.mobile}</p>
-                </div>
-              )}
-              {user.country && (
-                <div>
-                  <p className="label">Χώρα</p>
-                  <p className="muted small">{user.country}</p>
-                </div>
-              )}
-              {user.occupation && (
-                <div>
-                  <p className="label">Επάγγελμα</p>
-                  <p className="muted small">{user.occupation}</p>
-                </div>
-              )}
             </div>
 
-            <div className="actions-row">
+            <div className="profile-highlight">
+              <div>
+                <p className="label">User ID</p>
+                <p className="muted small mono">{user.id}</p>
+              </div>
+              <div>
+                <p className="label">Πάροχος</p>
+                <p className="pill subtle">{user.provider}</p>
+              </div>
+            </div>
+
+            <div className="profile-section">
+              <div>
+                <h3>Προαιρετικά στοιχεία</h3>
+                <p className="muted small">
+                  Εμπλουτίστε το προφίλ σας προσθέτοντας όνομα, στοιχεία επικοινωνίας ή επαγγελματικές πληροφορίες.
+                </p>
+              </div>
+              <div className="profile-grid">{optionalFields.map(renderOptionalField)}</div>
+            </div>
+
+            <div className="profile-section">
+              <h3>Βασικά στοιχεία επικοινωνίας</h3>
+              <div className="profile-grid">
+                <div className="profile-field">
+                  <p className="label">Email</p>
+                  <p className="profile-field-value">{user.email || "Δεν έχει δηλωθεί email"}</p>
+                </div>
+                <div className="profile-field">
+                  <p className="label">Όνομα εμφάνισης</p>
+                  <p className="profile-field-value">{user.displayName || "Χρήστης"}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="actions-row profile-actions">
               <button type="button" className="btn" onClick={loadProfile} disabled={loading}>
                 Ανανέωση
               </button>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL, getAuthStatus, loginUser, registerUser } from "../lib/api.js";
-import { useNavigate } from "../lib/router.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [registerForm, setRegisterForm] = useState({
@@ -78,6 +78,7 @@ export default function Register() {
       await loginUser(loginForm);
       setFeedback("Επιτυχής σύνδεση.");
       await loadStatus();
+      navigate("/");
     } catch (err) {
       setError(err.message || "Η σύνδεση απέτυχε.");
     } finally {
