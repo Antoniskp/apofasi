@@ -34,13 +34,8 @@ export const registerUser = async (payload) =>
       `${API_BASE_URL}/auth/register`,
       buildJsonRequest({
         displayName: payload.displayName?.trim(),
-        firstName: payload.firstName?.trim(),
-        lastName: payload.lastName?.trim(),
         email: normalizeEmail(payload.email),
-        password: payload.password,
-        mobile: payload.mobile?.trim(),
-        country: payload.country?.trim(),
-        occupation: payload.occupation?.trim()
+        password: payload.password
       })
     )
   );
