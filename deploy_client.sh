@@ -29,7 +29,12 @@ sudo rsync -a --delete client/dist/ /var/www/apofasi/
 echo "== Reloading nginx =="
 sudo systemctl reload nginx
 
-# 5) Verification
+# 5) Deploy Server build
+cd server
+npm i
+sudo systemctl restart apofasi.service
+
+# 6) Verification
 echo "== Deployment finished =="
 echo "Deployed commit: $(git rev-parse --short HEAD)"
 ls -la /var/www/apofasi/index.html
