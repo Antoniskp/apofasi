@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getAuthStatus, logoutUser } from "../lib/api.js";
 
 const topMenu = [
   { label: "Αρχική", to: "/", icon: "fa-house" },
@@ -26,9 +27,31 @@ const bottomMenu = [
 
 export default function MenuBars() {
   const [isOpen, setIsOpen] = useState(false);
+  const [authStatus, setAuthStatus] = useState({ loading: true, user: null });
   const location = useLocation();
 
   const closeMenu = () => setIsOpen(false);
+
+  const loadAuthStatus = async () => {
+    try {
+      const data = await getAuthStatus();
+      setAuthStatus({ loading: false, user: data.user });
+    } catch (error) {
+      setAuthStatus({ loading: false, user: null });
+    }
+  };
+
+  useEffect(() => {
+    loadAuthStatus();
+  }, []);
+
+  const handleLogout = async () => {
+    await logoutUser();
+    await loadAuthStatus();
+    closeMenu();
+  };
+
+  const isAuthenticated = Boolean(authStatus.user);
 
   return (
     <div className="menu-shell">
@@ -72,76 +95,134 @@ export default function MenuBars() {
             ))}
 
             <div className="menu-actions menu-actions-mobile">
-              <Link
-                to="/auth"
-                className="menu-auth-btn primary"
-                aria-label="Σύνδεση"
-                onClick={closeMenu}
-              >
-                <span className="menu-auth-icon" aria-hidden>
-                  <i className="fa-solid fa-right-to-bracket" />
-                </span>
-                <span className="sr-only">Σύνδεση</span>
-              </Link>
-              <Link
-                to="/register"
-                className="menu-auth-btn"
-                aria-label="Εγγραφή"
-                onClick={closeMenu}
-              >
-                <span className="menu-auth-icon" aria-hidden>
-                  <i className="fa-solid fa-user-plus" />
-                </span>
-                <span className="sr-only">Εγγραφή</span>
-              </Link>
-              <Link
-                to="/profile"
-                className="menu-auth-btn"
-                aria-label="Προφίλ"
-                onClick={closeMenu}
-              >
-                <span className="menu-auth-icon" aria-hidden>
-                  <i className="fa-solid fa-circle-user" />
-                </span>
-                <span className="sr-only">Προφίλ</span>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <button
+                    type="button"
+                    className="menu-auth-btn primary"
+                    aria-label="Αποσύνδεση"
+                    onClick={handleLogout}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-right-from-bracket" />
+                    </span>
+                    <span className="sr-only">Αποσύνδεση</span>
+                  </button>
+                  <Link
+                    to="/profile"
+                    className="menu-auth-btn"
+                    aria-label="Προφίλ"
+                    onClick={closeMenu}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-circle-user" />
+                    </span>
+                    <span className="sr-only">Προφίλ</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/auth"
+                    className="menu-auth-btn primary"
+                    aria-label="Σύνδεση"
+                    onClick={closeMenu}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-right-to-bracket" />
+                    </span>
+                    <span className="sr-only">Σύνδεση</span>
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="menu-auth-btn"
+                    aria-label="Εγγραφή"
+                    onClick={closeMenu}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-user-plus" />
+                    </span>
+                    <span className="sr-only">Εγγραφή</span>
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className="menu-auth-btn"
+                    aria-label="Προφίλ"
+                    onClick={closeMenu}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-circle-user" />
+                    </span>
+                    <span className="sr-only">Προφίλ</span>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
 
           <div className="menu-actions menu-actions-desktop">
-            <Link
-              to="/auth"
-              className="menu-auth-btn primary"
-              aria-label="Σύνδεση"
-              onClick={closeMenu}
-            >
-              <span className="menu-auth-icon" aria-hidden>
-                <i className="fa-solid fa-right-to-bracket" />
-              </span>
-              <span className="sr-only">Σύνδεση</span>
-            </Link>
-            <Link
-              to="/register"
-              className="menu-auth-btn"
-              aria-label="Εγγραφή"
-              onClick={closeMenu}
-            >
-              <span className="menu-auth-icon" aria-hidden>
-                <i className="fa-solid fa-user-plus" />
-              </span>
-              <span className="sr-only">Εγγραφή</span>
-            </Link>
-            <Link
-              to="/profile"
-              className="menu-auth-btn"
-              aria-label="Προφίλ"
-              onClick={closeMenu}
-            >
-              <span className="menu-auth-icon" aria-hidden>
-                <i className="fa-solid fa-circle-user" />
-              </span>
-              <span className="sr-only">Προφίλ</span>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <button
+                  type="button"
+                  className="menu-auth-btn primary"
+                  aria-label="Αποσύνδεση"
+                  onClick={handleLogout}
+                >
+                  <span className="menu-auth-icon" aria-hidden>
+                    <i className="fa-solid fa-right-from-bracket" />
+                  </span>
+                  <span className="sr-only">Αποσύνδεση</span>
+                </button>
+                <Link
+                  to="/profile"
+                  className="menu-auth-btn"
+                  aria-label="Προφίλ"
+                  onClick={closeMenu}
+                >
+                  <span className="menu-auth-icon" aria-hidden>
+                    <i className="fa-solid fa-circle-user" />
+                  </span>
+                  <span className="sr-only">Προφίλ</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/auth"
+                  className="menu-auth-btn primary"
+                  aria-label="Σύνδεση"
+                  onClick={closeMenu}
+                >
+                  <span className="menu-auth-icon" aria-hidden>
+                    <i className="fa-solid fa-right-to-bracket" />
+                  </span>
+                  <span className="sr-only">Σύνδεση</span>
+                </Link>
+                <Link
+                  to="/register"
+                  className="menu-auth-btn"
+                  aria-label="Εγγραφή"
+                  onClick={closeMenu}
+                >
+                  <span className="menu-auth-icon" aria-hidden>
+                    <i className="fa-solid fa-user-plus" />
+                  </span>
+                  <span className="sr-only">Εγγραφή</span>
+                </Link>
+                <Link
+                  to="/profile"
+                  className="menu-auth-btn"
+                  aria-label="Προφίλ"
+                  onClick={closeMenu}
+                >
+                  <span className="menu-auth-icon" aria-hidden>
+                    <i className="fa-solid fa-circle-user" />
+                  </span>
+                  <span className="sr-only">Προφίλ</span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
