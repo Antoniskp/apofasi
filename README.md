@@ -43,3 +43,15 @@ On the frontend, set `VITE_API_BASE_URL` to point to your running server (e.g. `
 
 For a step-by-step server setup guide (including provider dashboard steps and how to run the server locally), see
 [`server/README.md`](server/README.md).
+
+### Sentry.io - monitor issues
+
+1. create an account (free tier) in [sentry.io](https://sentry.io/signup)
+2. create a new project - a node js one
+3. get the DSN (link) from the sentry.io platform
+4. paste it in the server > .env > SENTRY_DSN=
+
+### CORS 
+
+Add the ip or domain of the machine serving the application in the CLIENT_ORIGIN env variable.  
+For example, when a domain (e.g., apofasi.gr) will be used im the deployment, update the variable in the directory `server > .env`, as such `CLIENT_ORIGIN=http://localhost:5173,http://176.126.202.242,https://apofasi.gr,https:www.apofasi.gr`
