@@ -5,8 +5,8 @@ const API_BASE_URL =
 
 const normalizeEmail = (email) => (email ? String(email).trim().toLowerCase() : "");
 
-const buildJsonRequest = (payload) => ({
-  method: "POST",
+const buildJsonRequest = (payload, method = "POST") => ({
+  method,
   headers: { "Content-Type": "application/json" },
   credentials: "include",
   body: JSON.stringify(payload)
@@ -26,6 +26,21 @@ export const getAuthStatus = async () =>
     await fetch(`${API_BASE_URL}/auth/status`, {
       credentials: "include"
     })
+  );
+
+export const updateProfile = async (payload) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/auth/profile`,
+      buildJsonRequest({
+        firstName: payload.firstName?.trim(),
+        lastName: payload.lastName?.trim(),
+        username: payload.username?.trim(),
+        mobile: payload.mobile?.trim(),
+        country: payload.country?.trim(),
+        occupation: payload.occupation?.trim()
+      }, "PUT")
+    )
   );
 
 export const registerUser = async (payload) =>

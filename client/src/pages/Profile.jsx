@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { API_BASE_URL, getAuthStatus, logoutUser } from "../lib/api.js";
+import { API_BASE_URL, getAuthStatus, logoutUser, updateProfile } from "../lib/api.js";
 
 export default function Profile() {
   const [status, setStatus] = useState({ loading: true, user: null, error: null });
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
+  const [isSaving, setIsSaving] = useState(false);
   const optionalFields = [
     { key: "firstName", label: "Όνομα", placeholder: "Δεν έχει προστεθεί ακόμα." },
     { key: "lastName", label: "Επώνυμο", placeholder: "Προσθέστε το επώνυμό σας." },
@@ -15,12 +15,21 @@ export default function Profile() {
     { key: "occupation", label: "Επάγγελμα", placeholder: "Προαιρετική επαγγελματική πληροφορία." }
   ];
 
+  const buildOptionalState = (userData) =>
+    optionalFields.reduce((acc, field) => ({ ...acc, [field.key]: userData?.[field.key] || "" }), {});
+
+  const [formState, setFormState] = useState(() => buildOptionalState(null));
+  const [saveMessage, setSaveMessage] = useState(null);
+  const [saveError, setSaveError] = useState(null);
+
   const loadProfile = async () => {
     setStatus((prev) => ({ ...prev, loading: true }));
 
     try {
       const data = await getAuthStatus();
       setStatus({ loading: false, user: data.user, error: null });
+
+      setFormState(buildOptionalState(data.user));
     } catch (error) {
       setStatus({
         loading: false,
@@ -47,20 +56,28 @@ export default function Profile() {
     }
   };
 
-  const { loading, user, error } = status;
-
-  const renderOptionalField = (field) => {
-    const value = user?.[field.key];
-    return (
-      <div key={field.key} className={`profile-field ${value ? "" : "profile-field-empty"}`}>
-        <div className="profile-field-header">
-          <p className="label">{field.label}</p>
-          {!value && <span className="tag">Προαιρετικό</span>}
-        </div>
-        <p className={`profile-field-value ${value ? "" : "muted"}`}>{value || field.placeholder}</p>
-      </div>
-    );
+  const handleInputChange = (key, value) => {
+    setFormState((prev) => ({ ...prev, [key]: value }));
   };
+
+  const handleProfileSave = async (event) => {
+    event.preventDefault();
+    setIsSaving(true);
+    setSaveMessage(null);
+    setSaveError(null);
+
+    try {
+      const response = await updateProfile(formState);
+      setStatus((prev) => ({ ...prev, user: response.user }));
+      setSaveMessage("Τα στοιχεία σας αποθηκεύτηκαν.");
+    } catch (error) {
+      setSaveError(error.message || "Δεν ήταν δυνατή η ενημέρωση του προφίλ.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const { loading, user, error } = status;
 
   return (
     <div className="section narrow">
@@ -113,7 +130,40 @@ export default function Profile() {
                   Εμπλουτίστε το προφίλ σας προσθέτοντας όνομα, στοιχεία επικοινωνίας ή επαγγελματικές πληροφορίες.
                 </p>
               </div>
-              <div className="profile-grid">{optionalFields.map(renderOptionalField)}</div>
+              <form className="profile-grid" onSubmit={handleProfileSave}>
+                {optionalFields.map((field) => (
+                  <div key={field.key} className="profile-field">
+                    <div className="profile-field-header">
+                      <label className="label" htmlFor={`profile-${field.key}`}>
+                        {field.label}
+                      </label>
+                      <span className="tag">Προαιρετικό</span>
+                    </div>
+                    <input
+                      id={`profile-${field.key}`}
+                      type="text"
+                      value={formState[field.key] || ""}
+                      onChange={(event) => handleInputChange(field.key, event.target.value)}
+                      placeholder={field.placeholder}
+                    />
+                    <p className="muted small">{field.placeholder}</p>
+                  </div>
+                ))}
+
+                <div className="profile-field">
+                  <p className="label">Αποθήκευση αλλαγών</p>
+                  <div className="actions-row profile-actions">
+                    <button type="submit" className="btn" disabled={isSaving}>
+                      {isSaving ? "Αποθήκευση..." : "Αποθήκευση προαιρετικών"}
+                    </button>
+                    <button type="button" className="btn btn-outline" onClick={loadProfile} disabled={loading}>
+                      Επαναφορά από προφίλ
+                    </button>
+                  </div>
+                  {saveMessage && <p className="success-text">{saveMessage}</p>}
+                  {saveError && <p className="error-text">{saveError}</p>}
+                </div>
+              </form>
             </div>
 
             <div className="profile-section">

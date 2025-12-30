@@ -286,6 +286,39 @@ authRouter.get("/profile", ensureAuthenticated, (req, res) => {
   res.json({ user: sanitizeUser(req.user) });
 });
 
+authRouter.put("/profile", ensureAuthenticated, async (req, res) => {
+  const allowedFields = ["firstName", "lastName", "username", "mobile", "country", "occupation"];
+  const updates = {};
+
+  for (const field of allowedFields) {
+    if (field in req.body) {
+      const rawValue = req.body[field];
+      const trimmedValue = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+      updates[field] = trimmedValue || undefined;
+    }
+  }
+
+  if (updates.username) {
+    const existingUser = await User.findOne({ username: updates.username, _id: { $ne: req.user._id } });
+    if (existingUser) {
+      return res.status(409).json({ message: "Το username χρησιμοποιείται ήδη." });
+    }
+  }
+
+  try {
+    Object.entries(updates).forEach(([key, value]) => {
+      req.user[key] = value;
+    });
+
+    await req.user.save();
+
+    return res.json({ user: sanitizeUser(req.user) });
+  } catch (error) {
+    console.error("[profile-update-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ενημέρωση του προφίλ." });
+  }
+});
+
 authRouter.get(
   "/google",
   ensureProviderConfigured("google"),

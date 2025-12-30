@@ -941,6 +941,16 @@ button:focus-visible {
   box-shadow: 0 6px 12px rgba(15, 23, 42, 0.04);
 }
 
+.profile-field input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 1rem;
+}
+
 .profile-field-empty {
   background: #f8fafc;
   border-style: dashed;
