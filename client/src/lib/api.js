@@ -63,4 +63,15 @@ export const logoutUser = async () =>
     })
   );
 
+export const createNews = async (payload) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/news`,
+      buildJsonRequest({
+        title: payload.title?.trim(),
+        content: payload.content?.trim()
+      })
+    )
+  );
+
 export { API_BASE_URL };

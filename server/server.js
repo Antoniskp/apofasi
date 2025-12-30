@@ -11,6 +11,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import configurePassport from "./config/passport.js";
+import News from "./models/News.js";
 import User from "./models/User.js";
 
 dotenv.config();
@@ -61,6 +62,7 @@ const sanitizeUser = (user) =>
         email: user.email,
         provider: user.provider,
         avatar: user.avatar,
+        role: user.role,
         username: user.username,
         mobile: user.mobile,
         country: user.country,
@@ -147,6 +149,54 @@ const ensureAuthenticated = (req, res, next) => {
   }
   return next();
 };
+
+const ensureRole = (...roles) => (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Απαιτείται σύνδεση." });
+  }
+
+  if (!roles.includes(req.user.role)) {
+    return res.status(403).json({ message: "Δεν έχετε δικαιώματα για αυτή την ενέργεια." });
+  }
+
+  return next();
+};
+
+const newsRouter = express.Router();
+
+newsRouter.use(ensureAuthenticated);
+
+newsRouter.post("/", ensureRole("reporter", "admin"), async (req, res) => {
+  const { title, content } = req.body || {};
+  const trimmedTitle = title?.trim();
+  const trimmedContent = content?.trim();
+
+  if (!trimmedTitle || !trimmedContent) {
+    return res.status(400).json({ message: "Απαιτούνται τίτλος και περιεχόμενο." });
+  }
+
+  try {
+    const createdNews = await News.create({
+      title: trimmedTitle,
+      content: trimmedContent,
+      author: req.user._id,
+    });
+
+    return res.status(201).json({
+      news: {
+        id: createdNews.id,
+        title: createdNews.title,
+        content: createdNews.content,
+        author: createdNews.author,
+        createdAt: createdNews.createdAt,
+        updatedAt: createdNews.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("[news-create-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η προσθήκη της είδησης." });
+  }
+});
 
 authRouter.post("/register", async (req, res) => {
   const { email, password, displayName, firstName, lastName, mobile, country, occupation } = req.body || {};
@@ -279,6 +329,8 @@ authRouter.get("/logout", (req, res, next) => {
 
 app.use("/auth", authRouter);
 app.use("/api/auth", authRouter);
+app.use("/news", newsRouter);
+app.use("/api/news", newsRouter);
 
 authRouter.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("Sentry Test Error!");
