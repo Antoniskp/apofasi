@@ -51,24 +51,59 @@ export default function Profile() {
 
         {!loading && user && (
           <div className="stack">
-            <div className="auth-user">
-              {user.avatar && <img src={user.avatar} alt="Προφίλ" className="auth-avatar" />}
-              <div>
-                <div className="auth-user-name">{user.displayName || "Χρήστης"}</div>
-                {user.email && <div className="muted">{user.email}</div>}
-                <div className="pill subtle">Πάροχος: {user.provider}</div>
+              <div className="auth-user">
+                {user.avatar && <img src={user.avatar} alt="Προφίλ" className="auth-avatar" />}
+                <div>
+                  <div className="auth-user-name">{user.displayName || "Χρήστης"}</div>
+                  {(user.firstName || user.lastName) && (
+                    <div className="muted">
+                      {[user.firstName, user.lastName].filter(Boolean).join(" ")}
+                    </div>
+                  )}
+                  {user.email && <div className="muted">{user.email}</div>}
+                  <div className="pill subtle">Πάροχος: {user.provider}</div>
+                </div>
               </div>
-            </div>
 
             <div className="info-grid">
               <div>
                 <p className="label">User ID</p>
                 <p className="muted small">{user.id}</p>
               </div>
+              {user.firstName && (
+                <div>
+                  <p className="label">Όνομα</p>
+                  <p className="muted small">{user.firstName}</p>
+                </div>
+              )}
+              {user.lastName && (
+                <div>
+                  <p className="label">Επώνυμο</p>
+                  <p className="muted small">{user.lastName}</p>
+                </div>
+              )}
               {user.username && (
                 <div>
                   <p className="label">Username</p>
                   <p className="muted small">{user.username}</p>
+                </div>
+              )}
+              {user.mobile && (
+                <div>
+                  <p className="label">Κινητό</p>
+                  <p className="muted small">{user.mobile}</p>
+                </div>
+              )}
+              {user.country && (
+                <div>
+                  <p className="label">Χώρα</p>
+                  <p className="muted small">{user.country}</p>
+                </div>
+              )}
+              {user.occupation && (
+                <div>
+                  <p className="label">Επάγγελμα</p>
+                  <p className="muted small">{user.occupation}</p>
                 </div>
               )}
             </div>

@@ -3,7 +3,16 @@ import { API_BASE_URL, getAuthStatus, loginUser, registerUser } from "../lib/api
 import { useNavigate } from "../lib/router.jsx";
 
 export default function Register() {
-  const [registerForm, setRegisterForm] = useState({ displayName: "", email: "", password: "" });
+  const [registerForm, setRegisterForm] = useState({
+    displayName: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    mobile: "",
+    country: "",
+    occupation: ""
+  });
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [status, setStatus] = useState({ loading: true, user: null });
   const [feedback, setFeedback] = useState("");
@@ -47,7 +56,16 @@ export default function Register() {
       const data = await registerUser(registerForm);
       setStatus({ loading: false, user: data.user });
       setFeedback("Η εγγραφή ολοκληρώθηκε! Συνδεθήκατε αυτόματα.");
-      setRegisterForm({ displayName: "", email: "", password: "" });
+      setRegisterForm({
+        displayName: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        mobile: "",
+        country: "",
+        occupation: "",
+      });
       navigate("/profile");
     } catch (err) {
       setError(err.message || "Η εγγραφή απέτυχε. Δοκιμάστε ξανά.");
@@ -102,6 +120,58 @@ export default function Register() {
                 value={registerForm.displayName}
                 onChange={(e) =>
                   setRegisterForm((prev) => ({ ...prev, displayName: e.target.value }))
+                }
+              />
+            </label>
+            <label className="field">
+              <span>Όνομα (προαιρετικό)</span>
+              <input
+                type="text"
+                name="firstName"
+                placeholder="Π.χ. Μαρία"
+                value={registerForm.firstName}
+                onChange={(e) => setRegisterForm((prev) => ({ ...prev, firstName: e.target.value }))}
+              />
+            </label>
+            <label className="field">
+              <span>Επώνυμο (προαιρετικό)</span>
+              <input
+                type="text"
+                name="lastName"
+                placeholder="Π.χ. Παπαδοπούλου"
+                value={registerForm.lastName}
+                onChange={(e) => setRegisterForm((prev) => ({ ...prev, lastName: e.target.value }))}
+              />
+            </label>
+            <label className="field">
+              <span>Κινητό (προαιρετικό)</span>
+              <input
+                type="tel"
+                name="mobile"
+                placeholder="Π.χ. +30 691 234 5678"
+                value={registerForm.mobile}
+                onChange={(e) => setRegisterForm((prev) => ({ ...prev, mobile: e.target.value }))}
+              />
+            </label>
+            <label className="field">
+              <span>Χώρα (προαιρετικό)</span>
+              <input
+                type="text"
+                name="country"
+                placeholder="Π.χ. Ελλάδα"
+                value={registerForm.country}
+                onChange={(e) => setRegisterForm((prev) => ({ ...prev, country: e.target.value }))}
+              />
+            </label>
+            <label className="field">
+              <span>Επάγγελμα (προαιρετικό)</span>
+              <input
+                type="text"
+                name="occupation"
+                placeholder="Π.χ. Μηχανικός"
+                value={registerForm.occupation}
+                onChange={(e) =>
+                  setRegisterForm((prev) => ({ ...prev, occupation: e.target.value }))
                 }
               />
             </label>

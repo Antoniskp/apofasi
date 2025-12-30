@@ -15,6 +15,26 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    firstName: {
+      type: String,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      trim: true,
+    },
+    mobile: {
+      type: String,
+      trim: true
+    },
+    country: {
+      type: String,
+      trim: true
+    },
+    occupation: {
+      type: String,
+      trim: true
+    },
     username: {
       type: String,
       trim: true,

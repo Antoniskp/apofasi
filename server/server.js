@@ -56,10 +56,15 @@ const sanitizeUser = (user) =>
     ? {
         id: user.id,
         displayName: user.displayName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         provider: user.provider,
         avatar: user.avatar,
         username: user.username,
+        mobile: user.mobile,
+        country: user.country,
+        occupation: user.occupation,
       }
     : null;
 
@@ -144,7 +149,7 @@ const ensureAuthenticated = (req, res, next) => {
 };
 
 authRouter.post("/register", async (req, res) => {
-  const { email, password, displayName } = req.body || {};
+  const { email, password, displayName, firstName, lastName, mobile, country, occupation } = req.body || {};
 
   if (!email || !password) {
     return res.status(400).json({ message: "Απαιτούνται email και κωδικός." });
@@ -152,6 +157,11 @@ authRouter.post("/register", async (req, res) => {
 
   const normalizedEmail = String(email).toLowerCase().trim();
   const trimmedName = displayName?.trim();
+  const trimmedFirstName = firstName?.trim();
+  const trimmedLastName = lastName?.trim();
+  const trimmedMobile = mobile?.trim();
+  const trimmedCountry = country?.trim();
+  const trimmedOccupation = occupation?.trim();
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
     return res.status(400).json({ message: "Μη έγκυρο email." });
@@ -172,7 +182,12 @@ authRouter.post("/register", async (req, res) => {
       providerId: normalizedEmail,
       email: normalizedEmail,
       password: hashPassword(password),
-      displayName: trimmedName || normalizedEmail.split("@")[0],
+      displayName: trimmedName || [trimmedFirstName, trimmedLastName].filter(Boolean).join(" ") || normalizedEmail.split("@")[0],
+      firstName: trimmedFirstName || undefined,
+      lastName: trimmedLastName || undefined,
+      mobile: trimmedMobile || undefined,
+      country: trimmedCountry || undefined,
+      occupation: trimmedOccupation || undefined,
     });
 
     req.login(newUser, (error) => {
