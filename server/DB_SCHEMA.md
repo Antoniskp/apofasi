@@ -15,7 +15,7 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
 - **email** (`String`, unique, sparse, lowercased, optional)
 - **password** (`String`, optional; only present for local accounts)
 - **avatar** (`String`, optional)
-- **role** (`String`, enum `user|admin`, default `user`)
+- **role** (`String`, enum `user|reporter|admin`, default `user`)
 - **timestamps**: `createdAt`, `updatedAt` (auto-managed)
 
 **Indexes**
