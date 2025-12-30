@@ -17,10 +17,21 @@ Follow these steps to bring up the full stack (database + server + client):
 
 ## Deploying the client build
 
-Use the `./deploy_client.sh` helper to compile the Vite client and populate
+Use the `./deploy_client_and_server.sh` helper to compile the Vite client and populate
 `client/dist`, which the server serves in production. The script checks for
 unresolved merge conflicts before running so you get a clear message instead of
 Git errors during deployment.
+
+## Deploying the server build
+
+The node.js service is managed by systemctl.
+- Check service status by running the command `sudo systemctl status apofasi.service`
+- Edit managed service config with `sudo nano /etc/systemd/system/apofasi.service`  
+
+To deploy new code for the server application:
+- `cd server`
+- `npm i`
+- `sudo systemctl restart apofasi.service`
 
 ## Social login (Google & Facebook)
 
