@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import express from "express";
 import session from "express-session";
 import fs from "fs";
+import mongoose from "mongoose";
 import MongoStore from "connect-mongo";
 import passport from "passport";
 import path from "path";
@@ -79,8 +80,14 @@ const sanitizeUser = (user) =>
         mobile: user.mobile,
         country: user.country,
         occupation: user.occupation,
+        createdAt: user.createdAt,
       }
     : null;
+
+const escapeRegex = (value = "") => {
+  const pattern = /[.*+?^${}()|[\]\\]/g;
+  return value.replace(pattern, "\\$&");
+};
 
 const hashPassword = (password) => {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -210,6 +217,64 @@ newsRouter.post("/", ensureRole("reporter", "admin"), async (req, res) => {
   } catch (error) {
     console.error("[news-create-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η προσθήκη της είδησης." });
+  }
+});
+
+const usersRouter = express.Router();
+
+usersRouter.use(ensureAuthenticated);
+usersRouter.use(ensureRole("admin"));
+
+usersRouter.get("/", async (req, res) => {
+  const rawSearch = req.query.search?.trim();
+  const filter = rawSearch
+    ? {
+        $or: [
+          { email: { $regex: escapeRegex(rawSearch), $options: "i" } },
+          { displayName: { $regex: escapeRegex(rawSearch), $options: "i" } },
+          { username: { $regex: escapeRegex(rawSearch), $options: "i" } },
+          { firstName: { $regex: escapeRegex(rawSearch), $options: "i" } },
+          { lastName: { $regex: escapeRegex(rawSearch), $options: "i" } },
+        ],
+      }
+    : {};
+
+  try {
+    const users = await User.find(filter).sort({ createdAt: -1 }).limit(200);
+    return res.json({ users: users.map(sanitizeUser) });
+  } catch (error) {
+    console.error("[users-list-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση χρηστών." });
+  }
+});
+
+usersRouter.put("/:userId/role", async (req, res) => {
+  const { userId } = req.params;
+  const { role } = req.body || {};
+  const allowedRoles = ["user", "reporter", "admin"];
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Μη έγκυρο αναγνωριστικό χρήστη." });
+  }
+
+  if (!allowedRoles.includes(role)) {
+    return res.status(400).json({ message: "Μη έγκυρος ρόλος." });
+  }
+
+  try {
+    const targetUser = await User.findById(userId);
+
+    if (!targetUser) {
+      return res.status(404).json({ message: "Ο χρήστης δεν βρέθηκε." });
+    }
+
+    targetUser.role = role;
+    await targetUser.save();
+
+    return res.json({ user: sanitizeUser(targetUser) });
+  } catch (error) {
+    console.error("[users-role-update-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ενημέρωση του ρόλου." });
   }
 });
 
@@ -379,6 +444,8 @@ app.use("/auth", authRouter);
 app.use("/api/auth", authRouter);
 app.use("/news", newsRouter);
 app.use("/api/news", newsRouter);
+app.use("/users", usersRouter);
+app.use("/api/users", usersRouter);
 
 authRouter.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("Sentry Test Error!");

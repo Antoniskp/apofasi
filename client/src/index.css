@@ -1337,3 +1337,74 @@ button:focus-visible {
   flex-wrap: wrap;
   gap: 10px;
 }
+
+.admin-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.admin-search-field {
+  flex: 1;
+  min-width: 240px;
+}
+
+.user-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.user-table th,
+.user-table td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.user-table th {
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  color: var(--ink-muted);
+  background: #f8fafc;
+}
+
+.user-table tbody tr:hover {
+  background: var(--accent-soft);
+}
+
+.user-cell-primary {
+  font-weight: 700;
+}
+
+.role-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.role-controls select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+}
+
+.error-text.small {
+  font-size: 0.9rem;
+}
+
+.user-table .pill.subtle {
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  color: var(--ink-strong);
+}

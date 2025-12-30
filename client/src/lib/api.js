@@ -84,4 +84,28 @@ export const createNews = async (payload) =>
     )
   );
 
+export const listUsers = async (searchTerm = "") => {
+  const params = new URLSearchParams();
+
+  if (searchTerm?.trim()) {
+    params.set("search", searchTerm.trim());
+  }
+
+  const query = params.toString();
+
+  return handleResponse(
+    await fetch(`${API_BASE_URL}/users${query ? `?${query}` : ""}`, {
+      credentials: "include"
+    })
+  );
+};
+
+export const updateUserRole = async (userId, role) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/users/${userId}/role`,
+      buildJsonRequest({ role }, "PUT")
+    )
+  );
+
 export { API_BASE_URL };
