@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import express from "express";
 import session from "express-session";
 import fs from "fs";
+import MongoStore from "connect-mongo";
 import passport from "passport";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -34,6 +35,17 @@ const app = express();
 Sentry.setupExpressErrorHandler(app);
 const authRouter = express.Router();
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+const sessionMaxAgeDays = Number(process.env.SESSION_MAX_AGE_DAYS);
+const sessionMaxAgeMs =
+  Number.isFinite(sessionMaxAgeDays) && sessionMaxAgeDays > 0
+    ? sessionMaxAgeDays * 24 * 60 * 60 * 1000
+    : 7 * 24 * 60 * 60 * 1000;
+const sessionStore = MongoStore.create({
+  mongoUrl: process.env.MONGO_URI,
+  collectionName: "sessions",
+  ttl: sessionMaxAgeMs / 1000,
+  touchAfter: 24 * 3600,
+});
 const allowedOrigins = CLIENT_ORIGIN.split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
@@ -114,14 +126,17 @@ if (shouldLogRequests) {
 app.set("trust proxy", 1);
 app.use(
   session({
+    name: process.env.SESSION_NAME || "apofasi.sid",
     secret: process.env.SESSION_SECRET || "apofasi-session-secret",
     resave: false,
     saveUninitialized: false,
+    proxy: true,
+    store: sessionStore,
     cookie: {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+      maxAge: sessionMaxAgeMs,
     },
   })
 );
