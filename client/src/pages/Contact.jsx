@@ -22,10 +22,11 @@ const contactChannels = [
 ];
 
 const socialLinks = [
-  { label: "X", icon: "✕", href: "#" },
-  { label: "Instagram", icon: "📸", href: "#" },
-  { label: "LinkedIn", icon: "💼", href: "#" },
-  { label: "YouTube", icon: "▶", href: "#" }
+  { label: "Discord", icon: "💬", href: "https://discord.gg/pvJftR4T98", available: true },
+  { label: "X", icon: "✕", href: "#", available: false },
+  { label: "Instagram", icon: "📸", href: "#", available: false },
+  { label: "LinkedIn", icon: "💼", href: "#", available: false },
+  { label: "YouTube", icon: "▶", href: "#", available: false }
 ];
 
 export default function Contact() {
@@ -149,8 +150,8 @@ export default function Contact() {
               <div className="pill subtle">Κοινότητα</div>
               <h3>Συνδεθείτε μαζί μας στα social</h3>
               <p className="muted">
-                Δείτε τις καθημερινές ενημερώσεις, τα live threads και τα behind-the-scenes της ομάδας. Τα links θα ενεργοποιηθούν
-                σύντομα.
+                Δείτε τις καθημερινές ενημερώσεις, τα live threads και τα behind-the-scenes της ομάδας. Συμμετέχετε άμεσα στο
+                Discord και ακολουθήστε τα υπόλοιπα κανάλια μας.
               </p>
             </div>
             <a className="btn btn-outline" href="/social">
@@ -159,7 +160,14 @@ export default function Contact() {
           </div>
           <div className="social-icons">
             {socialLinks.map((link) => (
-              <a key={link.label} className="social-btn" href={link.href} aria-label={`${link.label} (σύνδεσμος σύντομα)`}>
+              <a
+                key={link.label}
+                className="social-btn"
+                href={link.href}
+                aria-label={link.available ? link.label : `${link.label} (σύνδεσμος σύντομα)`}
+                target={link.available ? "_blank" : undefined}
+                rel={link.available ? "noreferrer" : undefined}
+              >
                 <span className="social-icon" aria-hidden>
                   {link.icon}
                 </span>

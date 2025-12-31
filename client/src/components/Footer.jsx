@@ -31,7 +31,7 @@ const footerSections = [
     description: "Ακολουθήστε τα κανάλια ενημέρωσης και τις κοινότητές μας.",
     links: [
       { label: "Newsletter", to: "/social" },
-      { label: "Community chat", to: "/social" }
+      { label: "Discord", href: "https://discord.gg/pvJftR4T98" }
     ]
   },
   {
@@ -77,11 +77,23 @@ export default function Footer() {
               <h3>{section.title}</h3>
               <p className="muted">{section.description}</p>
               <div className="footer-links">
-                {section.links.map((link) => (
-                  <Link key={link.label} to={link.to} className="footer-link">
-                    {link.label}
-                  </Link>
-                ))}
+                {section.links.map((link) =>
+                  link.href ? (
+                    <a
+                      key={link.label}
+                      className="footer-link"
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link key={link.label} to={link.to} className="footer-link">
+                      {link.label}
+                    </Link>
+                  )
+                )}
               </div>
             </div>
           ))}
