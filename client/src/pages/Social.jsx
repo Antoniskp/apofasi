@@ -1,24 +1,3 @@
-const socialUpdates = [
-  {
-    channel: "Newsletter",
-    description: "Μηνιαίες ενημερώσεις με τις πιο σημαντικές ιστορίες και τα συμπεράσματα από τις ψηφοφορίες.",
-    cadence: "1x / μήνα",
-    cta: "Εγγραφή"
-  },
-  {
-    channel: "Community chat",
-    description: "Συζητήσεις για νέες ιδέες, feedback και τεχνική στήριξη στην κοινότητά μας.",
-    cadence: "Ζωντανή κοινότητα",
-    cta: "Join Discord"
-  },
-  {
-    channel: "Social media",
-    description: "Σύντομες ενημερώσεις και breaking news από την ομάδα σύνταξης και τους συνεργάτες μας.",
-    cadence: "Καθημερινά",
-    cta: "Ακολουθήστε"
-  }
-];
-
 export default function Social() {
   return (
     <div className="page">
@@ -27,25 +6,33 @@ export default function Social() {
           <p className="eyebrow">Social</p>
           <h1>Μείνετε σε επαφή με την κοινότητα</h1>
           <p className="muted">
-            Επιλέξτε το κανάλι που σας ταιριάζει για να ενημερώνεστε για νέες δυνατότητες, έρευνες και δράσεις του Apofasi.
+            Προς το παρόν το επίσημο κανάλι μας είναι το Discord, όπου συγκεντρώνουμε όλες τις ενημερώσεις, τα Q&A και την
+            υποστήριξη της κοινότητας. Τα υπόλοιπα κανάλια θα προστεθούν όταν είναι έτοιμα.
           </p>
         </div>
       </header>
 
       <section className="section">
-        <div className="grid-3">
-          {socialUpdates.map((item) => (
-            <div key={item.channel} className="card">
-              <h3>{item.channel}</h3>
-              <p>{item.description}</p>
-              <p className="muted">Συχνότητα: {item.cadence}</p>
-              <div className="cta-row">
-                <a className="btn btn-outline" href="#">
-                  {item.cta}
-                </a>
-              </div>
-            </div>
-          ))}
+        <div className="card contact-card">
+          <div className="pill subtle">Discord</div>
+          <h3>Το κεντρικό hub της κοινότητας</h3>
+          <p>
+            Ελάτε στο Discord για να μιλήσετε με την ομάδα, να μάθετε πρώτοι για νέα χαρακτηριστικά και να δώσετε feedback για
+            το τι θέλετε να δείτε στην πλατφόρμα Apofasi.
+          </p>
+          <ul className="contact-meta">
+            <li>Live ενημερώσεις για releases και βελτιώσεις</li>
+            <li>Κανάλια Q&A και τεχνικής υποστήριξης</li>
+            <li>Συνεργατικά threads για ιδέες, δοκιμές και εθελοντισμό</li>
+          </ul>
+          <div className="cta-row">
+            <a className="btn btn-outline" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+              Join Discord
+            </a>
+            <a className="btn btn-subtle" href="/contact">
+              Δείτε τρόπους επικοινωνίας
+            </a>
+          </div>
         </div>
       </section>
     </div>
