@@ -36,8 +36,8 @@ const waysToSupport = [
     detail:
       "Θέλετε να ενισχύσετε την ομάδα με χρήματα ή crypto; Μπορούμε να προχωρήσουμε με δωρεά ή να σχεδιάσουμε μαζί ένα sponsorship για τη λειτουργία της πλατφόρμας.",
     action: {
-      label: "Συνεννόηση με την ομάδα",
-      href: "mailto:team@apofasi.news",
+      label: "Συνεννόηση στο Discord",
+      href: "https://discord.gg/pvJftR4T98",
       external: true
     }
   },
@@ -54,8 +54,8 @@ const waysToSupport = [
     title: "Μοιραστείτε γνώση",
     detail: "Προτείνετε πηγές δεδομένων, μηχανισμούς εντοπισμού παραπληροφόρησης ή εργαλεία αυτοματοποίησης για την ομάδα.",
     action: {
-      label: "Στείλτε ιδέα",
-      href: "mailto:team@apofasi.news",
+      label: "Στείλτε ιδέα στο Discord",
+      href: "https://discord.gg/pvJftR4T98",
       external: true
     }
   }
@@ -73,8 +73,8 @@ export default function Contribute() {
             προσφέρουμε ένα καθαρότερο περιβάλλον ειδήσεων και μια πιο συμμετοχική δημόσια συζήτηση.
           </p>
           <div className="hero-buttons">
-            <a className="btn" href="mailto:team@apofasi.news">
-              Επικοινωνία με την ομάδα
+            <a className="btn" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+              Επικοινωνία στο Discord
             </a>
             <Link to="/mission" className="btn btn-outline">
               Δείτε το όραμα
@@ -106,8 +106,8 @@ export default function Contribute() {
               καθοδηγήσουμε στα διαθέσιμα κανάλια ώστε η ενίσχυση να ολοκληρωθεί με ασφάλεια και διαφάνεια.
             </p>
             <div className="cta-row">
-              <a className="btn btn-outline" href="mailto:team@apofasi.news">
-                Στείλτε email για οδηγίες
+              <a className="btn btn-outline" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+                Ζητήστε οδηγίες στο Discord
               </a>
             </div>
           </div>
@@ -119,8 +119,8 @@ export default function Contribute() {
               μέγιστο αντίκτυπο.
             </p>
             <div className="cta-row">
-              <a className="btn btn-outline" href="mailto:team@apofasi.news?subject=Funding%20a%20feature">
-                Καθορισμός έργου
+              <a className="btn btn-outline" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+                Καθορισμός έργου στο Discord
               </a>
             </div>
           </div>
