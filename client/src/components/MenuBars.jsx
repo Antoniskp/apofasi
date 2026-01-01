@@ -28,6 +28,7 @@ const bottomMenu = [
 export default function MenuBars() {
   const [isOpen, setIsOpen] = useState(false);
   const [authStatus, setAuthStatus] = useState({ loading: true, user: null });
+  const [isMenuHidden, setIsMenuHidden] = useState(false);
   const location = useLocation();
 
   const closeMenu = () => setIsOpen(false);
@@ -44,6 +45,36 @@ export default function MenuBars() {
   useEffect(() => {
     loadAuthStatus();
   }, []);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      if (isOpen) {
+        setIsMenuHidden(false);
+        lastScrollY = window.scrollY;
+        return;
+      }
+
+      const currentY = window.scrollY;
+      const isScrollingDown = currentY > lastScrollY;
+      const pastThreshold = currentY > 80;
+      const shouldHide = isScrollingDown && pastThreshold;
+
+      setIsMenuHidden((prev) => (prev === shouldHide ? prev : shouldHide));
+
+      lastScrollY = currentY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsMenuHidden(false);
+    }
+  }, [isOpen]);
 
   const handleLogout = async () => {
     await logoutUser();
@@ -65,7 +96,7 @@ export default function MenuBars() {
     : null;
 
   return (
-    <div className="menu-shell">
+    <div className={`menu-shell${isMenuHidden ? " menu-hidden" : ""}`}>
       <div className="menu-top">
         <div className="menu-top-inner">
           <div className="menu-left">
