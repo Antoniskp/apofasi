@@ -99,7 +99,16 @@ export default function MenuBars() {
     <div className={`menu-shell${isMenuHidden ? " menu-hidden" : ""}`}>
       <div className="menu-top">
         <div className="menu-top-inner">
-          <div className="menu-primary">
+          <div className="menu-left">
+            <div className="menu-brand">
+              <span className="brand-mark" aria-hidden>
+                <i className="fa-solid fa-scale-balanced" />
+              </span>
+              <Link to="/" className="brand-wordmark">
+                Apofasi
+              </Link>
+            </div>
+
             <button
               type="button"
               className="menu-toggle"
@@ -112,102 +121,99 @@ export default function MenuBars() {
                 aria-hidden
               />
             </button>
-
-            <nav
-              className={`menu-links ${isOpen ? "open" : ""}`}
-              aria-label="Top navigation"
-            >
-              {topMenu.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  className={`menu-link${location.pathname === item.to ? " active" : ""}`}
-                  onClick={closeMenu}
-                >
-                  <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
-                  {item.label}
-                </Link>
-              ))}
-
-              <div className="menu-actions menu-actions-mobile">
-                {isAuthenticated ? (
-                  <>
-                    <button
-                      type="button"
-                      className="menu-auth-btn primary"
-                      aria-label="Αποσύνδεση"
-                      onClick={handleLogout}
-                    >
-                      <span className="menu-auth-icon" aria-hidden>
-                        <i className="fa-solid fa-right-from-bracket" />
-                      </span>
-                      <span className="sr-only">Αποσύνδεση</span>
-                    </button>
-                    {isAdmin && (
-                      <Link
-                        to="/admin/users"
-                        className="menu-auth-btn"
-                        aria-label="Διαχείριση χρηστών"
-                        onClick={closeMenu}
-                      >
-                        <span className="menu-auth-icon" aria-hidden>
-                          <i className="fa-solid fa-user-shield" />
-                        </span>
-                        <span className="sr-only">Διαχείριση χρηστών</span>
-                      </Link>
-                    )}
-                    <Link
-                      to="/profile"
-                      className="menu-auth-btn"
-                      aria-label="Προφίλ"
-                      onClick={closeMenu}
-                    >
-                      <span className="menu-auth-icon" aria-hidden>
-                        <i className="fa-solid fa-circle-user" />
-                      </span>
-                      <span className="sr-only">Προφίλ</span>
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/auth"
-                      className="menu-auth-btn primary"
-                      aria-label="Σύνδεση"
-                      onClick={closeMenu}
-                    >
-                      <span className="menu-auth-icon" aria-hidden>
-                        <i className="fa-solid fa-right-to-bracket" />
-                      </span>
-                      <span className="sr-only">Σύνδεση</span>
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="menu-auth-btn"
-                      aria-label="Εγγραφή"
-                      onClick={closeMenu}
-                    >
-                      <span className="menu-auth-icon" aria-hidden>
-                        <i className="fa-solid fa-user-plus" />
-                      </span>
-                      <span className="sr-only">Εγγραφή</span>
-                    </Link>
-                    <Link
-                      to="/profile"
-                      className="menu-auth-btn"
-                      aria-label="Προφίλ"
-                      onClick={closeMenu}
-                    >
-                      <span className="menu-auth-icon" aria-hidden>
-                        <i className="fa-solid fa-circle-user" />
-                      </span>
-                      <span className="sr-only">Προφίλ</span>
-                    </Link>
-                  </>
-                )}
-              </div>
-            </nav>
           </div>
+
+          <nav className={`menu-links ${isOpen ? "open" : ""}`} aria-label="Top navigation">
+            {topMenu.map((item) => (
+              <Link
+                key={item.label}
+                to={item.to}
+                className={`menu-link${location.pathname === item.to ? " active" : ""}`}
+                onClick={closeMenu}
+              >
+                <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
+                {item.label}
+              </Link>
+            ))}
+
+            <div className="menu-actions menu-actions-mobile">
+              {isAuthenticated ? (
+                <>
+                  <button
+                    type="button"
+                    className="menu-auth-btn primary"
+                    aria-label="Αποσύνδεση"
+                    onClick={handleLogout}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-right-from-bracket" />
+                    </span>
+                    <span className="sr-only">Αποσύνδεση</span>
+                  </button>
+                  {isAdmin && (
+                    <Link
+                      to="/admin/users"
+                      className="menu-auth-btn"
+                      aria-label="Διαχείριση χρηστών"
+                      onClick={closeMenu}
+                    >
+                      <span className="menu-auth-icon" aria-hidden>
+                        <i className="fa-solid fa-user-shield" />
+                      </span>
+                      <span className="sr-only">Διαχείριση χρηστών</span>
+                    </Link>
+                  )}
+                  <Link
+                    to="/profile"
+                    className="menu-auth-btn"
+                    aria-label="Προφίλ"
+                    onClick={closeMenu}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-circle-user" />
+                    </span>
+                    <span className="sr-only">Προφίλ</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/auth"
+                    className="menu-auth-btn primary"
+                    aria-label="Σύνδεση"
+                    onClick={closeMenu}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-right-to-bracket" />
+                    </span>
+                    <span className="sr-only">Σύνδεση</span>
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="menu-auth-btn"
+                    aria-label="Εγγραφή"
+                    onClick={closeMenu}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-user-plus" />
+                    </span>
+                    <span className="sr-only">Εγγραφή</span>
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className="menu-auth-btn"
+                    aria-label="Προφίλ"
+                    onClick={closeMenu}
+                  >
+                    <span className="menu-auth-icon" aria-hidden>
+                      <i className="fa-solid fa-circle-user" />
+                    </span>
+                    <span className="sr-only">Προφίλ</span>
+                  </Link>
+                </>
+              )}
+            </div>
+          </nav>
 
           <div className="menu-actions menu-actions-desktop">
             {isAuthenticated ? (
@@ -292,15 +298,6 @@ export default function MenuBars() {
                 </Link>
               </>
             )}
-          </div>
-
-          <div className="menu-brand">
-            <span className="brand-mark" aria-hidden>
-              <i className="fa-solid fa-scale-balanced" />
-            </span>
-            <Link to="/" className="brand-wordmark">
-              Apofasi
-            </Link>
           </div>
         </div>
       </div>
