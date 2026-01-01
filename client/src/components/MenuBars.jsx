@@ -53,6 +53,16 @@ export default function MenuBars() {
 
   const isAuthenticated = Boolean(authStatus.user);
   const isAdmin = authStatus.user?.role === "admin";
+  const userName =
+    authStatus.user?.displayName ||
+    authStatus.user?.firstName ||
+    authStatus.user?.email ||
+    "Χρήστης";
+  const userRole = authStatus.user?.role
+    ? authStatus.user.role === "admin"
+      ? "Διαχειριστής"
+      : "Μέλος"
+    : null;
 
   return (
     <div className="menu-shell">
@@ -177,6 +187,13 @@ export default function MenuBars() {
           <div className="menu-actions menu-actions-desktop">
             {isAuthenticated ? (
               <>
+                <div className="menu-auth-summary" aria-label="Πληροφορίες χρήστη">
+                  <div className="menu-auth-hello">
+                    Hello,
+                    <span className="menu-auth-name">{` ${userName}`}</span>
+                  </div>
+                  {userRole && <div className="menu-auth-role">{userRole}</div>}
+                </div>
                 <button
                   type="button"
                   className="menu-auth-btn primary"
