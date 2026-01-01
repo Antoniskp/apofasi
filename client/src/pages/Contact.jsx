@@ -22,11 +22,11 @@ const contactChannels = [
 ];
 
 const socialLinks = [
-  { label: "Discord", icon: "💬", href: "https://discord.gg/pvJftR4T98", available: true },
-  { label: "X", icon: "✕", href: "#", available: false },
-  { label: "Instagram", icon: "📸", href: "#", available: false },
-  { label: "LinkedIn", icon: "💼", href: "#", available: false },
-  { label: "YouTube", icon: "▶", href: "#", available: false }
+  {
+    label: "Discord",
+    icon: "💬",
+    href: "https://discord.gg/pvJftR4T98"
+  }
 ];
 
 export default function Contact() {
@@ -148,26 +148,19 @@ export default function Contact() {
           <div className="social-card-head">
             <div>
               <div className="pill subtle">Κοινότητα</div>
-              <h3>Συνδεθείτε μαζί μας στα social</h3>
+              <h3>Συνδεθείτε μαζί μας στο Discord</h3>
               <p className="muted">
-                Δείτε τις καθημερινές ενημερώσεις, τα live threads και τα behind-the-scenes της ομάδας. Συμμετέχετε άμεσα στο
-                Discord και ακολουθήστε τα υπόλοιπα κανάλια μας.
+                Για την ώρα, όλες οι ανακοινώσεις και η υποστήριξη γίνονται μέσα από το Discord. Μπείτε για να λάβετε άμεσες
+                ενημερώσεις, να δώσετε feedback και να μιλήσετε με την ομάδα ανάπτυξης.
               </p>
             </div>
-            <a className="btn btn-outline" href="/social">
-              Περισσότερα κανάλια
+            <a className="btn btn-outline" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+              Είσοδος στο Discord
             </a>
           </div>
           <div className="social-icons">
             {socialLinks.map((link) => (
-              <a
-                key={link.label}
-                className="social-btn"
-                href={link.href}
-                aria-label={link.available ? link.label : `${link.label} (σύνδεσμος σύντομα)`}
-                target={link.available ? "_blank" : undefined}
-                rel={link.available ? "noreferrer" : undefined}
-              >
+              <a key={link.label} className="social-btn" href={link.href} target="_blank" rel="noreferrer">
                 <span className="social-icon" aria-hidden>
                   {link.icon}
                 </span>
@@ -175,6 +168,11 @@ export default function Contact() {
               </a>
             ))}
           </div>
+          <ul className="contact-meta">
+            <li>Άμεσες ενημερώσεις για αλλαγές στην πλατφόρμα</li>
+            <li>Κανάλι υποστήριξης για απορίες και αναφορές σφαλμάτων</li>
+            <li>Χώρος για προτάσεις, ιδέες και δοκιμές νέων χαρακτηριστικών</li>
+          </ul>
         </div>
       </section>
     </div>
