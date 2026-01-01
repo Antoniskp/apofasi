@@ -15,6 +15,16 @@ Follow these steps to bring up the full stack (database + server + client):
 4. **Install dependencies.** Run `npm install` inside both `server/` and `client/`.
 5. **Run locally.** Start MongoDB, then `npm run dev` in `server/` to launch the API and `npm run dev` in `client/` for the Vite frontend. For production-style testing, build the client with `npm run build` in `client/` and let the Express server serve `client/dist`.
 
+### Connecting with MongoDB Compass (remote)
+
+If you want to browse the live database from your machine instead of a local Mongo instance, open MongoDB Compass and create a new connection using the same URI the server uses in production. For the deployed host at `176.126.202.242`, the typical connection string is:
+
+```
+mongodb://<username>:<password>@176.126.202.242:27017/apofasi?authSource=admin
+```
+
+Replace `<username>`/`<password>` with the credentials configured on the server (they mirror the `MONGO_URI` value in `server/.env`). Make sure your IP is allowed through the server firewall/security group before connecting.
+
 ## Deploying the client build
 
 Use the `./deploy.sh` helper to compile the Vite client and populate
