@@ -72,18 +72,19 @@ body {
 }
 
 .menu-top-inner {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
   gap: 12px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.menu-left {
+.menu-primary {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
 }
 
 .menu-brand {
@@ -92,6 +93,7 @@ body {
   gap: 6px;
   font-weight: 800;
   letter-spacing: 0.01em;
+  margin-left: auto;
 }
 
 .brand-mark {
@@ -121,7 +123,7 @@ body {
   align-items: center;
   gap: 8px;
   flex: 1;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 
@@ -1269,14 +1271,15 @@ button:focus-visible {
   }
 
   .menu-top-inner {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
 
-  .menu-left {
+  .menu-primary {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .menu-links {
@@ -1294,6 +1297,10 @@ button:focus-visible {
 
   .menu-actions-desktop {
     display: none;
+  }
+
+  .menu-brand {
+    align-self: flex-end;
   }
 
   .menu-actions-mobile {
