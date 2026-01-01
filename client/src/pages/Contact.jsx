@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import AuthButtons from "../components/AuthButtons.jsx";
+import { getAuthStatus } from "../lib/api.js";
 
 const contactChannels = [
   {
@@ -30,6 +32,33 @@ const socialLinks = [
 ];
 
 export default function Contact() {
+  const [authState, setAuthState] = useState({ loading: true, user: null });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkAuth = async () => {
+      try {
+        const data = await getAuthStatus();
+        if (isMounted) {
+          setAuthState({ loading: false, user: data.user });
+        }
+      } catch {
+        if (isMounted) {
+          setAuthState({ loading: false, user: null });
+        }
+      }
+    };
+
+    checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const showAuthCard = !authState.loading && !authState.user;
+
   return (
     <div className="page contact-page">
       <header className="page-hero">
@@ -41,7 +70,7 @@ export default function Contact() {
             θα βρείτε ένα κανάλι επικοινωνίας που σας ταιριάζει.
           </p>
         </div>
-        <AuthButtons />
+        {showAuthCard && <AuthButtons />}
       </header>
 
       <section className="section">
