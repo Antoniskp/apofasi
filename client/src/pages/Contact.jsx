@@ -71,7 +71,10 @@ export default function Contact() {
             </p>
             <ul className="contact-meta">
               <li>
-                <strong>Email:</strong> team@apofasi.news
+                <strong>Discord:</strong>{" "}
+                <a href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+                  Συμμετοχή στον server
+                </a>
               </li>
               <li>
                 <strong>Ώρες:</strong> Δευτέρα–Παρασκευή, 10:00–18:00
@@ -81,8 +84,8 @@ export default function Contact() {
               </li>
             </ul>
             <div className="cta-row">
-              <a className="btn" href="mailto:team@apofasi.news">
-                Αποστολή email
+              <a className="btn" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+                Επικοινωνία στο Discord
               </a>
               <a className="btn btn-outline" href="/contribute">
                 Μάθετε πώς να συνεισφέρετε
@@ -103,8 +106,8 @@ export default function Contact() {
               <li>Ρυθμίσεις ειδοποιήσεων και ενημερώσεων</li>
             </ul>
             <div className="cta-row">
-              <a className="btn btn-outline" href="mailto:team@apofasi.news?subject=Υποστήριξη%20Apofasi">
-                Ζητήστε βοήθεια
+              <a className="btn btn-outline" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+                Ζητήστε βοήθεια στο Discord
               </a>
               <a className="btn btn-subtle" href="/news">
                 Δείτε τις ενημερώσεις
@@ -132,8 +135,8 @@ export default function Contact() {
               </ul>
             </div>
             <div className="cta-row">
-              <a className="btn" href="mailto:team@apofasi.news?subject=Συνεργασία%20με%20το%20Apofasi">
-                Κλείστε ραντεβού
+              <a className="btn" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+                Κλείστε ραντεβού στο Discord
               </a>
               <a className="btn btn-outline" href="/mission">
                 Δείτε την αποστολή
