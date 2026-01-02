@@ -14,126 +14,162 @@ const Home = () => {
     <div className="home">
       <section className="hero">
         <div className="hero-inner">
-          <div className="hero-kicker">Πρώτα η Ελλάδα • Πρώτα ο Ιστός • Επίπεδο δημόσιου αισθήματος</div>
+          <div className="hero-kicker">Απόφαση • Δημόσιο αίσθημα για την επικαιρότητα</div>
 
-          <h1>Απόφαση: ειδήσεις ομαδοποιημένες από πολλές πηγές, με μια ψηφοφορία κάτω από κάθε ιστορία.</h1>
+          <h1>Καθαρή εικόνα από όλα τα ελληνικά media και μια ψήφος κάτω από κάθε ιστορία.</h1>
 
           <p className="hero-sub">
-            Διαβάστε τι συνέβη, συγκρίνετε πώς το καλύπτουν διαφορετικά μέσα και ψηφίστε για να δείξετε πώς
-            νιώθει ο κόσμος — σε πραγματικό χρόνο. Φτιαγμένο για την Ελλάδα.
+            Η «Απόφαση» ομαδοποιεί τίτλους από διαφορετικές πηγές, δείχνει πώς καλύπτουν το ίδιο θέμα και
+            καταγράφει τη στάση των αναγνωστών με μικρές, διαφανείς ψηφοφορίες.
           </p>
+
+          <ul className="hero-points">
+            <li>
+              <span className="point-dot" aria-hidden>
+                •
+              </span>
+              Ομαδοποιούμε τίτλους από εφημερίδες, ενημερωτικά sites και δημόσια ΜΜΕ.
+            </li>
+            <li>
+              <span className="point-dot" aria-hidden>
+                •
+              </span>
+              Προβάλλουμε πώς πλαισιώνεται η ίδια ιστορία με μια ματιά.
+            </li>
+            <li>
+              <span className="point-dot" aria-hidden>
+                •
+              </span>
+              Προσθέτουμε μια απλή ψηφοφορία για να φαίνεται η τάση σε πραγματικό χρόνο.
+            </li>
+          </ul>
 
           <div className="hero-buttons">
             <Link to="/news" className="btn">
-              Δείτε τις Ειδήσεις (σύντομα)
+              Δείτε τις ιστορίες
             </Link>
             <Link to="/polls" className="btn btn-outline">
-              Δείτε τις Ψηφοφορίες (σύντομα)
+              Ψηφίστε σε μια ιστορία
             </Link>
             <Link to="/mission" className="btn btn-subtle">
               Μάθετε τι επιδιώκουμε
             </Link>
           </div>
 
+          <div className="hero-meta">
+            <span className="pill pill-soft">Ανοιχτός κώδικας</span>
+            <span className="pill pill-soft">Χωρίς paywall</span>
+            <span className="pill pill-soft">Εστίαση στην Ελλάδα</span>
+          </div>
+
           <p className="hero-disclaimer">
-            Διαφάνεια: Οι ψηφοφορίες της πλατφόρμας είναι ενδεικτικές και δεν είναι στατιστικά
-            αντιπροσωπευτικές.
+            Διαφάνεια: Οι ψηφοφορίες είναι ενδεικτικές και δεν αποτελούν στατιστικά αντιπροσωπευτικό δείγμα.
           </p>
         </div>
       </section>
 
       <section className="section">
-        <h2 className="section-title">Πώς λειτουργεί</h2>
+        <div className="section-header">
+          <h2 className="section-title">Τι είναι η Απόφαση</h2>
+          <p className="section-lead">Ένα σημείο αναφοράς για την ελληνική επικαιρότητα, που κρατά τον αναγνώστη στο κέντρο.</p>
+        </div>
+
+        <div className="grid-2 feature-grid">
+          <div className="card emphasis-card">
+            <h3>Ένα σημείο, όλες οι οπτικές</h3>
+            <ul className="list-tight">
+              <li>Ενιαία προβολή των τίτλων που μιλούν για το ίδιο γεγονός.</li>
+              <li>Καθαρό πλαίσιο χωρίς clickbait ή κατακερματισμό.</li>
+              <li>Σύντομη ταυτότητα πηγής για να φαίνεται ποιος μιλάει.</li>
+            </ul>
+          </div>
+
+          <div className="card muted-border">
+            <h3>Ποιον βοηθά</h3>
+            <p>
+              Πολίτες, δημοσιογράφους, φοιτητές και όποιον θέλει να καταλάβει γρήγορα τι συμβαίνει στην Ελλάδα με
+              διαφάνεια.
+            </p>
+
+            <div className="pill-row">
+              <span className="pill pill-soft">Ακρίβεια</span>
+              <span className="pill pill-soft">Διαφάνεια</span>
+              <span className="pill pill-soft">Συμμετοχή</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <h2 className="section-title">Γιατί θα σας αρέσει</h2>
+          <p className="section-lead">Σχεδιασμένο για καθαρή ενημέρωση και για να φαίνεται πώς σκέφτεται το κοινό.</p>
+        </div>
+
+        <div className="grid-3">
+          <div className="card">
+            <h3>Όλα τα media μαζί</h3>
+            <p>
+              Σώστε χρόνο βλέποντας πώς καλύπτουν την ίδια ιστορία διαφορετικά ελληνικά και διεθνή μέσα, χωρίς να
+              αλλάζετε tab.
+            </p>
+          </div>
+
+          <div className="card">
+            <h3>Σήμα από τους πολίτες</h3>
+            <p>
+              Οι ψηφοφορίες δείχνουν την τάση του κοινού. Ψηφίζετε μία φορά, βλέπετε αμέσως τα αποτελέσματα, χωρίς
+              θόρυβο.
+            </p>
+          </div>
+
+          <div className="card">
+            <h3>Καθαρή, ελαφριά εμπειρία</h3>
+            <p>
+              Χωρίς paywall ή pop-ups. Ελαφριά σχεδίαση που αφήνει χώρο στο περιεχόμενο και στο δικό σας συμπέρασμα.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <h2 className="section-title">Πώς λειτουργεί</h2>
+          <p className="section-lead">Τρία καθαρά βήματα για να φτάσει το γεγονός από την πηγή σε εσάς.</p>
+        </div>
 
         <div className="grid-3">
           <div className="card">
             <h3>1) Συγκέντρωση</h3>
-            <p>Συγκεντρώνουμε τίτλους από πολλές ελληνικές και διεθνείς πηγές και τους κανονικοποιούμε σε ένα καθαρό feed.</p>
+            <p>
+              Φέρνουμε τίτλους από πολλές ελληνικές και διεθνείς πηγές και τους κανονικοποιούμε σε ένα καθαρό feed,
+              χωρίς διπλοεγγραφές.
+            </p>
           </div>
 
           <div className="card">
             <h3>2) Ομαδοποίηση</h3>
-            <p>Παρόμοια άρθρα ομαδοποιούνται σε μία «ομάδα ιστορίας» ώστε να βλέπετε την κάλυψη από όλα τα μέσα σε ένα μέρος.</p>
+            <p>
+              Παρόμοια άρθρα ομαδοποιούνται σε μία «ομάδα ιστορίας» ώστε να βλέπετε την κάλυψη από όλα τα μέσα σε ένα
+              μέρος με κοινή περίληψη.
+            </p>
           </div>
 
           <div className="card">
             <h3>3) Ψηφοφορία</h3>
-            <p>Κάθε ιστορία έχει μια απλή ψηφοφορία. Ψηφίστε μία φορά, δείτε τα αποτελέσματα αμέσως και παρακολουθήστε την τάση με τον χρόνο.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <h2 className="section-title">Γιατί έχει σημασία</h2>
-
-        <div className="grid-3">
-          <div className="card">
-            <h3>Διαφάνεια στην ενημέρωση</h3>
             <p>
-              Βλέπετε πώς καλύπτει κάθε μέσο την ίδια είδηση, ώστε να σχηματίζετε άποψη
-              χωρίς θόρυβο ή αλγόριθμους που κρύβουν πληροφορίες.
-            </p>
-          </div>
-
-          <div className="card">
-            <h3>Συμμετοχή των πολιτών</h3>
-            <p>
-              Οι ψηφοφορίες κάτω από κάθε ιστορία καταγράφουν το δημόσιο αίσθημα σε
-              πραγματικό χρόνο, ενισχύοντας τη φωνή των αναγνωστών.
-            </p>
-          </div>
-
-          <div className="card">
-            <h3>Δημόσιο καλό, ανοιχτός κώδικας</h3>
-            <p>
-              Το project είναι ανοιχτού κώδικα και χτισμένο για την Ελλάδα. Μπορείτε να
-              δείτε τι φτιάχνουμε και να προτείνετε βελτιώσεις.
+              Κάθε ιστορία έχει μια απλή ψηφοφορία. Ψηφίστε μία φορά, δείτε τα αποτελέσματα αμέσως και παρακολουθήστε
+              την τάση με τον χρόνο.
             </p>
           </div>
         </div>
       </section>
 
       <section className="section">
-        <h2 className="section-title">Τι μπορείτε να κάνετε σήμερα</h2>
-
-        <div className="grid-3">
-          <div className="card">
-            <h3>Διαβάστε την αποστολή</h3>
-            <p>
-              Μάθετε γιατί ξεκινήσαμε την «Απόφαση» και πώς θέλουμε να στηρίξουμε την
-              ενημέρωση στην Ελλάδα.
-            </p>
-            <Link className="btn btn-subtle" to="/mission">
-              Δείτε την αποστολή
-            </Link>
-          </div>
-
-          <div className="card">
-            <h3>Ζητήστε χαρακτηριστικά</h3>
-            <p>
-              Έχετε ιδέα για την εμπειρία χρήστη ή για τη συλλογή ειδήσεων; Πείτε μας τι
-              θα ήταν πιο χρήσιμο για εσάς.
-            </p>
-            <Link className="btn btn-subtle" to="/news">
-              Μοιραστείτε ανάγκες
-            </Link>
-          </div>
-
-          <div className="card">
-            <h3>Συμβάλετε στον κώδικα</h3>
-            <p>
-              Αν ασχολείστε με web, data ή σχεδιασμό, ρίξτε μια ματιά στον κώδικα στο
-              GitHub και βοηθήστε να πάμε στο επόμενο βήμα.
-            </p>
-            <a className="btn btn-outline" href="https://github.com/Antoniskp/apofasi" target="_blank" rel="noreferrer">
-              Συμμετοχή στο GitHub
-            </a>
-          </div>
+        <div className="section-header">
+          <h2 className="section-title">Δείγμα ομαδοποίησης & ψηφοφορίας</h2>
+          <p className="section-lead">Έτσι θα εμφανίζεται μια ομάδα ιστορίας με τις πηγές της και το απλό widget ψηφοφορίας.</p>
         </div>
-      </section>
-
-      <section className="section">
-        <h2 className="section-title">Επίδειξη (τι θα δείτε)</h2>
 
         <div className="story">
           <div className="story-header">
@@ -185,7 +221,10 @@ const Home = () => {
       </section>
 
       <section id="roadmap" className="section">
-        <h2 className="section-title">Οδικός χάρτης (MVP)</h2>
+        <div className="section-header">
+          <h2 className="section-title">Οδικός χάρτης (MVP)</h2>
+          <p className="section-lead">Σύντομος οδηγός για το πού πηγαίνει το project στους πρώτους κύκλους.</p>
+        </div>
 
         <div className="grid-2">
           <div className="card">
