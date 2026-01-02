@@ -38,7 +38,9 @@ export const updateProfile = async (payload) =>
         username: payload.username?.trim(),
         mobile: payload.mobile?.trim(),
         country: payload.country?.trim(),
-        occupation: payload.occupation?.trim()
+        occupation: payload.occupation?.trim(),
+        region: payload.region?.trim(),
+        cityOrVillage: payload.cityOrVillage?.trim(),
       }, "PUT")
     )
   );

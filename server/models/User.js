@@ -35,6 +35,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    region: {
+      type: String,
+      trim: true,
+    },
+    cityOrVillage: {
+      type: String,
+      trim: true,
+    },
     username: {
       type: String,
       trim: true,

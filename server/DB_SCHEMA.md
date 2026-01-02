@@ -11,6 +11,8 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
 - **mobile** (`String`, optional, trimmed)
 - **country** (`String`, optional, trimmed)
 - **occupation** (`String`, optional, trimmed)
+- **region** (`String`, optional, trimmed)
+- **cityOrVillage** (`String`, optional, trimmed)
 - **username** (`String`, unique, sparse, trimmed, optional)
 - **email** (`String`, unique, sparse, lowercased, optional)
 - **password** (`String`, optional; only present for local accounts)

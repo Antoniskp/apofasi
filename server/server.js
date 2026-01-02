@@ -15,6 +15,7 @@ import connectDB from "./config/db.js";
 import configurePassport from "./config/passport.js";
 import News from "./models/News.js";
 import User from "./models/User.js";
+import { CITIES_BY_REGION, REGION_NAMES } from "../shared/locations.js";
 
 dotenv.config();
 connectDB();
@@ -80,6 +81,8 @@ const sanitizeUser = (user) =>
         mobile: user.mobile,
         country: user.country,
         occupation: user.occupation,
+        region: user.region,
+        cityOrVillage: user.cityOrVillage,
         createdAt: user.createdAt,
       }
     : null;
@@ -367,7 +370,16 @@ authRouter.get("/profile", ensureAuthenticated, (req, res) => {
 });
 
 authRouter.put("/profile", ensureAuthenticated, async (req, res) => {
-  const allowedFields = ["firstName", "lastName", "username", "mobile", "country", "occupation"];
+  const allowedFields = [
+    "firstName",
+    "lastName",
+    "username",
+    "mobile",
+    "country",
+    "occupation",
+    "region",
+    "cityOrVillage",
+  ];
   const updates = {};
 
   for (const field of allowedFields) {
@@ -383,6 +395,26 @@ authRouter.put("/profile", ensureAuthenticated, async (req, res) => {
     if (existingUser) {
       return res.status(409).json({ message: "Το username χρησιμοποιείται ήδη." });
     }
+  }
+
+  if ("region" in updates && updates.region && !REGION_NAMES.includes(updates.region)) {
+    return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
+  }
+
+  const nextRegion = updates.region ?? req.user.region;
+
+  if ("cityOrVillage" in updates) {
+    if (!updates.cityOrVillage) {
+      updates.cityOrVillage = undefined;
+    } else if (!nextRegion) {
+      return res.status(400).json({ message: "Επιλέξτε πρώτα περιφέρεια για να ορίσετε πόλη ή χωριό." });
+    } else if (!CITIES_BY_REGION[nextRegion]?.includes(updates.cityOrVillage)) {
+      return res.status(400).json({ message: "Η πόλη ή το χωριό δεν ανήκει στην επιλεγμένη περιφέρεια." });
+    }
+  }
+
+  if (updates.region && req.user.cityOrVillage && !CITIES_BY_REGION[updates.region]?.includes(req.user.cityOrVillage)) {
+    updates.cityOrVillage = undefined;
   }
 
   try {
