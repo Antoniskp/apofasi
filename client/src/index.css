@@ -406,6 +406,34 @@ button:focus-visible {
   color: var(--ink-soft);
 }
 
+.hero-points {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.hero-points li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+  color: var(--ink-strong);
+}
+
+.point-dot {
+  color: var(--accent);
+  font-weight: 900;
+  line-height: 1;
+  margin-top: 2px;
+}
+
 .hero-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -466,6 +494,19 @@ button:focus-visible {
   color: var(--ink-muted);
 }
 
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pill-soft {
+  background: #f5f7fb;
+  border-color: #d6dfef;
+  color: var(--accent-strong);
+}
+
 .section {
   max-width: 1080px;
   margin: 28px auto;
@@ -480,6 +521,28 @@ button:focus-visible {
   margin: 0 0 18px;
   font-size: 1.7rem;
   color: var(--accent-strong);
+}
+
+.section-header {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.section-lead {
+  margin: 0;
+  color: var(--ink-soft);
+  max-width: 860px;
+}
+
+.feature-grid {
+  margin-top: 10px;
+}
+
+.emphasis-card {
+  background: linear-gradient(145deg, #f9fbff 0%, #eef3fb 100%);
+  border-color: #d8e1f1;
+  box-shadow: 0 12px 28px rgba(34, 55, 90, 0.12);
 }
 
 .grid-3 {
@@ -682,6 +745,14 @@ button:focus-visible {
   color: var(--ink-muted);
 }
 
+.list-tight {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: var(--ink-muted);
+}
+
 .stack {
   display: flex;
   flex-direction: column;
@@ -697,6 +768,13 @@ button:focus-visible {
 
 .card-body {
   flex: 1;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .footer {
