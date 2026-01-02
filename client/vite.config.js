@@ -18,6 +18,9 @@ export default defineConfig(({ mode }) => {
       }
     },
     server: {
+      fs: {
+        allow: [path.resolve(__dirname, "..")],
+      },
       proxy: {
         "/auth": {
           target: apiTarget,

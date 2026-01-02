@@ -1,22 +1,49 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { API_BASE_URL, getAuthStatus, logoutUser, updateProfile } from "../lib/api.js";
+import { CITIES_BY_REGION, REGION_NAMES } from "../../../shared/locations.js";
 
 export default function Profile() {
   const [status, setStatus] = useState({ loading: true, user: null, error: null });
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const getCityOptions = (region) => CITIES_BY_REGION[region] || [];
   const optionalFields = [
     { key: "firstName", label: "Όνομα", placeholder: "Δεν έχει προστεθεί ακόμα." },
     { key: "lastName", label: "Επώνυμο", placeholder: "Προσθέστε το επώνυμό σας." },
     { key: "username", label: "Username", placeholder: "Επιλέξτε ένα όνομα χρήστη όταν είναι διαθέσιμο." },
     { key: "mobile", label: "Κινητό", placeholder: "Μπορείτε να δηλώσετε ένα κινητό για ειδοποιήσεις." },
     { key: "country", label: "Χώρα", placeholder: "Προσθέστε τη χώρα διαμονής σας." },
-    { key: "occupation", label: "Επάγγελμα", placeholder: "Προαιρετική επαγγελματική πληροφορία." }
+    { key: "occupation", label: "Επάγγελμα", placeholder: "Προαιρετική επαγγελματική πληροφορία." },
+    {
+      key: "region",
+      label: "Περιφέρεια",
+      placeholder: "Επιλέξτε την περιφέρεια κατοικίας σας.",
+      type: "select",
+      options: REGION_NAMES,
+    },
+    {
+      key: "cityOrVillage",
+      label: "Πόλη ή χωριό",
+      placeholder: "Επιλέξτε πόλη ή χωριό από την περιφέρειά σας.",
+      type: "select",
+      getOptions: (state) => getCityOptions(state.region),
+      disabledWhen: (state) => !state.region,
+    },
   ];
 
-  const buildOptionalState = (userData) =>
-    optionalFields.reduce((acc, field) => ({ ...acc, [field.key]: userData?.[field.key] || "" }), {});
+  const buildOptionalState = (userData) => {
+    const state = optionalFields.reduce(
+      (acc, field) => ({ ...acc, [field.key]: userData?.[field.key] || "" }),
+      {}
+    );
+
+    if (state.region && state.cityOrVillage && !getCityOptions(state.region).includes(state.cityOrVillage)) {
+      state.cityOrVillage = "";
+    }
+
+    return state;
+  };
 
   const [formState, setFormState] = useState(() => buildOptionalState(null));
   const [saveMessage, setSaveMessage] = useState(null);
@@ -57,7 +84,18 @@ export default function Profile() {
   };
 
   const handleInputChange = (key, value) => {
-    setFormState((prev) => ({ ...prev, [key]: value }));
+    setFormState((prev) => {
+      const nextState = { ...prev, [key]: value };
+
+      if (key === "region") {
+        const allowedCities = getCityOptions(value);
+        if (!allowedCities.includes(nextState.cityOrVillage)) {
+          nextState.cityOrVillage = "";
+        }
+      }
+
+      return nextState;
+    });
   };
 
   const handleProfileSave = async (event) => {
@@ -131,24 +169,48 @@ export default function Profile() {
                 </p>
               </div>
               <form className="profile-grid" onSubmit={handleProfileSave}>
-                {optionalFields.map((field) => (
-                  <div key={field.key} className="profile-field">
-                    <div className="profile-field-header">
-                      <label className="label" htmlFor={`profile-${field.key}`}>
-                        {field.label}
-                      </label>
-                      <span className="tag">Προαιρετικό</span>
+                {optionalFields.map((field) => {
+                  const isSelect = field.type === "select";
+                  const options = field.getOptions
+                    ? field.getOptions(formState)
+                    : field.options || [];
+                  const disabled = field.disabledWhen?.(formState) || false;
+
+                  return (
+                    <div key={field.key} className="profile-field">
+                      <div className="profile-field-header">
+                        <label className="label" htmlFor={`profile-${field.key}`}>
+                          {field.label}
+                        </label>
+                        <span className="tag">Προαιρετικό</span>
+                      </div>
+                      {isSelect ? (
+                        <select
+                          id={`profile-${field.key}`}
+                          value={formState[field.key] || ""}
+                          onChange={(event) => handleInputChange(field.key, event.target.value)}
+                          disabled={disabled}
+                        >
+                          <option value="">{field.placeholder}</option>
+                          {options.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          id={`profile-${field.key}`}
+                          type="text"
+                          value={formState[field.key] || ""}
+                          onChange={(event) => handleInputChange(field.key, event.target.value)}
+                          placeholder={field.placeholder}
+                        />
+                      )}
+                      <p className="muted small">{field.placeholder}</p>
                     </div>
-                    <input
-                      id={`profile-${field.key}`}
-                      type="text"
-                      value={formState[field.key] || ""}
-                      onChange={(event) => handleInputChange(field.key, event.target.value)}
-                      placeholder={field.placeholder}
-                    />
-                    <p className="muted small">{field.placeholder}</p>
-                  </div>
-                ))}
+                  );
+                })}
 
                 <div className="profile-field">
                   <p className="label">Αποθήκευση αλλαγών</p>
