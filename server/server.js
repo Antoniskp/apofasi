@@ -15,6 +15,7 @@ import connectDB from "./config/db.js";
 import configurePassport from "./config/passport.js";
 import News from "./models/News.js";
 import User from "./models/User.js";
+import ContactMessage from "./models/ContactMessage.js";
 import { CITIES_BY_REGION, REGION_NAMES } from "../shared/locations.js";
 
 dotenv.config();
@@ -188,6 +189,7 @@ const ensureRole = (...roles) => (req, res, next) => {
 };
 
 const newsRouter = express.Router();
+const contactRouter = express.Router();
 
 newsRouter.use(ensureAuthenticated);
 
@@ -278,6 +280,64 @@ usersRouter.put("/:userId/role", async (req, res) => {
   } catch (error) {
     console.error("[users-role-update-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η ενημέρωση του ρόλου." });
+  }
+});
+
+contactRouter.post("/", async (req, res) => {
+  const { name, email, topic, message } = req.body || {};
+  const trimmedName = name?.trim();
+  const normalizedEmail = email?.trim().toLowerCase();
+  const trimmedTopic = topic?.trim();
+  const trimmedMessage = message?.trim();
+
+  if (!trimmedMessage || trimmedMessage.length < 10) {
+    return res
+      .status(400)
+      .json({ message: "Παρακαλώ γράψτε ένα μήνυμα με τουλάχιστον 10 χαρακτήρες." });
+  }
+
+  const finalEmail = normalizedEmail || req.user?.email;
+  const finalName = trimmedName || req.user?.displayName || req.user?.username;
+
+  if (!finalEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalEmail)) {
+    return res.status(400).json({ message: "Απαιτείται έγκυρο email επικοινωνίας." });
+  }
+
+  const userSnapshot = req.user
+    ? {
+        id: req.user.id,
+        displayName: req.user.displayName,
+        email: req.user.email,
+        username: req.user.username,
+        provider: req.user.provider,
+        role: req.user.role,
+      }
+    : undefined;
+
+  try {
+    const createdMessage = await ContactMessage.create({
+      name: finalName,
+      email: finalEmail,
+      topic: trimmedTopic || "general",
+      message: trimmedMessage,
+      user: req.user?._id,
+      userSnapshot,
+      ipAddress: req.ip,
+      userAgent: req.get("user-agent"),
+      referrer: req.get("referer"),
+    });
+
+    return res.status(201).json({
+      message: "Το μήνυμα καταχωρήθηκε με επιτυχία.",
+      contact: {
+        id: createdMessage.id,
+        topic: createdMessage.topic,
+        createdAt: createdMessage.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("[contact-create-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η αποστολή του μηνύματος." });
   }
 });
 
@@ -478,6 +538,8 @@ app.use("/news", newsRouter);
 app.use("/api/news", newsRouter);
 app.use("/users", usersRouter);
 app.use("/api/users", usersRouter);
+app.use("/contact", contactRouter);
+app.use("/api/contact", contactRouter);
 
 authRouter.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("Sentry Test Error!");

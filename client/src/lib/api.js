@@ -110,4 +110,17 @@ export const updateUserRole = async (userId, role) =>
     )
   );
 
+export const submitContactMessage = async (payload) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/contact`,
+      buildJsonRequest({
+        name: payload.name?.trim(),
+        email: normalizeEmail(payload.email),
+        topic: payload.topic?.trim(),
+        message: payload.message?.trim(),
+      })
+    )
+  );
+
 export { API_BASE_URL };
