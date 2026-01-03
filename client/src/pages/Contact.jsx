@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AuthButtons from "../components/AuthButtons.jsx";
-import { getAuthStatus } from "../lib/api.js";
+import { getAuthStatus, submitContactMessage } from "../lib/api.js";
 
 const contactChannels = [
   {
@@ -31,8 +31,17 @@ const socialLinks = [
   }
 ];
 
+const contactTopics = [
+  { value: "support", label: "Υποστήριξη / τεχνικό ζήτημα" },
+  { value: "collaboration", label: "Συνεργασία ή τύπος" },
+  { value: "feedback", label: "Feedback για την πλατφόρμα" },
+  { value: "general", label: "Γενική ερώτηση" }
+];
+
 export default function Contact() {
   const [authState, setAuthState] = useState({ loading: true, user: null });
+  const [formData, setFormData] = useState({ name: "", email: "", topic: "general", message: "" });
+  const [submitState, setSubmitState] = useState({ submitting: false, success: false, error: null });
 
   useEffect(() => {
     let isMounted = true;
@@ -56,6 +65,39 @@ export default function Contact() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (authState.user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || authState.user.displayName || authState.user.username || "",
+        email: prev.email || authState.user.email || "",
+      }));
+    }
+  }, [authState.user]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmitState({ submitting: true, success: false, error: null });
+
+    try {
+      await submitContactMessage(formData);
+      setSubmitState({ submitting: false, success: true, error: null });
+      setFormData((prev) => ({
+        name: prev.name,
+        email: prev.email,
+        topic: "general",
+        message: "",
+      }));
+    } catch (error) {
+      setSubmitState({ submitting: false, success: false, error: error.message });
+    }
+  };
 
   const showAuthCard = !authState.loading && !authState.user;
 
@@ -91,35 +133,83 @@ export default function Contact() {
 
       <section id="contact-form" className="section contact-section">
         <div className="grid-2 contact-grid">
-          <div className="card contact-card">
+          <div className="card contact-card contact-form-card">
             <div className="pill subtle">Γρήγορη επαφή</div>
             <h3>Στείλτε μήνυμα στην ομάδα</h3>
             <p>
               Για γενικές ερωτήσεις, προτάσεις ή διορθώσεις, επικοινωνήστε απευθείας με την ομάδα του Apofasi.
               Απαντάμε συνήθως μέσα σε μία εργάσιμη ημέρα.
             </p>
-            <ul className="contact-meta">
-              <li>
-                <strong>Discord:</strong>{" "}
-                <a href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
-                  Συμμετοχή στον server
+
+            <form className="contact-form" onSubmit={handleSubmit}>
+              <div className="form-grid">
+                <label className="form-field">
+                  Όνομα
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Προαιρετικό (ανώνυμο μήνυμα)"
+                  />
+                </label>
+                <label className="form-field">
+                  Email επικοινωνίας
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="you@example.com"
+                  />
+                </label>
+                <label className="form-field">
+                  Θέμα
+                  <select name="topic" value={formData.topic} onChange={handleChange}>
+                    {contactTopics.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <label className="form-field">
+                Μήνυμα
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  minLength={10}
+                  rows={6}
+                  placeholder="Περιγράψτε πώς μπορούμε να βοηθήσουμε. Αν αφορά λογαριασμό, προσθέστε χρήσιμο context."
+                />
+              </label>
+
+              <p className="muted small-text">
+                Τα στοιχεία αποθηκεύονται με IP και συσκευή για λόγους υποστήριξης.
+                Αν είστε συνδεδεμένοι, το αίτημα συνδέεται με το προφίλ σας.
+              </p>
+
+              {submitState.error && <p className="error-text">{submitState.error}</p>}
+              {submitState.success && (
+                <div className="success-box">
+                  <strong>Ευχαριστούμε!</strong> Λάβαμε το μήνυμα και θα απαντήσουμε σύντομα.
+                </div>
+              )}
+
+              <div className="cta-row">
+                <button className="btn" type="submit" disabled={submitState.submitting}>
+                  {submitState.submitting ? "Αποστολή..." : "Αποστολή μηνύματος"}
+                </button>
+                <a className="btn btn-outline" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
+                  Άμεση επικοινωνία στο Discord
                 </a>
-              </li>
-              <li>
-                <strong>Ώρες:</strong> Δευτέρα–Παρασκευή, 10:00–18:00
-              </li>
-              <li>
-                <strong>Χρόνος απάντησης:</strong> 24–48 ώρες
-              </li>
-            </ul>
-            <div className="cta-row">
-              <a className="btn" href="https://discord.gg/pvJftR4T98" target="_blank" rel="noreferrer">
-                Επικοινωνία στο Discord
-              </a>
-              <a className="btn btn-outline" href="/contribute">
-                Μάθετε πώς να συνεισφέρετε
-              </a>
-            </div>
+              </div>
+            </form>
           </div>
 
           <div id="support" className="card contact-card secondary">

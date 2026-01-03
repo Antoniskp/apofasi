@@ -39,6 +39,20 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
 - **author** (`ObjectId` referencing `users`)
 - **timestamps**: `createdAt`, `updatedAt` (auto-managed)
 
+## Contact Messages (`contactmessages` collection)
+- **name** (`String`, optional; sender provided or derived from user profile)
+- **email** (`String`, required, lowercased, trimmed)
+- **topic** (`String`, default `"general"`)
+- **message** (`String`, required)
+- **user** (`ObjectId` referencing `users`, optional)
+- **userSnapshot** (`Object`, optional) immutable copy of key profile fields at submission time
+  - **id**, **displayName**, **email**, **username**, **provider**, **role**
+- **ipAddress** (`String`, optional) request IP captured via Express
+- **userAgent** (`String`, optional) request user-agent header
+- **referrer** (`String`, optional) HTTP referrer when present
+- **status** (`String`, enum `open|reviewed|closed`, default `open`)
+- **timestamps**: `createdAt`, `updatedAt` (auto-managed)
+
 ## Relationships
 - Polls and news entries reference the `users` collection via `createdBy`, `votedUsers`, and `author` fields for ownership and attribution.
 - Social login accounts are distinguished by the `{ provider, providerId }` pair, while local accounts rely on `username`/`email` plus `password`.
