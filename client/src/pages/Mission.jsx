@@ -134,6 +134,15 @@ export default function Mission() {
       </section>
 
       <section className="section">
+        <h2 className="section-title">Χτίζοντας την dream team των αξιωματούχων</h2>
+        <p className="mission-lede">
+          Θέλουμε η κοινότητα να ψηφίζει ποιοι αξιωματούχοι θα συγκροτήσουν την ιδανική ομάδα διακυβέρνησης. Με
+          διαφανείς ψηφοφορίες και καθαρές εξηγήσεις για τα αποτελέσματα, δίνουμε χώρο στους πολίτες να
+          ξεχωρίζουν όσους εμπνέουν εμπιστοσύνη και συνεργασία.
+        </p>
+      </section>
+
+      <section className="section">
         <h2 className="section-title">Πώς κρίνουμε την επιτυχία</h2>
         <div className="mission-success">
           <p className="mission-lede">
