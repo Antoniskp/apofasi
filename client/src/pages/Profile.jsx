@@ -12,9 +12,20 @@ export default function Profile() {
     { key: "firstName", label: "Όνομα", placeholder: "Δεν έχει προστεθεί ακόμα." },
     { key: "lastName", label: "Επώνυμο", placeholder: "Προσθέστε το επώνυμό σας." },
     { key: "username", label: "Username", placeholder: "Επιλέξτε ένα όνομα χρήστη όταν είναι διαθέσιμο." },
-    { key: "mobile", label: "Κινητό", placeholder: "Μπορείτε να δηλώσετε ένα κινητό για ειδοποιήσεις." },
-    { key: "country", label: "Χώρα", placeholder: "Προσθέστε τη χώρα διαμονής σας." },
+    {
+      key: "mobile",
+      label: "Κινητό",
+      placeholder: "Μπορείτε να δηλώσετε ένα κινητό για ειδοποιήσεις.",
+      inputType: "tel",
+      inputMode: "tel",
+      pattern: "^[+]?\\d{7,15}$",
+      title: "Χρησιμοποιήστε μόνο αριθμούς και προαιρετικό πρόθεμα +",
+    },
     { key: "occupation", label: "Επάγγελμα", placeholder: "Προαιρετική επαγγελματική πληροφορία." },
+  ];
+
+  const locationFields = [
+    { key: "country", label: "Χώρα", placeholder: "Προσθέστε τη χώρα διαμονής σας." },
     {
       key: "region",
       label: "Περιφέρεια",
@@ -32,8 +43,10 @@ export default function Profile() {
     },
   ];
 
+  const allProfileFields = [...optionalFields, ...locationFields];
+
   const buildOptionalState = (userData) => {
-    const state = optionalFields.reduce(
+    const state = allProfileFields.reduce(
       (acc, field) => ({ ...acc, [field.key]: userData?.[field.key] || "" }),
       {}
     );
@@ -201,16 +214,69 @@ export default function Profile() {
                       ) : (
                         <input
                           id={`profile-${field.key}`}
-                          type="text"
+                          type={field.inputType || "text"}
                           value={formState[field.key] || ""}
                           onChange={(event) => handleInputChange(field.key, event.target.value)}
                           placeholder={field.placeholder}
+                          pattern={field.pattern}
+                          inputMode={field.inputMode}
+                          title={field.title}
                         />
                       )}
                       <p className="muted small">{field.placeholder}</p>
                     </div>
                   );
                 })}
+
+                <div className="profile-field profile-field-grouped">
+                  <div className="profile-field-header">
+                    <div>
+                      <p className="label">Τοποθεσία</p>
+                      <p className="muted small">Συγκεντρωμένα στοιχεία χώρας, περιφέρειας και πόλης για γρήγορη ενημέρωση.</p>
+                    </div>
+                    <span className="tag">Προαιρετικό</span>
+                  </div>
+                  <div className="profile-location-grid">
+                    {locationFields.map((field) => {
+                      const isSelect = field.type === "select";
+                      const options = field.getOptions
+                        ? field.getOptions(formState)
+                        : field.options || [];
+                      const disabled = field.disabledWhen?.(formState) || false;
+
+                      return (
+                        <div key={field.key} className="profile-subfield">
+                          <label className="label small" htmlFor={`profile-${field.key}`}>
+                            {field.label}
+                          </label>
+                          {isSelect ? (
+                            <select
+                              id={`profile-${field.key}`}
+                              value={formState[field.key] || ""}
+                              onChange={(event) => handleInputChange(field.key, event.target.value)}
+                              disabled={disabled}
+                            >
+                              <option value="">{field.placeholder}</option>
+                              {options.map((option) => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              id={`profile-${field.key}`}
+                              type="text"
+                              value={formState[field.key] || ""}
+                              onChange={(event) => handleInputChange(field.key, event.target.value)}
+                              placeholder={field.placeholder}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
 
                 <div className="profile-field">
                   <p className="label">Αποθήκευση αλλαγών</p>
