@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getAuthStatus, logoutUser } from "../lib/api.js";
+import { getAuthStatus } from "../lib/api.js";
 
 const topMenu = [
   { label: "Ειδήσεις", to: "/news", icon: "fa-newspaper" },
@@ -79,14 +79,7 @@ export default function MenuBars() {
     }
   }, [isOpen]);
 
-  const handleLogout = async () => {
-    await logoutUser();
-    await loadAuthStatus();
-    closeMenu();
-  };
-
   const isAuthenticated = Boolean(authStatus.user);
-  const isAdmin = authStatus.user?.role === "admin";
   const userName =
     authStatus.user?.displayName ||
     authStatus.user?.firstName ||
@@ -97,6 +90,21 @@ export default function MenuBars() {
       ? "Διαχειριστής"
       : "Μέλος"
     : null;
+
+  const authGreeting = (
+    <Link
+      to="/profile"
+      className="menu-auth-summary menu-auth-link"
+      aria-label="Προφίλ"
+      onClick={closeMenu}
+    >
+      <div className="menu-auth-hello">
+        Hello,
+        <span className="menu-auth-name">{` ${userName}`}</span>
+      </div>
+      {userRole && <div className="menu-auth-role">{userRole}</div>}
+    </Link>
+  );
 
   return (
     <div className={`menu-shell${isMenuHidden ? " menu-hidden" : ""}`}>
@@ -141,43 +149,7 @@ export default function MenuBars() {
 
             <div className="menu-actions menu-actions-mobile">
               {isAuthenticated ? (
-                <>
-                  <button
-                    type="button"
-                    className="menu-auth-btn primary"
-                    aria-label="Αποσύνδεση"
-                    onClick={handleLogout}
-                  >
-                    <span className="menu-auth-icon" aria-hidden>
-                      <i className="fa-solid fa-right-from-bracket" />
-                    </span>
-                    <span className="sr-only">Αποσύνδεση</span>
-                  </button>
-                  {isAdmin && (
-                    <Link
-                      to="/admin/users"
-                      className="menu-auth-btn"
-                      aria-label="Διαχείριση χρηστών"
-                      onClick={closeMenu}
-                    >
-                      <span className="menu-auth-icon" aria-hidden>
-                        <i className="fa-solid fa-user-shield" />
-                      </span>
-                      <span className="sr-only">Διαχείριση χρηστών</span>
-                    </Link>
-                  )}
-                  <Link
-                    to="/profile"
-                    className="menu-auth-btn"
-                    aria-label="Προφίλ"
-                    onClick={closeMenu}
-                  >
-                    <span className="menu-auth-icon" aria-hidden>
-                      <i className="fa-solid fa-circle-user" />
-                    </span>
-                    <span className="sr-only">Προφίλ</span>
-                  </Link>
-                </>
+                authGreeting
               ) : (
                 <>
                   <Link
@@ -218,55 +190,12 @@ export default function MenuBars() {
             </div>
           </nav>
 
-          <div className="menu-actions menu-actions-desktop">
-            {isAuthenticated ? (
-              <>
-                <div className="menu-auth-summary" aria-label="Πληροφορίες χρήστη">
-                  <div className="menu-auth-hello">
-                    Hello,
-                    <span className="menu-auth-name">{` ${userName}`}</span>
-                  </div>
-                  {userRole && <div className="menu-auth-role">{userRole}</div>}
-                </div>
-                <button
-                  type="button"
-                  className="menu-auth-btn primary"
-                  aria-label="Αποσύνδεση"
-                  onClick={handleLogout}
-                >
-                  <span className="menu-auth-icon" aria-hidden>
-                    <i className="fa-solid fa-right-from-bracket" />
-                  </span>
-                  <span className="sr-only">Αποσύνδεση</span>
-                </button>
-                {isAdmin && (
-                  <Link
-                    to="/admin/users"
-                    className="menu-auth-btn"
-                    aria-label="Διαχείριση χρηστών"
-                    onClick={closeMenu}
-                  >
-                    <span className="menu-auth-icon" aria-hidden>
-                      <i className="fa-solid fa-user-shield" />
-                    </span>
-                    <span className="sr-only">Διαχείριση χρηστών</span>
-                  </Link>
-                )}
-                <Link
-                  to="/profile"
-                  className="menu-auth-btn"
-                  aria-label="Προφίλ"
-                  onClick={closeMenu}
-                >
-                  <span className="menu-auth-icon" aria-hidden>
-                    <i className="fa-solid fa-circle-user" />
-                  </span>
-                  <span className="sr-only">Προφίλ</span>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
+        <div className="menu-actions menu-actions-desktop">
+          {isAuthenticated ? (
+            authGreeting
+          ) : (
+            <>
+              <Link
                   to="/auth"
                   className="menu-auth-btn primary"
                   aria-label="Σύνδεση"
