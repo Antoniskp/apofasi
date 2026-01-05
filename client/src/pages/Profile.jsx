@@ -130,6 +130,12 @@ export default function Profile() {
 
   const { loading, user, error } = status;
 
+  const userRole = user?.role
+    ? user.role === "admin"
+      ? "Διαχειριστής"
+      : "Μέλος"
+    : null;
+
   return (
     <div className="section narrow">
       <p className="pill">Προφίλ</p>
@@ -150,6 +156,7 @@ export default function Profile() {
                     <div className="muted">{[user.firstName, user.lastName].filter(Boolean).join(" ")}</div>
                   )}
                   {user.email && <div className="muted">{user.email}</div>}
+                  {userRole && <div className="pill subtle">Ρόλος: {userRole}</div>}
                   <div className="pill subtle">Σύνδεση μέσω {user.provider}</div>
                 </div>
               </div>
