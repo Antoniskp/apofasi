@@ -31,6 +31,9 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
   - **votes** (`Number`, default `0`)
 - **votedUsers** (`Array<ObjectId>` referencing `users`)
 - **createdBy** (`ObjectId` referencing `users`)
+- **tags** (`Array<String>`, trimmed, unique per poll)
+- **region** (`String`, optional)
+- **cityOrVillage** (`String`, optional; must match selected region when present)
 - **timestamps**: `createdAt`, `updatedAt` (auto-managed)
 
 ## News (`news` collection)

@@ -86,6 +86,13 @@ export const createNews = async (payload) =>
     )
   );
 
+export const listNews = async () =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/news`, {
+      credentials: "include",
+    })
+  );
+
 export const listUsers = async (searchTerm = "") => {
   const params = new URLSearchParams();
 
@@ -120,6 +127,35 @@ export const submitContactMessage = async (payload) =>
         topic: payload.topic?.trim(),
         message: payload.message?.trim(),
       })
+    )
+  );
+
+export const createPoll = async (payload) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/polls`,
+      buildJsonRequest({
+        question: payload.question?.trim(),
+        options: payload.options?.map((opt) => opt?.trim()),
+        tags: payload.tags,
+        region: payload.region?.trim(),
+        cityOrVillage: payload.cityOrVillage?.trim(),
+      })
+    )
+  );
+
+export const listPolls = async () =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/polls`, {
+      credentials: "include",
+    })
+  );
+
+export const voteOnPoll = async (pollId, optionId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/polls/${pollId}/vote`,
+      buildJsonRequest({ optionId })
     )
   );
 
