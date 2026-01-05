@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { API_BASE_URL, createNews, getAuthStatus } from "../lib/api.js";
+import { API_BASE_URL, createNews, getAuthStatus, listNews } from "../lib/api.js";
 
 const hasReporterAccess = (user) => user && ["reporter", "admin"].includes(user.role);
+
+const formatDateTime = (value) => {
+  if (!value) return "";
+  return new Date(value).toLocaleString("el-GR", { dateStyle: "medium", timeStyle: "short" });
+};
 
 export default function News() {
   const [status, setStatus] = useState({ loading: true, user: null, error: null });
   const [form, setForm] = useState({ title: "", content: "" });
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
+  const [newsFeed, setNewsFeed] = useState({ loading: true, news: [], error: null });
 
   const loadSession = async () => {
     setStatus((prev) => ({ ...prev, loading: true }));
@@ -27,8 +33,27 @@ export default function News() {
     }
   };
 
+  const loadNews = async () => {
+    setNewsFeed((prev) => ({ ...prev, loading: true }));
+
+    try {
+      const data = await listNews();
+      setNewsFeed({ loading: false, news: data.news || [], error: null });
+    } catch (error) {
+      setNewsFeed({
+        loading: false,
+        news: [],
+        error:
+          API_BASE_URL
+            ? error.message || "Δεν ήταν δυνατή η φόρτωση ειδήσεων."
+            : "Ορίστε το VITE_API_BASE_URL για να φορτώσουν οι ειδήσεις.",
+      });
+    }
+  };
+
   useEffect(() => {
     loadSession();
+    loadNews();
   }, []);
 
   const handleInputChange = (event) => {
@@ -58,6 +83,7 @@ export default function News() {
       await createNews({ title: trimmedTitle, content: trimmedContent });
       setSubmission({ submitting: false, success: "Η είδηση προστέθηκε με επιτυχία.", error: null });
       setForm({ title: "", content: "" });
+      await loadNews();
     } catch (error) {
       setSubmission({
         submitting: false,
@@ -140,6 +166,37 @@ export default function News() {
             </div>
           </form>
         )}
+      </div>
+
+      <div className="section">
+        <div className="section-header">
+          <h2 className="section-title">Πρόσφατες δημοσιεύσεις</h2>
+          <p className="muted">Οι τελευταίες ειδήσεις που έχουν καταχωρηθεί από συντάκτες.</p>
+        </div>
+
+        {newsFeed.loading && <p className="muted">Φόρτωση ειδήσεων...</p>}
+        {newsFeed.error && <p className="error-text">{newsFeed.error}</p>}
+
+        {!newsFeed.loading && !newsFeed.error && newsFeed.news.length === 0 && (
+          <div className="card muted-border">
+            <p className="muted">Δεν έχουν προστεθεί ειδήσεις ακόμα.</p>
+          </div>
+        )}
+
+        <div className="stack">
+          {newsFeed.news.map((item) => (
+            <div key={item.id} className="card muted-border">
+              <div className="story-header">
+                <div>
+                  <div className="story-title">{item.title}</div>
+                  <div className="muted small">{formatDateTime(item.createdAt)}</div>
+                </div>
+                {item.author?.displayName && <div className="pill pill-soft">{item.author.displayName}</div>}
+              </div>
+              <p>{item.content}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

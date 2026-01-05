@@ -14,6 +14,7 @@ import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 import configurePassport from "./config/passport.js";
 import News from "./models/News.js";
+import Poll from "./models/Poll.js";
 import User from "./models/User.js";
 import ContactMessage from "./models/ContactMessage.js";
 import { CITIES_BY_REGION, REGION_NAMES } from "../shared/locations.js";
@@ -110,6 +111,54 @@ const verifyPassword = (password, storedValue) => {
   }
 };
 
+const serializeAuthor = (user) => {
+  if (!user) return null;
+
+  if (typeof user === "string") {
+    return { id: user };
+  }
+
+  return {
+    id: user.id || user._id,
+    displayName: user.displayName || user.username || user.email,
+  };
+};
+
+const serializeNews = (news) => ({
+  id: news.id,
+  title: news.title,
+  content: news.content,
+  author: serializeAuthor(news.author),
+  createdAt: news.createdAt,
+  updatedAt: news.updatedAt,
+});
+
+const serializePoll = (poll, currentUser) => {
+  const totalVotes =
+    poll.options?.reduce((sum, option) => sum + (option.votes || 0), 0) || 0;
+  const hasVoted = currentUser
+    ? poll.votedUsers?.some((userId) => userId.toString() === currentUser.id)
+    : false;
+
+  return {
+    id: poll.id,
+    question: poll.question,
+    options: (poll.options || []).map((option) => ({
+      id: option._id?.toString() || String(option.text),
+      text: option.text,
+      votes: option.votes || 0,
+    })),
+    tags: poll.tags || [],
+    region: poll.region,
+    cityOrVillage: poll.cityOrVillage,
+    createdBy: serializeAuthor(poll.createdBy),
+    createdAt: poll.createdAt,
+    updatedAt: poll.updatedAt,
+    totalVotes,
+    hasVoted,
+  };
+};
+
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.options("/auth/*", cors(corsOptions));
@@ -189,11 +238,24 @@ const ensureRole = (...roles) => (req, res, next) => {
 };
 
 const newsRouter = express.Router();
+const pollsRouter = express.Router();
 const contactRouter = express.Router();
 
-newsRouter.use(ensureAuthenticated);
+newsRouter.get("/", async (req, res) => {
+  try {
+    const newsItems = await News.find()
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate("author", "displayName username email");
 
-newsRouter.post("/", ensureRole("reporter", "admin"), async (req, res) => {
+    return res.json({ news: newsItems.map(serializeNews) });
+  } catch (error) {
+    console.error("[news-list-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση ειδήσεων." });
+  }
+});
+
+newsRouter.post("/", ensureAuthenticated, ensureRole("reporter", "admin"), async (req, res) => {
   const { title, content } = req.body || {};
   const trimmedTitle = title?.trim();
   const trimmedContent = content?.trim();
@@ -209,19 +271,165 @@ newsRouter.post("/", ensureRole("reporter", "admin"), async (req, res) => {
       author: req.user._id,
     });
 
+    const populatedNews = await createdNews.populate("author", "displayName username email");
+
     return res.status(201).json({
-      news: {
-        id: createdNews.id,
-        title: createdNews.title,
-        content: createdNews.content,
-        author: createdNews.author,
-        createdAt: createdNews.createdAt,
-        updatedAt: createdNews.updatedAt,
-      },
+      news: serializeNews(populatedNews),
     });
   } catch (error) {
     console.error("[news-create-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η προσθήκη της είδησης." });
+  }
+});
+
+pollsRouter.get("/", async (req, res) => {
+  try {
+    const polls = await Poll.find()
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .populate("createdBy", "displayName username email");
+
+    return res.json({ polls: polls.map((poll) => serializePoll(poll, req.user)) });
+  } catch (error) {
+    console.error("[polls-list-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση ψηφοφοριών." });
+  }
+});
+
+pollsRouter.get("/:pollId", async (req, res) => {
+  const { pollId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(pollId)) {
+    return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    return res.json({ poll: serializePoll(poll, req.user) });
+  } catch (error) {
+    console.error("[polls-detail-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση της ψηφοφορίας." });
+  }
+});
+
+pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
+  const { question, options, tags, region, cityOrVillage } = req.body || {};
+  const trimmedQuestion = question?.trim();
+
+  const normalizedOptions = Array.isArray(options)
+    ? options
+    : typeof options === "string"
+      ? options.split(",")
+      : [];
+
+  const cleanedOptions = normalizedOptions
+    .map((option) => (typeof option === "string" ? option : option?.text))
+    .map((text) => text?.trim())
+    .filter(Boolean);
+
+  const uniqueOptions = Array.from(new Set(cleanedOptions));
+
+  if (!trimmedQuestion || uniqueOptions.length < 2) {
+    return res
+      .status(400)
+      .json({ message: "Χρειάζονται ερώτηση και τουλάχιστον δύο μοναδικές επιλογές." });
+  }
+
+  if (uniqueOptions.length !== cleanedOptions.length) {
+    return res.status(400).json({ message: "Οι επιλογές πρέπει να είναι διαφορετικές μεταξύ τους." });
+  }
+
+  const normalizedTags = Array.from(
+    new Set(
+      (Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",") : [])
+        .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+        .filter(Boolean)
+    )
+  ).slice(0, 10);
+
+  const trimmedRegion = region?.trim();
+  const trimmedCity = cityOrVillage?.trim();
+
+  if (trimmedRegion && !REGION_NAMES.includes(trimmedRegion)) {
+    return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
+  }
+
+  if (trimmedCity) {
+    if (!trimmedRegion) {
+      return res
+        .status(400)
+        .json({ message: "Επιλέξτε πρώτα περιφέρεια για να προσθέσετε πόλη ή χωριό." });
+    }
+
+    if (!CITIES_BY_REGION[trimmedRegion]?.includes(trimmedCity)) {
+      return res.status(400).json({ message: "Η πόλη ή το χωριό δεν ανήκει στην επιλεγμένη περιφέρεια." });
+    }
+  }
+
+  try {
+    const createdPoll = await Poll.create({
+      question: trimmedQuestion,
+      options: uniqueOptions.map((text) => ({ text })),
+      tags: normalizedTags,
+      region: trimmedRegion,
+      cityOrVillage: trimmedCity,
+      createdBy: req.user._id,
+    });
+
+    const populatedPoll = await createdPoll.populate("createdBy", "displayName username email");
+
+    return res.status(201).json({ poll: serializePoll(populatedPoll, req.user) });
+  } catch (error) {
+    console.error("[polls-create-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η δημιουργία ψηφοφορίας." });
+  }
+});
+
+pollsRouter.post("/:pollId/vote", ensureAuthenticated, async (req, res) => {
+  const { pollId } = req.params;
+  const { optionId } = req.body || {};
+
+  if (!mongoose.Types.ObjectId.isValid(pollId)) {
+    return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
+  }
+
+  if (!optionId) {
+    return res.status(400).json({ message: "Επιλέξτε μία από τις διαθέσιμες απαντήσεις." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    const alreadyVoted = poll.votedUsers?.some((userId) => userId.toString() === req.user.id);
+    if (alreadyVoted) {
+      return res.status(400).json({ message: "Έχετε ήδη ψηφίσει σε αυτή την ψηφοφορία." });
+    }
+
+    const selectedOption = poll.options.id(optionId) ||
+      poll.options.find((option) => option._id?.toString() === optionId);
+
+    if (!selectedOption) {
+      return res.status(400).json({ message: "Μη έγκυρη επιλογή ψηφοφορίας." });
+    }
+
+    selectedOption.votes += 1;
+    poll.votedUsers.push(req.user._id);
+
+    await poll.save();
+
+    return res.json({ poll: serializePoll(poll, req.user) });
+  } catch (error) {
+    console.error("[polls-vote-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η καταχώρηση της ψήφου." });
   }
 });
 
@@ -536,6 +744,8 @@ app.use("/auth", authRouter);
 app.use("/api/auth", authRouter);
 app.use("/news", newsRouter);
 app.use("/api/news", newsRouter);
+app.use("/polls", pollsRouter);
+app.use("/api/polls", pollsRouter);
 app.use("/users", usersRouter);
 app.use("/api/users", usersRouter);
 app.use("/contact", contactRouter);
