@@ -133,11 +133,14 @@ const serializeNews = (news) => ({
   updatedAt: news.updatedAt,
 });
 
-const serializePoll = (poll, currentUser) => {
+const serializePoll = (poll, currentUser, session) => {
   const totalVotes =
     poll.options?.reduce((sum, option) => sum + (option.votes || 0), 0) || 0;
   const hasVoted = currentUser
     ? poll.votedUsers?.some((userId) => userId.toString() === currentUser.id)
+    : false;
+  const hasVotedAnonymously = poll.anonymousResponses
+    ? session?.anonymousPollVotes?.includes(poll.id?.toString())
     : false;
 
   return {
@@ -151,11 +154,13 @@ const serializePoll = (poll, currentUser) => {
     tags: poll.tags || [],
     region: poll.region,
     cityOrVillage: poll.cityOrVillage,
-    createdBy: serializeAuthor(poll.createdBy),
+    createdBy: poll.isAnonymousCreator ? null : serializeAuthor(poll.createdBy),
+    isAnonymousCreator: Boolean(poll.isAnonymousCreator),
+    anonymousResponses: Boolean(poll.anonymousResponses),
     createdAt: poll.createdAt,
     updatedAt: poll.updatedAt,
     totalVotes,
-    hasVoted,
+    hasVoted: hasVoted || hasVotedAnonymously,
   };
 };
 
@@ -289,7 +294,7 @@ pollsRouter.get("/", async (req, res) => {
       .limit(100)
       .populate("createdBy", "displayName username email");
 
-    return res.json({ polls: polls.map((poll) => serializePoll(poll, req.user)) });
+    return res.json({ polls: polls.map((poll) => serializePoll(poll, req.user, req.session)) });
   } catch (error) {
     console.error("[polls-list-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση ψηφοφοριών." });
@@ -310,7 +315,7 @@ pollsRouter.get("/:pollId", async (req, res) => {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
     }
 
-    return res.json({ poll: serializePoll(poll, req.user) });
+    return res.json({ poll: serializePoll(poll, req.user, req.session) });
   } catch (error) {
     console.error("[polls-detail-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση της ψηφοφορίας." });
@@ -318,7 +323,15 @@ pollsRouter.get("/:pollId", async (req, res) => {
 });
 
 pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
-  const { question, options, tags, region, cityOrVillage } = req.body || {};
+  const {
+    question,
+    options,
+    tags,
+    region,
+    cityOrVillage,
+    isAnonymousCreator,
+    anonymousResponses,
+  } = req.body || {};
   const trimmedQuestion = question?.trim();
 
   const normalizedOptions = Array.isArray(options)
@@ -354,6 +367,8 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
 
   const trimmedRegion = region?.trim();
   const trimmedCity = cityOrVillage?.trim();
+  const shouldHideCreator = Boolean(isAnonymousCreator);
+  const shouldHideResponders = Boolean(anonymousResponses);
 
   if (trimmedRegion && !REGION_NAMES.includes(trimmedRegion)) {
     return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
@@ -378,21 +393,24 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
       tags: normalizedTags,
       region: trimmedRegion,
       cityOrVillage: trimmedCity,
+      isAnonymousCreator: shouldHideCreator,
+      anonymousResponses: shouldHideResponders,
       createdBy: req.user._id,
     });
 
     const populatedPoll = await createdPoll.populate("createdBy", "displayName username email");
 
-    return res.status(201).json({ poll: serializePoll(populatedPoll, req.user) });
+    return res.status(201).json({ poll: serializePoll(populatedPoll, req.user, req.session) });
   } catch (error) {
     console.error("[polls-create-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η δημιουργία ψηφοφορίας." });
   }
 });
 
-pollsRouter.post("/:pollId/vote", ensureAuthenticated, async (req, res) => {
+pollsRouter.post("/:pollId/vote", async (req, res) => {
   const { pollId } = req.params;
   const { optionId } = req.body || {};
+  const userId = req.user?.id;
 
   if (!mongoose.Types.ObjectId.isValid(pollId)) {
     return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
@@ -409,9 +427,27 @@ pollsRouter.post("/:pollId/vote", ensureAuthenticated, async (req, res) => {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
     }
 
-    const alreadyVoted = poll.votedUsers?.some((userId) => userId.toString() === req.user.id);
+    const pollIdStr = poll.id?.toString();
+
+    if (!poll.anonymousResponses && !userId) {
+      return res.status(401).json({ message: "Χρειάζεται σύνδεση για να ψηφίσετε." });
+    }
+
+    const alreadyVoted = !poll.anonymousResponses
+      ? poll.votedUsers?.some((storedId) => storedId.toString() === userId)
+      : false;
+
     if (alreadyVoted) {
       return res.status(400).json({ message: "Έχετε ήδη ψηφίσει σε αυτή την ψηφοφορία." });
+    }
+
+    if (poll.anonymousResponses) {
+      const anonymousVotes = req.session.anonymousPollVotes || [];
+      if (pollIdStr && anonymousVotes.includes(pollIdStr)) {
+        return res
+          .status(400)
+          .json({ message: "Έχετε ήδη ψηφίσει ανώνυμα σε αυτή την ψηφοφορία." });
+      }
     }
 
     const selectedOption = poll.options.id(optionId) ||
@@ -422,11 +458,20 @@ pollsRouter.post("/:pollId/vote", ensureAuthenticated, async (req, res) => {
     }
 
     selectedOption.votes += 1;
-    poll.votedUsers.push(req.user._id);
+
+    if (poll.anonymousResponses) {
+      if (pollIdStr) {
+        const anonymousVotes = new Set(req.session.anonymousPollVotes || []);
+        anonymousVotes.add(pollIdStr);
+        req.session.anonymousPollVotes = Array.from(anonymousVotes);
+      }
+    } else {
+      poll.votedUsers.push(req.user._id);
+    }
 
     await poll.save();
 
-    return res.json({ poll: serializePoll(poll, req.user) });
+    return res.json({ poll: serializePoll(poll, req.user, req.session) });
   } catch (error) {
     console.error("[polls-vote-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η καταχώρηση της ψήφου." });

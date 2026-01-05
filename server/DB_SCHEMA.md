@@ -34,6 +34,8 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
 - **tags** (`Array<String>`, trimmed, unique per poll)
 - **region** (`String`, optional)
 - **cityOrVillage** (`String`, optional; must match selected region when present)
+- **isAnonymousCreator** (`Boolean`, default `false`; hides creator identity from readers)
+- **anonymousResponses** (`Boolean`, default `false`; allows voters to remain anonymous and vote without logging in once per session)
 - **timestamps**: `createdAt`, `updatedAt` (auto-managed)
 
 ## News (`news` collection)

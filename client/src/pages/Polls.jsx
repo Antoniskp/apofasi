@@ -29,6 +29,8 @@ export default function Polls() {
     tags: "",
     region: "",
     cityOrVillage: "",
+    isAnonymousCreator: false,
+    anonymousResponses: false,
   });
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
   const [voteState, setVoteState] = useState({});
@@ -127,10 +129,20 @@ export default function Polls() {
         tags,
         region: formState.region,
         cityOrVillage: formState.cityOrVillage,
+        isAnonymousCreator: formState.isAnonymousCreator,
+        anonymousResponses: formState.anonymousResponses,
       });
 
       setSubmission({ submitting: false, success: "Η ψηφοφορία δημοσιεύτηκε.", error: null });
-      setFormState({ question: "", options: DEFAULT_OPTIONS, tags: "", region: "", cityOrVillage: "" });
+      setFormState({
+        question: "",
+        options: DEFAULT_OPTIONS,
+        tags: "",
+        region: "",
+        cityOrVillage: "",
+        isAnonymousCreator: false,
+        anonymousResponses: false,
+      });
       await loadPolls();
     } catch (error) {
       setSubmission({
@@ -141,25 +153,25 @@ export default function Polls() {
     }
   };
 
-  const handleVote = async (pollId, optionId) => {
-    if (!authState.user) {
-      setVoteState((prev) => ({ ...prev, [pollId]: { error: "Χρειάζεται σύνδεση για να ψηφίσετε." } }));
+  const handleVote = async (poll, optionId) => {
+    if (!poll.anonymousResponses && !authState.user) {
+      setVoteState((prev) => ({ ...prev, [poll.id]: { error: "Χρειάζεται σύνδεση για να ψηφίσετε." } }));
       return;
     }
 
-    setVoteState((prev) => ({ ...prev, [pollId]: { submitting: true, error: null } }));
+    setVoteState((prev) => ({ ...prev, [poll.id]: { submitting: true, error: null } }));
 
     try {
-      const response = await voteOnPoll(pollId, optionId);
+      const response = await voteOnPoll(poll.id, optionId);
       setPollsState((prev) => ({
         ...prev,
-        polls: prev.polls.map((poll) => (poll.id === pollId ? response.poll : poll)),
+        polls: prev.polls.map((item) => (item.id === poll.id ? response.poll : item)),
       }));
-      setVoteState((prev) => ({ ...prev, [pollId]: { submitting: false, error: null } }));
+      setVoteState((prev) => ({ ...prev, [poll.id]: { submitting: false, error: null } }));
     } catch (error) {
       setVoteState((prev) => ({
         ...prev,
-        [pollId]: { submitting: false, error: error.message || "Η ψήφος δεν καταχωρήθηκε." },
+        [poll.id]: { submitting: false, error: error.message || "Η ψήφος δεν καταχωρήθηκε." },
       }));
     }
   };
@@ -171,7 +183,7 @@ export default function Polls() {
     <div className="section narrow">
       <p className="pill">Ψηφοφορίες</p>
       <h1 className="section-title">Δημόσιες ψηφοφορίες</h1>
-      <p className="muted">Δημιουργήστε και ψηφίστε σε θέματα επικαιρότητας με ετικέτες και προαιρετική τοποθεσία.</p>
+      <p className="muted">Δημιουργήστε και ψηφίστε σε θέματα επικαιρότητας με ετικέτες, προαιρετική τοποθεσία και έμφαση στην ιδιωτικότητα.</p>
 
       <div className="card auth-card stack">
         {authLoading && <p className="muted">Φόρτωση συνεδρίας...</p>}
@@ -180,7 +192,9 @@ export default function Polls() {
 
         {!authLoading && !authError && !user && (
           <div className="stack">
-            <p className="muted">Χρειάζεται σύνδεση για να δημοσιεύσετε ή να ψηφίσετε.</p>
+            <p className="muted">
+              Χρειάζεται σύνδεση για να δημοσιεύσετε ή να ψηφίσετε σε ψηφοφορίες που δεν είναι ανώνυμες για τους ψηφοφόρους.
+            </p>
             <div className="cta-row">
               <Link className="btn" to="/auth">
                 Σύνδεση
@@ -193,11 +207,12 @@ export default function Polls() {
         )}
 
         {!authLoading && !authError && user && (
-          <form className="stack" onSubmit={handleSubmit}>
+          <form className="stack modern-card" onSubmit={handleSubmit}>
             <div className="info-grid">
               <div>
                 <p className="label">Ερώτηση</p>
                 <input
+                  className="input-modern"
                   type="text"
                   value={formState.question}
                   onChange={(event) => setFormState((prev) => ({ ...prev, question: event.target.value }))}
@@ -207,6 +222,7 @@ export default function Polls() {
               <div>
                 <p className="label">Ετικέτες</p>
                 <input
+                  className="input-modern"
                   type="text"
                   value={formState.tags}
                   onChange={(event) => setFormState((prev) => ({ ...prev, tags: event.target.value }))}
@@ -220,8 +236,9 @@ export default function Polls() {
               <p className="label">Επιλογές απάντησης</p>
               <div className="option-stack">
                 {formState.options.map((option, index) => (
-                  <div key={index} className="option-row">
+                  <div key={index} className="option-row option-row-modern">
                     <input
+                      className="input-modern"
                       type="text"
                       value={option}
                       onChange={(event) => handleOptionChange(index, event.target.value)}
@@ -253,7 +270,11 @@ export default function Polls() {
             <div className="info-grid">
               <div>
                 <p className="label">Περιφέρεια (προαιρετικό)</p>
-                <select value={formState.region} onChange={(event) => handleRegionChange(event.target.value)}>
+                <select
+                  className="input-modern"
+                  value={formState.region}
+                  onChange={(event) => handleRegionChange(event.target.value)}
+                >
                   <option value="">Χωρίς τοποθεσία</option>
                   {REGION_NAMES.map((regionName) => (
                     <option key={regionName} value={regionName}>
@@ -265,6 +286,7 @@ export default function Polls() {
               <div>
                 <p className="label">Πόλη ή χωριό (προαιρετικό)</p>
                 <select
+                  className="input-modern"
                   value={formState.cityOrVillage}
                   onChange={(event) => setFormState((prev) => ({ ...prev, cityOrVillage: event.target.value }))}
                   disabled={!formState.region}
@@ -278,6 +300,42 @@ export default function Polls() {
                 </select>
                 {!formState.region && <p className="muted small">Επιλέξτε πρώτα περιφέρεια για να ενεργοποιηθεί.</p>}
               </div>
+            </div>
+
+            <div className="privacy-grid">
+              <label className="privacy-tile">
+                <div className="privacy-toggle">
+                  <input
+                    type="checkbox"
+                    checked={formState.isAnonymousCreator}
+                    onChange={(event) =>
+                      setFormState((prev) => ({ ...prev, isAnonymousCreator: event.target.checked }))
+                    }
+                  />
+                  <span className="toggle-visual" aria-hidden />
+                </div>
+                <div>
+                  <p className="label">Ανώνυμη ανάρτηση</p>
+                  <p className="muted small">Απόκρυψη ονόματος δημιουργού στις λίστες ψηφοφοριών.</p>
+                </div>
+              </label>
+
+              <label className="privacy-tile">
+                <div className="privacy-toggle">
+                  <input
+                    type="checkbox"
+                    checked={formState.anonymousResponses}
+                    onChange={(event) =>
+                      setFormState((prev) => ({ ...prev, anonymousResponses: event.target.checked }))
+                    }
+                  />
+                  <span className="toggle-visual" aria-hidden />
+                </div>
+                <div>
+                  <p className="label">Ανώνυμη συμμετοχή</p>
+                  <p className="muted small">Επιτρέπει μία ψήφο ανά συσκευή χωρίς εμφάνιση στοιχείων χρήστη.</p>
+                </div>
+              </label>
             </div>
 
             {submission.error && <p className="error-text">{submission.error}</p>}
@@ -298,7 +356,7 @@ export default function Polls() {
       <div className="section">
         <div className="section-header">
           <h2 className="section-title">Πρόσφατες ψηφοφορίες</h2>
-          <p className="muted">Δείτε τις ψηφοφορίες των χρηστών και ψηφίστε μία φορά ανά λογαριασμό.</p>
+          <p className="muted">Δείτε τις ψηφοφορίες των χρηστών και ψηφίστε με μία συμμετοχή ανά λογαριασμό ή ανά συσκευή όταν η συμμετοχή είναι ανώνυμη.</p>
         </div>
 
         {pollsLoading && <p className="muted">Φόρτωση ψηφοφοριών...</p>}
@@ -316,13 +374,22 @@ export default function Polls() {
             const voteStatus = voteState[poll.id] || {};
 
             return (
-              <div key={poll.id} className="card poll-card">
+              <div key={poll.id} className="card poll-card modern-card">
                 <div className="poll-header-row">
                   <div className="pill pill-soft">Ψηφοφορία</div>
                   <div className="muted small">{formatDateTime(poll.createdAt)}</div>
                 </div>
 
                 <h3 className="poll-question">{poll.question}</h3>
+
+                <div className="poll-meta-row">
+                  <span className="muted small">
+                    {poll.isAnonymousCreator
+                      ? "Ανώνυμος δημιουργός"
+                      : `Δημιουργός: ${poll.createdBy?.displayName || "—"}`}
+                  </span>
+                  {poll.anonymousResponses && <span className="pill pill-ghost">Ανώνυμες ψήφοι</span>}
+                </div>
 
                 {poll.tags?.length > 0 && (
                   <div className="chips">
@@ -338,6 +405,10 @@ export default function Polls() {
                   <p className="muted small">
                     Τοποθεσία: {[poll.region, poll.cityOrVillage].filter(Boolean).join(" • ")}
                   </p>
+                )}
+
+                {poll.anonymousResponses && (
+                  <p className="muted small">Οι ψήφοι καταγράφονται ανώνυμα — μία συμμετοχή ανά συσκευή.</p>
                 )}
 
                 <div className="poll-options-list">
@@ -361,7 +432,7 @@ export default function Polls() {
                             className="btn btn-outline"
                             type="button"
                             disabled={disabled}
-                            onClick={() => handleVote(poll.id, option.id)}
+                            onClick={() => handleVote(poll, option.id)}
                           >
                             {voteStatus.submitting ? "Καταχώρηση..." : "Ψήφισε"}
                           </button>
