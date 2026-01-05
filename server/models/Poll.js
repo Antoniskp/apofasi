@@ -48,7 +48,15 @@ const pollSchema = new mongoose.Schema(
     cityOrVillage: {
       type: String,
       trim: true,
-    }
+    },
+    isAnonymousCreator: {
+      type: Boolean,
+      default: false,
+    },
+    anonymousResponses: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

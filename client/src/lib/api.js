@@ -140,6 +140,8 @@ export const createPoll = async (payload) =>
         tags: payload.tags,
         region: payload.region?.trim(),
         cityOrVillage: payload.cityOrVillage?.trim(),
+        isAnonymousCreator: Boolean(payload.isAnonymousCreator),
+        anonymousResponses: Boolean(payload.anonymousResponses),
       })
     )
   );
