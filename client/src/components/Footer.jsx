@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getAuthStatus, logoutUser } from "../lib/api.js";
 
 const footerSections = [
   {
@@ -53,6 +55,32 @@ const footerSections = [
 ];
 
 export default function Footer() {
+  const [authStatus, setAuthStatus] = useState({ loading: true, user: null });
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const loadAuthStatus = async () => {
+    try {
+      const data = await getAuthStatus();
+      setAuthStatus({ loading: false, user: data.user });
+    } catch (error) {
+      setAuthStatus({ loading: false, user: null });
+    }
+  };
+
+  useEffect(() => {
+    loadAuthStatus();
+  }, []);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logoutUser();
+      await loadAuthStatus();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <footer className="footer" aria-label="Footer menu">
       <div className="footer-inner">
@@ -110,7 +138,19 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <span>© {new Date().getFullYear()} Apofasi</span>
-        <span>Χτισμένο με ανοιχτό κώδικα και φροντίδα.</span>
+        <div className="footer-bottom-right">
+          <span>Χτισμένο με ανοιχτό κώδικα και φροντίδα.</span>
+          {authStatus.user && (
+            <button
+              type="button"
+              className="btn btn-outline footer-logout"
+              onClick={handleLogout}
+              disabled={authStatus.loading || isLoggingOut}
+            >
+              {isLoggingOut ? "Αποσύνδεση..." : "Αποσύνδεση"}
+            </button>
+          )}
+        </div>
       </div>
     </footer>
   );

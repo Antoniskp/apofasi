@@ -197,6 +197,11 @@ body {
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
 }
 
+.menu-auth-link {
+  text-decoration: none;
+  color: inherit;
+}
+
 .menu-auth-hello {
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -954,6 +959,18 @@ button:focus-visible {
   font-size: 0.9rem;
 }
 
+.footer-bottom-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.footer-logout {
+  height: auto;
+  padding: 9px 12px;
+}
+
 .auth-card {
   display: flex;
   flex-direction: column;
@@ -1595,6 +1612,13 @@ button:focus-visible {
   .footer-bottom {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .footer-bottom-right {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
+    flex-wrap: wrap;
   }
 }
 
