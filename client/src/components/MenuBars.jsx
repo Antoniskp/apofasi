@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { getAuthStatus, logoutUser } from "../lib/api.js";
 
 const topMenu = [
-  { label: "Αρχική", to: "/", icon: "fa-house" },
+  { label: "Ειδήσεις", to: "/news", icon: "fa-newspaper" },
+  { label: "Ψηφοφορίες", to: "/polls", icon: "fa-square-poll-vertical" },
+  { label: "Εκπαίδευση", to: "/education", icon: "fa-graduation-cap" },
   { label: "Τι επιδιώκουμε", to: "/mission", icon: "fa-bullseye" },
   { label: "Πώς δουλεύουμε", to: "/how-we-do-it", icon: "fa-diagram-project" },
   { label: "Συνεισφέρετε", to: "/contribute", icon: "fa-handshake-simple" },
@@ -11,18 +13,19 @@ const topMenu = [
 ];
 
 const bottomMenu = [
-  { label: "Ειδήσεις", to: "/news" },
-  { label: "Ψηφοφορίες", to: "/polls" },
-  { label: "LIVE", to: "/news" },
-  { label: "Πολιτική" },
-  { label: "Οικονομία" },
-  { label: "Κοινωνία" },
-  { label: "Κόσμος" },
-  { label: "Αθλητικά" },
-  { label: "Lifestyle" },
-  { label: "Auto/Moto" },
-  { label: "Science" },
-  { label: "Opinions" }
+  { label: "Ανατολική Μακεδονία και Θράκη" },
+  { label: "Κεντρική Μακεδονία" },
+  { label: "Δυτική Μακεδονία" },
+  { label: "Ήπειρος" },
+  { label: "Θεσσαλία" },
+  { label: "Ιόνια Νησιά" },
+  { label: "Δυτική Ελλάδα" },
+  { label: "Στερεά Ελλάδα" },
+  { label: "Αττική" },
+  { label: "Πελοπόννησος" },
+  { label: "Βόρειο Αιγαίο" },
+  { label: "Νότιο Αιγαίο" },
+  { label: "Κρήτη" }
 ];
 
 export default function MenuBars() {
