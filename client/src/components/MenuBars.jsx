@@ -5,11 +5,7 @@ import { getAuthStatus } from "../lib/api.js";
 const topMenu = [
   { label: "Ειδήσεις", to: "/news", icon: "fa-newspaper" },
   { label: "Ψηφοφορίες", to: "/polls", icon: "fa-square-poll-vertical" },
-  { label: "Εκπαίδευση", to: "/education", icon: "fa-graduation-cap" },
-  { label: "Τι επιδιώκουμε", to: "/mission", icon: "fa-bullseye" },
-  { label: "Πώς δουλεύουμε", to: "/how-we-do-it", icon: "fa-diagram-project" },
-  { label: "Συνεισφέρετε", to: "/contribute", icon: "fa-handshake-simple" },
-  { label: "Επικοινωνία", to: "/contact", icon: "fa-envelope-open-text" }
+  { label: "Εκπαίδευση", to: "/education", icon: "fa-graduation-cap" }
 ];
 
 const bottomMenu = [
