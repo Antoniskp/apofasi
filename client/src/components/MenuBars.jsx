@@ -85,25 +85,17 @@ export default function MenuBars() {
     authStatus.user?.firstName ||
     authStatus.user?.email ||
     "Χρήστης";
-  const userRole = authStatus.user?.role
-    ? authStatus.user.role === "admin"
-      ? "Διαχειριστής"
-      : "Μέλος"
-    : null;
-
   const authGreeting = (
-    <Link
-      to="/profile"
-      className="menu-auth-summary menu-auth-link"
-      aria-label="Προφίλ"
-      onClick={closeMenu}
-    >
-      <div className="menu-auth-hello">
-        Hello,
-        <span className="menu-auth-name">{` ${userName}`}</span>
-      </div>
-      {userRole && <div className="menu-auth-role">{userRole}</div>}
-    </Link>
+    <div className="menu-auth-summary" aria-label="Προφίλ">
+      <span className="menu-auth-hello">Hello,</span>
+      <Link
+        to="/profile"
+        className="menu-auth-name menu-auth-link"
+        onClick={closeMenu}
+      >
+        {userName}
+      </Link>
+    </div>
   );
 
   return (
