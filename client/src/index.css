@@ -312,6 +312,31 @@ body {
   padding: 4px 0;
 }
 
+.menu-bottom-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.16);
+  background: rgba(226, 232, 240, 0.08);
+  color: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 140ms ease, transform 120ms ease;
+}
+
+.menu-bottom-toggle:hover {
+  background: rgba(226, 232, 240, 0.14);
+  transform: translateY(-1px);
+}
+
+.menu-bottom-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .menu-bottom-meta {
   display: inline-flex;
   align-items: center;
