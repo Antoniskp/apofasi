@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { API_BASE_URL } from "../lib/api.js";
 
-const messages = {
+const statusMessages = {
   success: {
     title: "Η σύνδεση ολοκληρώθηκε",
     detail: "Επιστρέψτε στην αρχική σελίδα για να συνεχίσετε.",
@@ -18,7 +18,7 @@ const messages = {
 export default function AuthStatus({ type = "success" }) {
   const [status, setStatus] = useState({ loading: true, user: null, error: null });
   const location = useLocation();
-  const copy = messages[type] || messages.success;
+  const copy = statusMessages[type] || statusMessages.success;
 
   useEffect(() => {
     const fetchStatus = async () => {

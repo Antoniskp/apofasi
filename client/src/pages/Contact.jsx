@@ -2,41 +2,38 @@ import { useEffect, useState } from "react";
 import AuthButtons from "../components/AuthButtons.jsx";
 import { getAuthStatus, submitContactMessage } from "../lib/api.js";
 
-const contactChannels = [
-  {
-    title: "Φόρμα επικοινωνίας",
-    detail:
-      "Στείλτε μας τις απορίες και τις προτάσεις σας ώστε να απαντήσουμε μέσα σε 48 ώρες.",
-    action: { label: "Άνοιγμα φόρμας", href: "#contact-form" }
-  },
-  {
-    title: "Συνεργασίες",
-    detail:
-      "Ενδιαφέρεστε για συνεργασία ή δημοσιογραφικό υλικό; Μιλήστε με την ομάδα σύνταξης.",
-    action: { label: "Κλείστε ραντεβού", href: "#collaboration" }
-  },
-  {
-    title: "Υποστήριξη χρηστών",
-    detail:
-      "Βρείτε βοήθεια για το λογαριασμό σας, την εγγραφή ή τις ψηφοφορίες της πλατφόρμας.",
-    action: { label: "Κέντρο βοήθειας", href: "#support" }
-  }
-];
-
-const socialLinks = [
-  {
-    label: "Discord",
-    icon: "💬",
-    href: "https://discord.gg/pvJftR4T98"
-  }
-];
-
-const contactTopics = [
-  { value: "support", label: "Υποστήριξη / τεχνικό ζήτημα" },
-  { value: "collaboration", label: "Συνεργασία ή τύπος" },
-  { value: "feedback", label: "Feedback για την πλατφόρμα" },
-  { value: "general", label: "Γενική ερώτηση" }
-];
+const contactContent = {
+  channels: [
+    {
+      title: "Φόρμα επικοινωνίας",
+      detail: "Στείλτε μας τις απορίες και τις προτάσεις σας ώστε να απαντήσουμε μέσα σε 48 ώρες.",
+      action: { label: "Άνοιγμα φόρμας", href: "#contact-form" }
+    },
+    {
+      title: "Συνεργασίες",
+      detail: "Ενδιαφέρεστε για συνεργασία ή δημοσιογραφικό υλικό; Μιλήστε με την ομάδα σύνταξης.",
+      action: { label: "Κλείστε ραντεβού", href: "#collaboration" }
+    },
+    {
+      title: "Υποστήριξη χρηστών",
+      detail: "Βρείτε βοήθεια για το λογαριασμό σας, την εγγραφή ή τις ψηφοφορίες της πλατφόρμας.",
+      action: { label: "Κέντρο βοήθειας", href: "#support" }
+    }
+  ],
+  socials: [
+    {
+      label: "Discord",
+      icon: "💬",
+      href: "https://discord.gg/pvJftR4T98"
+    }
+  ],
+  topics: [
+    { value: "support", label: "Υποστήριξη / τεχνικό ζήτημα" },
+    { value: "collaboration", label: "Συνεργασία ή τύπος" },
+    { value: "feedback", label: "Feedback για την πλατφόρμα" },
+    { value: "general", label: "Γενική ερώτηση" }
+  ]
+};
 
 export default function Contact() {
   const [authState, setAuthState] = useState({ loading: true, user: null });
@@ -117,7 +114,7 @@ export default function Contact() {
 
       <section className="section">
         <div className="grid-3">
-          {contactChannels.map((item) => (
+          {contactContent.channels.map((item) => (
             <div key={item.title} className="card">
               <h3>{item.title}</h3>
               <p>{item.detail}</p>
@@ -167,7 +164,7 @@ export default function Contact() {
                 <label className="form-field">
                   Θέμα
                   <select name="topic" value={formData.topic} onChange={handleChange}>
-                    {contactTopics.map((option) => (
+                    {contactContent.topics.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
