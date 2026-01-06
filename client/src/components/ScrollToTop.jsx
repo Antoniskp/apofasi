@@ -14,8 +14,11 @@ export default function ScrollToTop() {
       const isInternal = url.origin === window.location.origin;
       const opensInNewTab = anchor.target && anchor.target !== "_self";
       const isDownload = anchor.hasAttribute("download");
+      const hasHash = url.hash && url.hash !== "#";
 
       if (!isInternal || opensInNewTab || isDownload) return;
+
+      if (hasHash) return;
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
@@ -26,6 +29,16 @@ export default function ScrollToTop() {
   }, []);
 
   useEffect(() => {
+    if (hash) {
+      const targetId = hash.replace("#", "");
+      const targetElement = document.getElementById(targetId);
+
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+    }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pathname, hash, search]);
 
