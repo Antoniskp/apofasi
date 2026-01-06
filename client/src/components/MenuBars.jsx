@@ -28,6 +28,7 @@ export default function MenuBars() {
   const [isOpen, setIsOpen] = useState(false);
   const [authStatus, setAuthStatus] = useState({ loading: true, user: null });
   const [isMenuHidden, setIsMenuHidden] = useState(false);
+  const [showAllRegions, setShowAllRegions] = useState(false);
   const location = useLocation();
 
   const closeMenu = () => setIsOpen(false);
@@ -225,7 +226,7 @@ export default function MenuBars() {
       <div className="menu-bottom" aria-label="Categories">
         <div className="menu-bottom-inner">
           <div className="menu-bottom-list">
-            {bottomMenu.map((item) => (
+            {(showAllRegions ? bottomMenu : bottomMenu.slice(0, 6)).map((item) => (
               item.to ? (
                 <Link
                   key={item.label}
@@ -242,6 +243,21 @@ export default function MenuBars() {
               )
             ))}
           </div>
+
+          <button
+            type="button"
+            className="menu-bottom-toggle"
+            onClick={() => setShowAllRegions((prev) => !prev)}
+            aria-label={showAllRegions ? "Εμφάνιση λιγότερων περιοχών" : "Εμφάνιση περισσότερων περιοχών"}
+          >
+            <span className="menu-bottom-toggle-text">
+              {showAllRegions ? "Λιγότερες περιοχές" : "Περισσότερες περιοχές"}
+            </span>
+            <i
+              className={`fa-solid ${showAllRegions ? "fa-chevron-up" : "fa-chevron-down"}`}
+              aria-hidden
+            />
+          </button>
         </div>
       </div>
     </div>
