@@ -5,12 +5,14 @@ import { getAuthStatus, logoutUser } from "../lib/api.js";
 const footerSections = [
   {
     title: "Επικοινωνία",
+    titleLink: "/contact",
     description:
       "Μιλήστε με την ομάδα, ακολουθήστε τα κανάλια μας ή ζητήστε υποστήριξη.",
     links: [
+      { label: "Σελίδα επικοινωνίας", to: "/contact" },
       { label: "Φόρμα επικοινωνίας", to: "/contact#contact-form" },
       { label: "Υποστήριξη", to: "/contact#support" },
-      { label: "Newsletter", to: "/social" },
+      { label: "Συνεργασίες", to: "/contact#collaboration" },
       { label: "Discord", href: "https://discord.gg/pvJftR4T98" }
     ]
   },
@@ -20,36 +22,29 @@ const footerSections = [
       "Μάθετε περισσότερα για την αποστολή μας και βρείτε χρήσιμους πόρους.",
     links: [
       { label: "Αποστολή", to: "/mission" },
-      { label: "Η ιστορία μας", to: "/about" },
       { label: "Πώς δουλεύουμε", to: "/how-we-do-it" },
+      { label: "Η ιστορία μας", to: "/about" },
       { label: "Συνεισφέρετε", to: "/contribute" }
     ]
   },
   {
-    title: "Ειδήσεις",
-    description: "Γρήγορη πρόσβαση στα κορυφαία και θεματικά νέα.",
+    title: "Περιεχόμενο",
+    description: "Πρόσβαση σε νέα, ψηφοφορίες και κορυφαίες επιλογές.",
     links: [
-      { label: "Top 10 ειδήσεις", to: "/news/top-10" },
-      { label: "Θεματικές ενότητες", to: "/news/categories" },
-      { label: "Επιλεγμένα άρθρα", to: "/news/featured" }
+      { label: "Τελευταίες ειδήσεις", to: "/news" },
+      { label: "Ψηφοφορίες", to: "/polls" },
+      { label: "Προτάσεις", to: "/recommendations" },
+      { label: "Top επιλογές", to: "/top-choices" }
     ]
   },
   {
-    title: "Εκπαίδευση",
-    description: "Υλικό μάθησης με κορυφαίες επιλογές και υποκατηγορίες.",
+    title: "Κοινότητα",
+    description: "Μείνετε συνδεδεμένοι με το project και την ομάδα ανάπτυξης.",
     links: [
-      { label: "Top 10 οδηγίες", to: "/education/top-10" },
-      { label: "Υποκατηγορίες", to: "/education/categories" },
-      { label: "Προτεινόμενα μαθήματα", to: "/education/featured" }
-    ]
-  },
-  {
-    title: "Ψηφοφορίες",
-    description: "Βρείτε τις πιο δημοφιλείς και θεματικές ψηφοφορίες.",
-    links: [
-      { label: "Top 10 ψηφοφορίες", to: "/polls/top-10" },
-      { label: "Κατηγορίες", to: "/polls/categories" },
-      { label: "Επιλεγμένες", to: "/polls/featured" }
+      { label: "Κοινωνικά δίκτυα", to: "/social" },
+      { label: "Συμμετοχή στην ανάπτυξη", to: "/contribute" },
+      { label: "Προφίλ χρήστη", to: "/profile" },
+      { label: "Σύνδεση/Εγγραφή", to: "/auth" }
     ]
   }
 ];
@@ -110,7 +105,13 @@ export default function Footer() {
         <div className="footer-grid">
           {footerSections.map((section) => (
             <div key={section.title} className="footer-card">
-              <h3>{section.title}</h3>
+              {section.titleLink ? (
+                <Link to={section.titleLink} className="footer-link heading-link">
+                  <h3>{section.title}</h3>
+                </Link>
+              ) : (
+                <h3>{section.title}</h3>
+              )}
               <p className="muted">{section.description}</p>
               <div className="footer-links">
                 {section.links.map((link) =>

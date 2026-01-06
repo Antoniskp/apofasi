@@ -1063,6 +1063,18 @@ button:focus-visible {
   margin: 0 0 8px;
 }
 
+.footer-card .heading-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-card .heading-link:hover {
+  color: var(--accent);
+}
+
 .footer-links {
   display: grid;
   gap: 5px;
