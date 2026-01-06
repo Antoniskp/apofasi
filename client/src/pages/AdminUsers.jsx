@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { API_BASE_URL, getAuthStatus, listUsers, updateUserRole } from "../lib/api.js";
 
+const adminUsersCopy = {
+  hero: {
+    pill: "Διαχειριστής",
+    title: "Διαχείριση χρηστών",
+    subtitle: "Οι διαχειριστές μπορούν να αναζητήσουν χρήστες και να τροποποιήσουν τον ρόλο τους."
+  }
+};
+
 const roleOptions = [
   { value: "user", label: "Χρήστης" },
   { value: "reporter", label: "Συντάκτης" },
@@ -114,9 +122,9 @@ export default function AdminUsers() {
 
   return (
     <div className="section">
-      <p className="pill">Διαχειριστής</p>
-      <h1 className="section-title">Διαχείριση χρηστών</h1>
-      <p className="muted">Οι διαχειριστές μπορούν να αναζητήσουν χρήστες και να τροποποιήσουν τον ρόλο τους.</p>
+      <p className="pill">{adminUsersCopy.hero.pill}</p>
+      <h1 className="section-title">{adminUsersCopy.hero.title}</h1>
+      <p className="muted">{adminUsersCopy.hero.subtitle}</p>
 
       <div className="card auth-card stack">
         {session.loading && <p className="muted">Φόρτωση συνεδρίας...</p>}
