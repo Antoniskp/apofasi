@@ -157,6 +157,13 @@ export const listPolls = async () =>
     })
   );
 
+export const getPoll = async (pollId) =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/polls/${pollId}`, {
+      credentials: "include",
+    })
+  );
+
 export const voteOnPoll = async (pollId, optionId) =>
   handleResponse(
     await fetch(
