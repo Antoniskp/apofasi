@@ -18,6 +18,7 @@ import Poll from "./models/Poll.js";
 import User from "./models/User.js";
 import ContactMessage from "./models/ContactMessage.js";
 import { CITIES_BY_REGION, REGION_NAMES } from "../shared/locations.js";
+import defaultPolls from "./data/defaultPolls.js";
 
 dotenv.config();
 connectDB();
@@ -163,6 +164,25 @@ const serializePoll = (poll, currentUser, session) => {
     hasVoted: hasVoted || hasVotedAnonymously,
   };
 };
+
+const seedDefaultPolls = async () => {
+  if (process.env.SEED_DEFAULT_POLLS === "false") return;
+
+  const existingPolls = await Poll.estimatedDocumentCount();
+
+  if (existingPolls > 0) {
+    return;
+  }
+
+  await Poll.create(defaultPolls);
+  console.log(`[polls-seed] Added ${defaultPolls.length} default polls.`);
+};
+
+mongoose.connection.once("open", () => {
+  seedDefaultPolls().catch((error) => {
+    console.error("[polls-seed-error]", error);
+  });
+});
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
