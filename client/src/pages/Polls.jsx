@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CITIES_BY_REGION, REGION_NAMES } from "../../../shared/locations.js";
 import { API_BASE_URL, createPoll, getAuthStatus, listPolls, voteOnPoll } from "../lib/api.js";
 
@@ -34,6 +34,7 @@ export default function Polls() {
   });
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
   const [voteState, setVoteState] = useState({});
+  const navigate = useNavigate();
 
   const availableCities = useMemo(() => CITIES_BY_REGION[formState.region] || [], [formState.region]);
 
@@ -123,7 +124,7 @@ export default function Polls() {
     setSubmission({ submitting: true, success: null, error: null });
 
     try {
-      await createPoll({
+      const response = await createPoll({
         question: trimmedQuestion,
         options: distinctOptions,
         tags,
@@ -143,6 +144,10 @@ export default function Polls() {
         isAnonymousCreator: false,
         anonymousResponses: false,
       });
+      if (response?.poll?.id) {
+        navigate(`/polls/${response.poll.id}`);
+        return;
+      }
       await loadPolls();
     } catch (error) {
       setSubmission({
