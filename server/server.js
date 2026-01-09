@@ -18,6 +18,7 @@ import Poll from "./models/Poll.js";
 import User from "./models/User.js";
 import ContactMessage from "./models/ContactMessage.js";
 import { CITIES_BY_REGION, REGION_NAMES } from "../shared/locations.js";
+import defaultPolls from "./data/defaultPolls.js";
 
 dotenv.config();
 connectDB();
@@ -164,6 +165,29 @@ const serializePoll = (poll, currentUser, session) => {
   };
 };
 
+const serializeDefaultPoll = (poll, index) => {
+  const now = new Date().toISOString();
+  return {
+    id: poll.id || `default-poll-${index + 1}`,
+    question: poll.question,
+    options: (poll.options || []).map((option, optionIndex) => ({
+      id: option.id || `default-poll-${index + 1}-option-${optionIndex + 1}`,
+      text: option.text,
+      votes: 0,
+    })),
+    tags: poll.tags || [],
+    region: poll.region,
+    cityOrVillage: poll.cityOrVillage,
+    createdBy: null,
+    isAnonymousCreator: true,
+    anonymousResponses: Boolean(poll.anonymousResponses),
+    createdAt: poll.createdAt || now,
+    updatedAt: poll.updatedAt || now,
+    totalVotes: 0,
+    hasVoted: false,
+  };
+};
+
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.options("/auth/*", cors(corsOptions));
@@ -293,6 +317,10 @@ pollsRouter.get("/", async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(100)
       .populate("createdBy", "displayName username email");
+
+    if (polls.length === 0) {
+      return res.json({ polls: defaultPolls.map((poll, index) => serializeDefaultPoll(poll, index)) });
+    }
 
     return res.json({ polls: polls.map((poll) => serializePoll(poll, req.user, req.session)) });
   } catch (error) {
