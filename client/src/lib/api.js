@@ -1,12 +1,7 @@
 const normalizedEnvBase = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
 
-const API_BASE_URL = normalizedEnvBase
-  ? normalizedEnvBase.endsWith("/api")
-    ? normalizedEnvBase
-    : `${normalizedEnvBase}/api`
-  : import.meta.env.DEV
-    ? "http://localhost:5000"
-    : "/api";
+const API_BASE_URL =
+  normalizedEnvBase || (import.meta.env.DEV ? "http://localhost:5000" : "/api");
 
 const normalizeEmail = (email) => (email ? String(email).trim().toLowerCase() : "");
 
