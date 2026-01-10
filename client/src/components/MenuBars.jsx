@@ -2,13 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getAuthStatus } from "../lib/api.js";
 
-const topMenu = [
-  { label: "Ειδήσεις", to: "/news", icon: "fa-newspaper" },
-  { label: "Ψηφοφορίες", to: "/polls", icon: "fa-square-poll-vertical" },
-  { label: "Εκπαίδευση", to: "/education", icon: "fa-graduation-cap" }
-];
-
-const bottomMenu = [
+const pollRegions = [
   { label: "Ανατολική Μακεδονία και Θράκη" },
   { label: "Κεντρική Μακεδονία" },
   { label: "Δυτική Μακεδονία" },
@@ -24,11 +18,21 @@ const bottomMenu = [
   { label: "Κρήτη" }
 ];
 
+const topMenu = [
+  { label: "Ειδήσεις", to: "/news", icon: "fa-newspaper" },
+  {
+    label: "Ψηφοφορίες",
+    to: "/polls",
+    icon: "fa-square-poll-vertical",
+    subItems: pollRegions
+  },
+  { label: "Εκπαίδευση", to: "/education", icon: "fa-graduation-cap" }
+];
+
 export default function MenuBars() {
   const [isOpen, setIsOpen] = useState(false);
   const [authStatus, setAuthStatus] = useState({ loading: true, user: null });
   const [isMenuHidden, setIsMenuHidden] = useState(false);
-  const [showAllRegions, setShowAllRegions] = useState(false);
   const location = useLocation();
 
   const closeMenu = () => setIsOpen(false);
@@ -124,17 +128,37 @@ export default function MenuBars() {
           </div>
 
           <nav className={`menu-links ${isOpen ? "open" : ""}`} aria-label="Top navigation">
-            {topMenu.map((item) => (
-              <Link
-                key={item.label}
-                to={item.to}
-                className={`menu-link${location.pathname === item.to ? " active" : ""}`}
-                onClick={closeMenu}
-              >
-                <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
-                {item.label}
-              </Link>
-            ))}
+            {topMenu.map((item) =>
+              item.subItems ? (
+                <div key={item.label} className="menu-link-group">
+                  <Link
+                    to={item.to}
+                    className={`menu-link${location.pathname === item.to ? " active" : ""}`}
+                    onClick={closeMenu}
+                  >
+                    <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
+                    {item.label}
+                  </Link>
+                  <div className="menu-submenu" aria-label={`${item.label} regions`}>
+                    {item.subItems.map((subItem) => (
+                      <span key={subItem.label} className="menu-subitem">
+                        {subItem.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  className={`menu-link${location.pathname === item.to ? " active" : ""}`}
+                  onClick={closeMenu}
+                >
+                  <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
+                  {item.label}
+                </Link>
+              )
+            )}
 
             <div className="menu-actions menu-actions-mobile">
               {isAuthenticated ? (
@@ -223,43 +247,6 @@ export default function MenuBars() {
         </div>
       </div>
 
-      <div className="menu-bottom" aria-label="Categories">
-        <div className="menu-bottom-inner">
-          <div className="menu-bottom-list">
-            {(showAllRegions ? bottomMenu : bottomMenu.slice(0, 6)).map((item) => (
-              item.to ? (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  className={`menu-pill${location.pathname === item.to ? " active" : ""}`}
-                  onClick={closeMenu}
-                >
-                  {item.label}
-                </Link>
-              ) : (
-                <span key={item.label} className="menu-pill">
-                  {item.label}
-                </span>
-              )
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="menu-bottom-toggle"
-            onClick={() => setShowAllRegions((prev) => !prev)}
-            aria-label={showAllRegions ? "Εμφάνιση λιγότερων περιοχών" : "Εμφάνιση περισσότερων περιοχών"}
-          >
-            <span className="menu-bottom-toggle-text">
-              {showAllRegions ? "Λιγότερες περιοχές" : "Περισσότερες περιοχές"}
-            </span>
-            <i
-              className={`fa-solid ${showAllRegions ? "fa-chevron-up" : "fa-chevron-down"}`}
-              aria-hidden
-            />
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
