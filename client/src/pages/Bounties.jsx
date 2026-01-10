@@ -12,19 +12,19 @@ const bountiesContent = {
   bugBounties: [
     {
       title: "Correct server URL implementation",
-      reward: "€250 - €500",
+      reward: "€30",
       detail: "Διορθώσεις στην υλοποίηση των URL του server ώστε να είναι ακριβείς σε όλα τα flows.",
       contact: "Αναφέρετε τα endpoints και τα βήματα αναπαραγωγής."
     },
     {
       title: "Server configuration passes",
-      reward: "€200 - €400",
+      reward: "€20",
       detail: "Καταγραφή και διόρθωση των ακριβών passes/ρυθμίσεων για σωστή εκκίνηση server.",
       contact: "Μοιραστείτε config, logs και προτεινόμενες αλλαγές."
     },
     {
       title: "405 error on poll registration",
-      reward: "€150 - €300",
+      reward: "€20",
       detail: "Εντοπισμός και διόρθωση του 405 κατά την εγγραφή σε polls.",
       contact: "Παραθέστε request/response details και πιθανή λύση."
     }
@@ -32,13 +32,13 @@ const bountiesContent = {
   implementationBounties: [
     {
       title: "Styling & οργάνωση polls",
-      reward: "€250",
+      reward: "€20",
       detail: "Βελτίωση layout, φίλτρων και προβολής αποτελεσμάτων στις ψηφοφορίες.",
       contact: "Προτείνετε design και υλοποιήστε σε components."
     },
     {
       title: "Styling & οργάνωση news",
-      reward: "€250",
+      reward: "€20",
       detail: "Καλύτερη οπτική ιεραρχία, κάρτες και grouping για τις ειδήσεις.",
       contact: "Ευθυγράμμιση με design system και responsive βελτιώσεις."
     }
