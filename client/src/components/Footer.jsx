@@ -24,7 +24,8 @@ const footerSections = [
       { label: "Αποστολή", to: "/mission" },
       { label: "Πώς δουλεύουμε", to: "/how-we-do-it" },
       { label: "Η ιστορία μας", to: "/about" },
-      { label: "Συνεισφέρετε", to: "/contribute" }
+      { label: "Συνεισφέρετε", to: "/contribute" },
+      { label: "Bounties", to: "/bounties" }
     ]
   },
   {
