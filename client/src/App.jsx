@@ -19,6 +19,7 @@ import Social from "./pages/Social.jsx";
 import Recommendations from "./pages/Recommendations.jsx";
 import TopChoices from "./pages/TopChoices.jsx";
 import HowWeDoIt from "./pages/HowWeDoIt.jsx";
+import Bounties from "./pages/Bounties.jsx";
 
 
 const withLayout = (page) => (
@@ -43,6 +44,7 @@ function App() {
         <Route path="/contact" element={withLayout(<Contact />)} />
         <Route path="/about" element={withLayout(<About />)} />
         <Route path="/how-we-do-it" element={withLayout(<HowWeDoIt />)} />
+        <Route path="/bounties" element={withLayout(<Bounties />)} />
         <Route path="/social" element={withLayout(<Social />)} />
         <Route path="/recommendations" element={withLayout(<Recommendations />)} />
         <Route path="/top-choices" element={withLayout(<TopChoices />)} />

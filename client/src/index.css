@@ -1625,6 +1625,39 @@ button:focus-visible {
   font-weight: 700;
 }
 
+.bounties-page {
+  background: radial-gradient(circle at 18% 16%, rgba(37, 99, 235, 0.08), transparent 32%),
+    radial-gradient(circle at 82% 14%, rgba(16, 185, 129, 0.06), transparent 34%),
+    var(--page-bg);
+}
+
+.bounties-hero {
+  padding: 84px 20px 70px;
+  background: linear-gradient(135deg, #eff6ff 0%, #ecfdf3 55%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.bounties-hero-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.bounties-hero h1 {
+  margin: 10px 0 12px;
+  font-size: clamp(2rem, 3vw + 1rem, 3rem);
+  line-height: 1.2;
+  color: var(--accent-strong);
+}
+
+.bounties-card .pill {
+  display: inline-flex;
+  margin-bottom: 10px;
+}
+
+.bounties-card .muted {
+  margin-top: 10px;
+}
+
 .contribute-page {
   background: radial-gradient(circle at 18% 16%, rgba(34, 55, 90, 0.06), transparent 32%),
     radial-gradient(circle at 82% 12%, rgba(34, 55, 90, 0.04), transparent 30%),
