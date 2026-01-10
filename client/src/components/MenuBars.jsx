@@ -26,7 +26,12 @@ const topMenu = [
     icon: "fa-square-poll-vertical",
     subItems: pollRegions
   },
-  { label: "Εκπαίδευση", to: "/education", icon: "fa-graduation-cap" }
+  {
+    label: "Εκπαίδευση",
+    to: "/education",
+    icon: "fa-graduation-cap",
+    subItems: [{ label: "Κρατικές εφαρμογές", to: "/education/government-apps" }]
+  }
 ];
 
 export default function MenuBars() {
@@ -139,12 +144,23 @@ export default function MenuBars() {
                     <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
                     {item.label}
                   </Link>
-                  <div className="menu-submenu" aria-label={`${item.label} regions`}>
-                    {item.subItems.map((subItem) => (
-                      <span key={subItem.label} className="menu-subitem">
-                        {subItem.label}
-                      </span>
-                    ))}
+                  <div className="menu-submenu" aria-label={`${item.label} submenu`}>
+                    {item.subItems.map((subItem) =>
+                      subItem.to ? (
+                        <Link
+                          key={subItem.label}
+                          to={subItem.to}
+                          className="menu-subitem"
+                          onClick={closeMenu}
+                        >
+                          {subItem.label}
+                        </Link>
+                      ) : (
+                        <span key={subItem.label} className="menu-subitem">
+                          {subItem.label}
+                        </span>
+                      )
+                    )}
                   </div>
                 </div>
               ) : (

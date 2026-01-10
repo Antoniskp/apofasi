@@ -21,6 +21,7 @@ import TopChoices from "./pages/TopChoices.jsx";
 import HowWeDoIt from "./pages/HowWeDoIt.jsx";
 import Bounties from "./pages/Bounties.jsx";
 import Education from "./pages/Education.jsx";
+import GovernmentApps from "./pages/GovernmentApps.jsx";
 
 
 const withLayout = (page) => (
@@ -47,6 +48,10 @@ function App() {
         <Route path="/how-we-do-it" element={withLayout(<HowWeDoIt />)} />
         <Route path="/bounties" element={withLayout(<Bounties />)} />
         <Route path="/education" element={withLayout(<Education />)} />
+        <Route
+          path="/education/government-apps"
+          element={withLayout(<GovernmentApps />)}
+        />
         <Route path="/social" element={withLayout(<Social />)} />
         <Route path="/recommendations" element={withLayout(<Recommendations />)} />
         <Route path="/top-choices" element={withLayout(<TopChoices />)} />
