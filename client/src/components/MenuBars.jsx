@@ -150,7 +150,7 @@ export default function MenuBars() {
                         <Link
                           key={subItem.label}
                           to={subItem.to}
-                          className="menu-subitem"
+                          className={`menu-subitem${location.pathname === subItem.to ? " active" : ""}`}
                           onClick={closeMenu}
                         >
                           {subItem.label}

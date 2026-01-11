@@ -218,6 +218,13 @@ body {
   white-space: nowrap;
 }
 
+.menu-subitem.active {
+  background: #facc15;
+  color: #0f172a;
+  border-color: #fbbf24;
+  box-shadow: 0 8px 18px rgba(250, 204, 21, 0.25);
+}
+
 .menu-actions {
   display: inline-flex;
   align-items: center;
