@@ -30,7 +30,10 @@ const topMenu = [
     label: "Εκπαίδευση",
     to: "/education",
     icon: "fa-graduation-cap",
-    subItems: [{ label: "Κρατικές εφαρμογές", to: "/education/government-apps" }]
+    subItems: [
+      { label: "Κρατικές εφαρμογές", to: "/education/government-apps" },
+      { label: "Στατιστικά Δημοσίου", to: "/education/government-statistics" }
+    ]
   }
 ];
 
