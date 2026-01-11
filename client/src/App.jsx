@@ -23,6 +23,7 @@ import Bounties from "./pages/Bounties.jsx";
 import Education from "./pages/Education.jsx";
 import GovernmentApps from "./pages/GovernmentApps.jsx";
 import GovernmentStatistics from "./pages/GovernmentStatistics.jsx";
+import GreekLawSystem from "./pages/GreekLawSystem.jsx";
 
 
 const withLayout = (page) => (
@@ -56,6 +57,10 @@ function App() {
         <Route
           path="/education/government-statistics"
           element={withLayout(<GovernmentStatistics />)}
+        />
+        <Route
+          path="/education/greek-law-system"
+          element={withLayout(<GreekLawSystem />)}
         />
         <Route path="/social" element={withLayout(<Social />)} />
         <Route path="/recommendations" element={withLayout(<Recommendations />)} />

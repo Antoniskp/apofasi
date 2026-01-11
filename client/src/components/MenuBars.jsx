@@ -32,7 +32,8 @@ const topMenu = [
     icon: "fa-graduation-cap",
     subItems: [
       { label: "Κρατικές εφαρμογές", to: "/education/government-apps" },
-      { label: "Στατιστικά Δημοσίου", to: "/education/government-statistics" }
+      { label: "Στατιστικά Δημοσίου", to: "/education/government-statistics" },
+      { label: "Ελληνικό νομικό σύστημα", to: "/education/greek-law-system" }
     ]
   }
 ];
