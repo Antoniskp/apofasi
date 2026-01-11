@@ -12,11 +12,6 @@ export default defineConfig(({ mode }) => {
         jsxRuntime: "automatic"
       })
     ],
-    resolve: {
-      alias: {
-        "react-router-dom": path.resolve(__dirname, "src/lib/router.jsx")
-      }
-    },
     server: {
       fs: {
         allow: [path.resolve(__dirname, "..")],
