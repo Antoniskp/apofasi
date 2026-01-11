@@ -1,6 +1,7 @@
 # apofasi
 
-For the moment this application which is live at http://176.126.202.242 is made mostly from ai(chatGPT paid version) with the instructions of a developer and the corrections and additions of a programmer. In hopes that it becomes more of a community project. The scope of the app is to educate, inform and help the community express and find better solutions.
+For the moment this application which is live at http://176.126.202.242 is made mostly from ai(chatGPT paid version).
+The scope of the app is to educate, inform and help the community express and find better solutions.
 
 Application for news, education and polls.
 The idea is creating the core of a super application which will support news, education, polls and collective decision making.
