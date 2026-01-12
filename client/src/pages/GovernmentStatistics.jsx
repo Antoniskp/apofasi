@@ -1,6 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
-import { API_BASE_URL } from "../lib/api.js";
-
 const governmentStatisticsContent = {
   hero: {
     eyebrow: "Στατιστικά Δημοσίου",
@@ -90,14 +87,8 @@ const governmentStatisticsContent = {
         "Το gov.gr συγκεντρώνει πάνω από 1.500 υπηρεσίες, μειώνοντας χρόνο και κόστος εξυπηρέτησης πολιτών."
     }
   ],
-  economicGrowth: {
-    title: "Ρυθμός οικονομικής μεγέθυνσης",
-    description:
-      "Ζωντανή απεικόνιση του πραγματικού ΑΕΠ για να φαίνεται πότε η οικονομία αναπτύσσεται ή συρρικνώνεται."
-  },
-  economicIndicatorsTitle: "Οικονομικοί δείκτες & κοινωνική εικόνα",
   notes: [
-    "Τα οικονομικά δεδομένα ενημερώνονται αυτόματα από δημόσιες πηγές.",
+    "Τα μεγέθη είναι ενδεικτικά και χρησιμοποιούνται για εκπαιδευτικούς σκοπούς.",
     "Οι αναλογίες διαφοροποιούνται ανάλογα με το έτος, τη μέθοδο μέτρησης και την πηγή.",
     "Οι αποδοχές βασίζονται σε τυπικά κλιμάκια και δεν αντικαθιστούν επίσημους πίνακες μισθοδοσίας.",
     "Για επίσημα στοιχεία, προτείνεται αναζήτηση σε ΕΛΣΤΑΤ, ΑΑΔΕ, Υπουργείο Εσωτερικών και Υπουργείο Παιδείας & Θρησκευμάτων."
@@ -105,47 +96,6 @@ const governmentStatisticsContent = {
 };
 
 export default function GovernmentStatistics() {
-  const [economicData, setEconomicData] = useState({
-    growth: [],
-    indicators: [],
-    updatedAt: null,
-    source: null
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchEconomicData = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/government-statistics`);
-        if (!response.ok) {
-          throw new Error("Δεν ήταν δυνατή η φόρτωση των οικονομικών δεδομένων.");
-        }
-        const payload = await response.json();
-        if (!isMounted) return;
-        setEconomicData(payload);
-        setIsLoading(false);
-      } catch (error) {
-        if (!isMounted) return;
-        setLoadError(error.message);
-        setIsLoading(false);
-      }
-    };
-
-    fetchEconomicData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const maxGrowthValue = useMemo(() => {
-    if (!economicData.growth.length) return 1;
-    return Math.max(...economicData.growth.map((entry) => Math.abs(entry.value)), 1);
-  }, [economicData.growth]);
-
   return (
     <div className="page">
       <header className="page-hero">
@@ -228,85 +178,6 @@ export default function GovernmentStatistics() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="section">
-        <div className="section-header">
-          <h2 className="section-title">{governmentStatisticsContent.economicGrowth.title}</h2>
-          <p className="section-lead">{governmentStatisticsContent.economicGrowth.description}</p>
-        </div>
-        <div className="chart-card">
-          {isLoading ? (
-            <p className="chart-note">Φόρτωση δεδομένων...</p>
-          ) : loadError ? (
-            <p className="chart-note">{loadError}</p>
-          ) : (
-            <>
-              <div className="bar-chart">
-                {economicData.growth.map((entry) => (
-                  <div key={entry.year} className="bar-column">
-                    <div className="bar-label">{entry.year}</div>
-                    <div className="bar-track">
-                      <div
-                        className={`bar ${entry.value >= 0 ? "positive" : "negative"}`}
-                        style={{
-                          height: `${(Math.abs(entry.value) / maxGrowthValue) * 100}%`
-                        }}
-                      >
-                        <span>{entry.value.toFixed(1)}%</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="chart-note">
-                Η απεικόνιση βασίζεται σε ενημερωμένα στοιχεία από {economicData.source}.
-              </p>
-            </>
-          )}
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section-header">
-          <h2 className="section-title">{governmentStatisticsContent.economicIndicatorsTitle}</h2>
-          <p className="section-lead">
-            Συνοπτικός πίνακας με βασικούς δείκτες που επηρεάζουν τον σχεδιασμό δημοσίων πολιτικών.
-          </p>
-        </div>
-        <div className="table-card">
-          {isLoading ? (
-            <p className="chart-note">Φόρτωση δεικτών...</p>
-          ) : loadError ? (
-            <p className="chart-note">{loadError}</p>
-          ) : (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Δείκτης</th>
-                  <th>Τελευταία τιμή</th>
-                  <th>Τάση</th>
-                  <th>Έτος αναφοράς</th>
-                </tr>
-              </thead>
-              <tbody>
-                {economicData.indicators.map((row) => (
-                  <tr key={row.indicator}>
-                    <td>{row.indicator}</td>
-                    <td>{row.latest}</td>
-                    <td>
-                      <span className={`pill ${row.trendClass}`}>{row.trend}</span>
-                    </td>
-                    <td>{row.year}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-        {!isLoading && !loadError && economicData.updatedAt ? (
-          <p className="chart-note">Τελευταία ενημέρωση: {economicData.updatedAt}</p>
-        ) : null}
       </section>
 
       <section className="section emphasis-card">
