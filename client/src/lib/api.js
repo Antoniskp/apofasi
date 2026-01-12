@@ -137,7 +137,7 @@ export const submitContactMessage = async (payload) =>
 export const createPoll = async (payload) =>
   handleResponse(
     await fetch(
-      `${API_BASE_URL}/polls`,
+      `${API_BASE_URL}/polls/`,
       buildJsonRequest({
         question: payload.question?.trim(),
         options: payload.options?.map((opt) => opt?.trim()),
@@ -152,7 +152,7 @@ export const createPoll = async (payload) =>
 
 export const listPolls = async () =>
   handleResponse(
-    await fetch(`${API_BASE_URL}/polls`, {
+    await fetch(`${API_BASE_URL}/polls/`, {
       credentials: "include",
     })
   );
