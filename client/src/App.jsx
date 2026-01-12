@@ -5,6 +5,7 @@ import ScrollToTop from "./components/ScrollToTop.jsx";
 import Home from "./pages/Home.jsx";
 import News from "./pages/News.jsx";
 import Polls from "./pages/Polls.jsx";
+import NewPoll from "./pages/NewPoll.jsx";
 import PollDetail from "./pages/PollDetail.jsx";
 import AuthStatus from "./pages/AuthStatus.jsx";
 import Mission from "./pages/Mission.jsx";
@@ -43,6 +44,7 @@ function App() {
         <Route path="/mission" element={withLayout(<Mission />)} />
         <Route path="/news" element={withLayout(<News />)} />
         <Route path="/polls" element={withLayout(<Polls />)} />
+        <Route path="/polls/new" element={withLayout(<NewPoll />)} />
         <Route path="/polls/:pollId" element={withLayout(<PollDetail />)} />
         <Route path="/contribute" element={withLayout(<Contribute />)} />
         <Route path="/contact" element={withLayout(<Contact />)} />
