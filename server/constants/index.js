@@ -114,7 +114,7 @@ export const ERROR_MESSAGES = {
   CONTACT_MESSAGE_FAILED: 'Δεν ήταν δυνατή η αποστολή του μηνύματος.',
   
   // OAuth
-  PROVIDER_NOT_CONFIGURED: 'login is not configured yet.',
+  PROVIDER_NOT_CONFIGURED: 'δεν είναι διαμορφωμένο ακόμα.',
   
   // Generic
   SOMETHING_WENT_WRONG: 'Κάτι πήγε στραβά. Προσπαθήστε ξανά.',

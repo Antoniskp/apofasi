@@ -146,6 +146,7 @@ app.use(errorHandler);
 5. **Input Validation**: Add comprehensive input validation
    - Use express-validator or joi
    - Validate all user inputs before processing
+   - Consider using `validator` library for email validation
 
 6. **Rate Limiting**: Add rate limiting middleware
    - Prevent abuse

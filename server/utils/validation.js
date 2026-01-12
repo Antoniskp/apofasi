@@ -9,17 +9,21 @@
  * @returns {string} The escaped string safe for use in regex
  */
 export const escapeRegex = (value = '') => {
-  const pattern = /[.*+?^${}()|[\]\\]/g;
+  const pattern = /[.*+?^${}()|[\]\\-]/g;
   return value.replace(pattern, '\\$&');
 };
 
 /**
  * Validate email format
+ * Note: This is a basic validation. For production, consider using
+ * a library like 'validator' for more robust email validation.
  * @param {string} email - Email address to validate
  * @returns {boolean} True if email format is valid
  */
 export const isValidEmail = (email) => {
   if (!email || typeof email !== 'string') return false;
+  // Basic email validation - prevents most common issues
+  // For production, consider: import validator from 'validator'; validator.isEmail(email)
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
