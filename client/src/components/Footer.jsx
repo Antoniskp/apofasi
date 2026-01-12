@@ -6,8 +6,6 @@ const footerSections = [
   {
     title: "Επικοινωνία",
     titleLink: "/contact",
-    description:
-      "Μιλήστε με την ομάδα, ακολουθήστε τα κανάλια μας ή ζητήστε υποστήριξη.",
     links: [
       { label: "Σελίδα επικοινωνίας", to: "/contact" },
       { label: "Φόρμα επικοινωνίας", to: "/contact#contact-form" },
@@ -18,8 +16,6 @@ const footerSections = [
   },
   {
     title: "Σχετικά",
-    description:
-      "Μάθετε περισσότερα για την αποστολή μας και βρείτε χρήσιμους πόρους.",
     links: [
       { label: "Αποστολή", to: "/mission" },
       { label: "Πώς δουλεύουμε", to: "/how-we-do-it" },
@@ -29,18 +25,17 @@ const footerSections = [
     ]
   },
   {
-    title: "Περιεχόμενο",
-    description: "Πρόσβαση σε νέα, ψηφοφορίες και κορυφαίες επιλογές.",
+    title: "Τεκμηρίωση",
+    titleLink: "/documentation",
     links: [
-      { label: "Τελευταίες ειδήσεις", to: "/news" },
-      { label: "Ψηφοφορίες", to: "/polls" },
-      { label: "Προτάσεις", to: "/recommendations" },
-      { label: "Top επιλογές", to: "/top-choices" }
+      { label: "Οδηγός ενημέρωσης", to: "/documentation" },
+      { label: "Χάρτης σελίδων", to: "/documentation#sitemap" },
+      { label: "DB schema", to: "/documentation#db-schema" },
+      { label: "Πού αλλάζουν τα κείμενα", to: "/documentation#content-updates" }
     ]
   },
   {
     title: "Κοινότητα",
-    description: "Μείνετε συνδεδεμένοι με το project και την ομάδα ανάπτυξης.",
     links: [
       { label: "Κοινωνικά δίκτυα", to: "/social" },
       { label: "Συμμετοχή στην ανάπτυξη", to: "/contribute" },
@@ -113,7 +108,6 @@ export default function Footer() {
               ) : (
                 <h3>{section.title}</h3>
               )}
-              <p className="muted">{section.description}</p>
               <div className="footer-links">
                 {section.links.map((link) =>
                   link.href ? (
