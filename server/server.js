@@ -911,6 +911,7 @@ authRouter.get("/debug-sentry", function mainHandler(req, res) {
 });
 
 const PORT = process.env.PORT || 5000;
+const HOST = "127.0.0.1";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -946,4 +947,6 @@ app.use(function onError(err, req, res, next) {
   res.end(res.sentry + "\n");
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, HOST, () => {
+  console.log(`Listening on http://${HOST}:${PORT}`);
+});
