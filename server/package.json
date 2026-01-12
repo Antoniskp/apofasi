@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "NODE_ENV=development nodemon server.js",
-    "seed:user": "node scripts/seedUser.js"
+    "seed:user": "node scripts/seedUser.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "check-env": "node -e \"require('dotenv').config(); console.log('Environment variables loaded successfully');\""
   },
   "dependencies": {
     "@sentry/node": "^10.32.1",
@@ -22,6 +25,7 @@
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
+    "eslint": "^8.57.0",
     "nodemon": "^3.1.4"
   }
 }
