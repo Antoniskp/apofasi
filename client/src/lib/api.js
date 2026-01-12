@@ -1,7 +1,7 @@
 const normalizedEnvBase = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
 const defaultApiOrigin = import.meta.env.DEV ? "http://localhost:5000" : "";
 const apiOrigin = normalizedEnvBase || defaultApiOrigin;
-const API_BASE_URL = apiOrigin
+export const API_BASE_URL = apiOrigin
   ? apiOrigin.endsWith("/api")
     ? apiOrigin
     : `${apiOrigin}/api`

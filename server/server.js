@@ -69,6 +69,45 @@ const oauthProviders = {
   facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET),
 };
 
+const WORLD_BANK_BASE = "https://api.worldbank.org/v2/country/GRC/indicator/";
+
+const fetchWorldBankIndicator = async (indicator, perPage = 10) => {
+  const response = await fetch(
+    `${WORLD_BANK_BASE}${indicator}?format=json&per_page=${perPage}`
+  );
+  if (!response.ok) {
+    throw new Error(`World Bank request failed for ${indicator}`);
+  }
+  const payload = await response.json();
+  const series = Array.isArray(payload[1]) ? payload[1] : [];
+  return series
+    .filter((entry) => entry.value !== null && entry.date)
+    .map((entry) => ({
+      year: Number(entry.date),
+      value: entry.value,
+    }));
+};
+
+const formatPercent = (value) =>
+  new Intl.NumberFormat("el-GR", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value);
+
+const calculateTrend = (latest, previous) => {
+  if (previous === null || previous === undefined) {
+    return { label: "Σταθερό", className: "neutral" };
+  }
+  const delta = latest - previous;
+  if (Math.abs(delta) < 0.1) {
+    return { label: "Σταθερό", className: "neutral" };
+  }
+  if (delta > 0) {
+    return { label: "Άνοδος", className: "positive" };
+  }
+  return { label: "Πτώση", className: "negative" };
+};
+
 const sanitizeUser = (user) =>
   user
     ? {
@@ -265,6 +304,56 @@ const ensureRole = (...roles) => (req, res, next) => {
 const newsRouter = express.Router();
 const pollsRouter = express.Router();
 const contactRouter = express.Router();
+const statisticsRouter = express.Router();
+
+statisticsRouter.get("/", async (req, res) => {
+  try {
+    const [gdpGrowth, inflation, unemployment, debt, spending] = await Promise.all([
+      fetchWorldBankIndicator("NY.GDP.MKTP.KD.ZG", 8),
+      fetchWorldBankIndicator("FP.CPI.TOTL.ZG", 5),
+      fetchWorldBankIndicator("SL.UEM.TOTL.ZS", 5),
+      fetchWorldBankIndicator("GC.DOD.TOTL.GD.ZS", 5),
+      fetchWorldBankIndicator("GC.XPN.TOTL.GD.ZS", 5),
+    ]);
+
+    const growthSeries = gdpGrowth
+      .slice(0, 5)
+      .map((entry) => ({
+        year: String(entry.year),
+        value: entry.value,
+      }))
+      .reverse();
+
+    const indicatorConfigs = [
+      { label: "Πληθωρισμός (ΔΤΚ)", data: inflation },
+      { label: "Ανεργία", data: unemployment },
+      { label: "Δημόσιο χρέος (% ΑΕΠ)", data: debt },
+      { label: "Δημόσιες δαπάνες (% ΑΕΠ)", data: spending },
+    ];
+
+    const indicators = indicatorConfigs.map(({ label, data }) => {
+      const [latest, previous] = data;
+      const trend = calculateTrend(latest?.value, previous?.value);
+      return {
+        indicator: label,
+        latest: latest ? `${formatPercent(latest.value)}%` : "—",
+        year: latest?.year ? String(latest.year) : "—",
+        trend: trend.label,
+        trendClass: trend.className,
+      };
+    });
+
+    res.json({
+      growth: growthSeries,
+      indicators,
+      updatedAt: new Date().toLocaleString("el-GR"),
+      source: "World Bank",
+    });
+  } catch (error) {
+    console.error("[statistics-error]", error);
+    res.status(502).json({ message: "Δεν ήταν δυνατή η ανάκτηση των δεικτών." });
+  }
+});
 
 newsRouter.get("/", async (req, res) => {
   try {
@@ -815,6 +904,7 @@ app.use("/users", usersRouter);
 app.use("/api/users", usersRouter);
 app.use("/contact", contactRouter);
 app.use("/api/contact", contactRouter);
+app.use("/api/government-statistics", statisticsRouter);
 
 authRouter.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("Sentry Test Error!");
