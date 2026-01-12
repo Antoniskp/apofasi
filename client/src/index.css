@@ -376,6 +376,17 @@ button:focus-visible {
   margin: 0 auto;
 }
 
+.hero-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  align-items: start;
+}
+
+.hero-copy {
+  min-width: 0;
+}
+
 .hero-kicker {
   font-size: 0.9rem;
   letter-spacing: 0.08em;
@@ -485,6 +496,41 @@ button:focus-visible {
   margin-top: 14px;
   font-size: 0.95rem;
   color: var(--ink-muted);
+}
+
+.hero-panel {
+  background: linear-gradient(160deg, #ffffff 0%, #f1f5fb 100%);
+  border: 1px solid #dbe3f2;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+  display: grid;
+  gap: 16px;
+}
+
+.hero-panel-header h2 {
+  margin: 10px 0 8px;
+  font-size: 1.2rem;
+  color: var(--accent-strong);
+}
+
+.hero-panel-list {
+  display: grid;
+  gap: 10px;
+}
+
+.hero-panel-item {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8faff;
+  border: 1px solid #e2e8f0;
+}
+
+.hero-panel-number {
+  font-weight: 700;
+  color: var(--accent-strong);
 }
 
 .hero-meta {
@@ -754,6 +800,21 @@ button:focus-visible {
   margin-top: 12px;
   font-size: 0.9rem;
   color: var(--ink-muted);
+}
+
+.home-polls-grid {
+  margin-top: 16px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.home-polls-grid .poll-card {
+  height: 100%;
+}
+
+.home-polls-grid .btn.btn-subtle {
+  margin-top: 12px;
 }
 
 .option-stack {
@@ -1780,6 +1841,10 @@ button:focus-visible {
 @media (max-width: 680px) {
   .hero {
     padding: 72px 20px 60px;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
   }
 
   .menu-top-inner {

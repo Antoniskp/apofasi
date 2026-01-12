@@ -1,70 +1,157 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { getAuthStatus, listPolls, voteOnPoll } from "../lib/api";
 
-const demoStory = {
-  title: "Παράδειγμα: Η Βουλή συζητά νέα μέτρα",
-  sources: ["Kathimerini", "Naftemporiki", "ERT", "Demo Source"],
-  updated: "Ενημερώθηκε πριν 15 λεπτά",
-  question: "Υποστηρίζετε τα προτεινόμενα μέτρα;",
-  options: ["Ναι", "Όχι", "Δεν είμαι σίγουρος/η"],
-  totalVotes: 412
+const getTotalVotes = (poll) => {
+  if (typeof poll.totalVotes === "number") return poll.totalVotes;
+  return (poll.options || []).reduce((sum, option) => sum + (option.votes || 0), 0);
 };
 
 const Home = () => {
+  const [authState, setAuthState] = useState({ loading: true, user: null, error: null });
+  const [pollsState, setPollsState] = useState({ loading: true, polls: [], error: null });
+  const [voteState, setVoteState] = useState({});
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadData = async () => {
+      try {
+        const [authData, pollsData] = await Promise.all([getAuthStatus(), listPolls()]);
+        if (!isMounted) return;
+        setAuthState({ loading: false, user: authData.user, error: null });
+        setPollsState({ loading: false, polls: pollsData.polls || [], error: null });
+      } catch (error) {
+        if (!isMounted) return;
+        setAuthState({ loading: false, user: null, error: error.message || "Η φόρτωση απέτυχε." });
+        setPollsState({
+          loading: false,
+          polls: [],
+          error: error.message || "Η φόρτωση απέτυχε.",
+        });
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const topPolls = useMemo(() => {
+    return [...pollsState.polls]
+      .sort((a, b) => getTotalVotes(b) - getTotalVotes(a))
+      .slice(0, 2);
+  }, [pollsState.polls]);
+
+  const handleVote = async (poll, optionId) => {
+    if (!poll.anonymousResponses && !authState.user) {
+      setVoteState((prev) => ({ ...prev, [poll.id]: { error: "Χρειάζεται σύνδεση για να ψηφίσετε." } }));
+      return;
+    }
+
+    setVoteState((prev) => ({ ...prev, [poll.id]: { submitting: true, error: null } }));
+
+    try {
+      const response = await voteOnPoll(poll.id, optionId);
+      setPollsState((prev) => ({
+        ...prev,
+        polls: prev.polls.map((item) => (item.id === poll.id ? response.poll : item)),
+      }));
+      setVoteState((prev) => ({ ...prev, [poll.id]: { submitting: false, error: null } }));
+    } catch (error) {
+      setVoteState((prev) => ({
+        ...prev,
+        [poll.id]: { submitting: false, error: error.message || "Η ψήφος δεν καταχωρήθηκε." },
+      }));
+    }
+  };
+
   return (
     <div className="home">
       <section className="hero">
         <div className="hero-inner">
-          <div className="hero-kicker">Απόφαση • Δημόσιο αίσθημα για την επικαιρότητα</div>
+          <div className="hero-grid">
+            <div className="hero-copy">
+              <div className="hero-kicker">Απόφαση • Δημόσιο αίσθημα για την επικαιρότητα</div>
 
-          <h1>Καθαρή εικόνα από όλα τα ελληνικά media και μια ψήφος κάτω από κάθε ιστορία.</h1>
+              <h1>Καθαρή εικόνα από όλα τα ελληνικά media και μια ψήφος κάτω από κάθε ιστορία.</h1>
 
-          <p className="hero-sub">
-            Η «Απόφαση» ομαδοποιεί τίτλους από διαφορετικές πηγές, δείχνει πώς καλύπτουν το ίδιο θέμα και
-            καταγράφει τη στάση των αναγνωστών με μικρές, διαφανείς ψηφοφορίες.
-          </p>
+              <p className="hero-sub">
+                Η «Απόφαση» ομαδοποιεί τίτλους από διαφορετικές πηγές, δείχνει πώς καλύπτουν το ίδιο θέμα και
+                καταγράφει τη στάση των αναγνωστών με μικρές, διαφανείς ψηφοφορίες.
+              </p>
 
-          <ul className="hero-points">
-            <li>
-              <span className="point-dot" aria-hidden>
-                •
-              </span>
-              Ομαδοποιούμε τίτλους από εφημερίδες, ενημερωτικά sites και δημόσια ΜΜΕ.
-            </li>
-            <li>
-              <span className="point-dot" aria-hidden>
-                •
-              </span>
-              Προβάλλουμε πώς πλαισιώνεται η ίδια ιστορία με μια ματιά.
-            </li>
-            <li>
-              <span className="point-dot" aria-hidden>
-                •
-              </span>
-              Προσθέτουμε μια απλή ψηφοφορία για να φαίνεται η τάση σε πραγματικό χρόνο.
-            </li>
-          </ul>
+              <ul className="hero-points">
+                <li>
+                  <span className="point-dot" aria-hidden>
+                    •
+                  </span>
+                  Ομαδοποιούμε τίτλους από εφημερίδες, ενημερωτικά sites και δημόσια ΜΜΕ.
+                </li>
+                <li>
+                  <span className="point-dot" aria-hidden>
+                    •
+                  </span>
+                  Προβάλλουμε πώς πλαισιώνεται η ίδια ιστορία με μια ματιά.
+                </li>
+                <li>
+                  <span className="point-dot" aria-hidden>
+                    •
+                  </span>
+                  Προσθέτουμε μια απλή ψηφοφορία για να φαίνεται η τάση σε πραγματικό χρόνο.
+                </li>
+              </ul>
 
-          <div className="hero-buttons">
-            <Link to="/news" className="btn">
-              Δείτε τις ιστορίες
-            </Link>
-            <Link to="/polls" className="btn btn-outline">
-              Ψηφίστε σε μια ιστορία
-            </Link>
-            <Link to="/mission" className="btn btn-subtle">
-              Μάθετε τι επιδιώκουμε
-            </Link>
+              <div className="hero-buttons">
+                <Link to="/news" className="btn">
+                  Δείτε τις ιστορίες
+                </Link>
+                <Link to="/polls" className="btn btn-outline">
+                  Ψηφίστε σε μια ιστορία
+                </Link>
+                <Link to="/mission" className="btn btn-subtle">
+                  Μάθετε τι επιδιώκουμε
+                </Link>
+              </div>
+
+              <div className="hero-meta">
+                <span className="pill pill-soft">Ανοιχτός κώδικας</span>
+                <span className="pill pill-soft">Χωρίς paywall</span>
+                <span className="pill pill-soft">Εστίαση στην Ελλάδα</span>
+              </div>
+
+              <p className="hero-disclaimer">
+                Διαφάνεια: Οι ψηφοφορίες είναι ενδεικτικές και δεν αποτελούν στατιστικά αντιπροσωπευτικό δείγμα.
+              </p>
+            </div>
+
+            <aside className="hero-panel">
+              <div className="hero-panel-header">
+                <span className="pill pill-soft">Σήμερα στην Απόφαση</span>
+                <h2>Συνοπτική εικόνα σε μία κάρτα.</h2>
+                <p className="muted">
+                  Οργανώνουμε την επικαιρότητα με σαφήνεια, ώστε να βλέπετε γρήγορα τις τάσεις και τις πηγές.
+                </p>
+              </div>
+
+              <div className="hero-panel-list">
+                <div className="hero-panel-item">
+                  <span className="hero-panel-number">Πολλαπλές</span>
+                  <span className="muted">πηγές & τίτλοι ανά ιστορία</span>
+                </div>
+                <div className="hero-panel-item">
+                  <span className="hero-panel-number">Ανοιχτές</span>
+                  <span className="muted">ψηφοφορίες με άμεση τάση</span>
+                </div>
+                <div className="hero-panel-item">
+                  <span className="hero-panel-number">Καθαρή</span>
+                  <span className="muted">ανάγνωση χωρίς clickbait</span>
+                </div>
+              </div>
+            </aside>
           </div>
-
-          <div className="hero-meta">
-            <span className="pill pill-soft">Ανοιχτός κώδικας</span>
-            <span className="pill pill-soft">Χωρίς paywall</span>
-            <span className="pill pill-soft">Εστίαση στην Ελλάδα</span>
-          </div>
-
-          <p className="hero-disclaimer">
-            Διαφάνεια: Οι ψηφοφορίες είναι ενδεικτικές και δεν αποτελούν στατιστικά αντιπροσωπευτικό δείγμα.
-          </p>
         </div>
       </section>
 
@@ -167,47 +254,90 @@ const Home = () => {
 
       <section className="section">
         <div className="section-header">
-          <h2 className="section-title">Δείγμα ομαδοποίησης & ψηφοφορίας</h2>
-          <p className="section-lead">Έτσι θα εμφανίζεται μια ομάδα ιστορίας με τις πηγές της και το απλό widget ψηφοφορίας.</p>
+          <h2 className="section-title">Οι δημοφιλέστερες ψηφοφορίες</h2>
+          <p className="section-lead">
+            Ζωντανά δεδομένα από τις πιο ενεργές ψηφοφορίες. Ψηφίστε και δείτε αμέσως πώς κινείται το κοινό.
+          </p>
         </div>
 
-        <div className="story">
-          <div className="story-header">
-            <div>
-              <div className="story-title">{demoStory.title}</div>
-              <div className="story-meta">{demoStory.updated}</div>
-            </div>
-            <div className="pill">Ομάδα</div>
+        {pollsState.loading && <p className="muted">Φόρτωση ψηφοφοριών...</p>}
+        {pollsState.error && <p className="error-text">{pollsState.error}</p>}
+
+        {!pollsState.loading && !pollsState.error && topPolls.length === 0 && (
+          <div className="card muted-border">
+            <p className="muted">Δεν υπάρχουν ακόμα ψηφοφορίες. Δημιουργήστε την πρώτη.</p>
           </div>
+        )}
 
-          <div className="story-sources">
-            <div className="label">Πηγές που καλύπτουν αυτή την ιστορία:</div>
-            <div className="chips">
-              {demoStory.sources.map((s) => (
-                <span key={s} className="chip">
-                  {s}
-                </span>
-              ))}
-            </div>
-          </div>
+        <div className="home-polls-grid">
+          {topPolls.map((poll) => {
+            const totalVotes = getTotalVotes(poll);
+            const voteStatus = voteState[poll.id] || {};
 
-          <div className="poll">
-            <div className="label">Ψηφοφορία</div>
-            <div className="poll-q">{demoStory.question}</div>
+            return (
+              <div key={poll.id} className="card poll-card modern-card">
+                <div className="poll-header-row">
+                  <div className="pill pill-soft">Ψηφοφορία</div>
+                  <div className="muted small">{totalVotes} ψήφοι</div>
+                </div>
 
-            <div className="poll-options">
-              {demoStory.options.map((opt) => (
-                <button key={opt} className="poll-btn" type="button">
-                  {opt}
-                </button>
-              ))}
-            </div>
+                <h3 className="poll-question">{poll.question}</h3>
 
-            <div className="poll-foot">
-              <span>Σύνολο ψήφων: {demoStory.totalVotes}</span>
-              <span className="muted">Τα αποτελέσματα εμφανίζονται μετά την ψήφο (κανόνας MVP)</span>
-            </div>
-          </div>
+                {(poll.region || poll.cityOrVillage) && (
+                  <p className="muted small">
+                    Τοποθεσία: {[poll.region, poll.cityOrVillage].filter(Boolean).join(" • ")}
+                  </p>
+                )}
+
+                {poll.tags?.length > 0 && (
+                  <div className="chips">
+                    {poll.tags.map((tag) => (
+                      <span key={tag} className="chip">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="poll-options-list">
+                  {poll.options.map((option) => {
+                    const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
+                    const disabled = poll.hasVoted || voteStatus.submitting;
+
+                    return (
+                      <div key={option.id} className="poll-option">
+                        <div className="poll-option-header">
+                          <div className="poll-option-title">{option.text}</div>
+                          <div className="muted small">
+                            {option.votes} ψήφοι {totalVotes > 0 ? `• ${percentage}%` : ""}
+                          </div>
+                        </div>
+                        <div className="progress-track" aria-hidden>
+                          <div className="progress-bar" style={{ width: `${percentage}%` }} />
+                        </div>
+                        {!poll.hasVoted && (
+                          <button
+                            className="btn btn-outline"
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => handleVote(poll, option.id)}
+                          >
+                            {voteStatus.submitting ? "Καταχώρηση..." : "Ψήφισε"}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {poll.hasVoted && <p className="positive-text small">Έχετε ήδη ψηφίσει.</p>}
+                {voteStatus.error && <p className="error-text">{voteStatus.error}</p>}
+                <Link className="btn btn-subtle" to={`/polls/${poll.id}`}>
+                  Δείτε αναλυτικά
+                </Link>
+              </div>
+            );
+          })}
         </div>
 
         <div className="cta-row">
