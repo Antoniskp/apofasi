@@ -827,9 +827,7 @@ authRouter.get("/logout", (req, res, next) => {
 
 app.use("/auth", authRouter);
 app.use("/api/auth", authRouter);
-app.use("/news", newsRouter);
 app.use("/api/news", newsRouter);
-app.use("/polls", pollsRouter);
 app.use("/api/polls", pollsRouter);
 app.use("/users", usersRouter);
 app.use("/api/users", usersRouter);
