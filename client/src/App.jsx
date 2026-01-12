@@ -25,6 +25,7 @@ import Education from "./pages/Education.jsx";
 import GovernmentApps from "./pages/GovernmentApps.jsx";
 import GovernmentStatistics from "./pages/GovernmentStatistics.jsx";
 import GreekLawSystem from "./pages/GreekLawSystem.jsx";
+import Documentation from "./pages/Documentation.jsx";
 
 
 const withLayout = (page) => (
@@ -67,6 +68,7 @@ function App() {
         <Route path="/social" element={withLayout(<Social />)} />
         <Route path="/recommendations" element={withLayout(<Recommendations />)} />
         <Route path="/top-choices" element={withLayout(<TopChoices />)} />
+        <Route path="/documentation" element={withLayout(<Documentation />)} />
         <Route path="/auth" element={withLayout(<Auth />)} />
         <Route path="/register" element={withLayout(<Register />)} />
         <Route path="/profile" element={withLayout(<Profile />)} />
