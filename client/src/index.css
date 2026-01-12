@@ -23,7 +23,7 @@ body {
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   background: var(--page-bg);
   color: var(--ink-strong);
-  line-height: 1.6;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -366,13 +366,13 @@ button:focus-visible {
 }
 
 .hero {
-  padding: 88px 20px 72px;
+  padding: 68px 20px 56px;
   background: linear-gradient(135deg, #f9fbff 0%, #eef2f7 100%);
   border-bottom: 1px solid var(--border);
 }
 
 .hero-inner {
-  max-width: 1040px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -393,29 +393,29 @@ button:focus-visible {
 
 .hero-sub {
   max-width: 760px;
-  margin: 16px 0 0;
-  line-height: 1.6;
-  font-size: 1.05rem;
+  margin: 12px 0 0;
+  line-height: 1.55;
+  font-size: 1rem;
   color: var(--ink-soft);
 }
 
 .hero-points {
-  margin: 18px 0 0;
+  margin: 14px 0 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .hero-points li {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 12px;
+  border-radius: 10px;
+  padding: 8px 10px;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
   color: var(--ink-strong);
 }
@@ -430,8 +430,8 @@ button:focus-visible {
 .hero-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 22px;
+  gap: 10px;
+  margin-top: 18px;
 }
 
 .btn {
@@ -442,8 +442,8 @@ button:focus-visible {
   background: var(--accent);
   color: #fff;
   border: 1px solid var(--accent);
-  border-radius: 12px;
-  padding: 12px 18px;
+  border-radius: 10px;
+  padding: 10px 14px;
   font-weight: 700;
   letter-spacing: 0.01em;
   box-shadow: 0 10px 25px rgba(34, 55, 90, 0.18);
@@ -501,9 +501,9 @@ button:focus-visible {
 }
 
 .section {
-  max-width: 1080px;
-  margin: 28px auto;
-  padding: 46px 28px;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 32px 24px;
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -511,15 +511,15 @@ button:focus-visible {
 }
 
 .section-title {
-  margin: 0 0 18px;
-  font-size: 1.7rem;
+  margin: 0 0 12px;
+  font-size: 1.6rem;
   color: var(--accent-strong);
 }
 
 .section-header {
   display: grid;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .section-lead {
@@ -540,20 +540,20 @@ button:focus-visible {
 
 .grid-3 {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .grid-2 {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .card {
   background: var(--card-bg);
   border-radius: 12px;
-  padding: 18px;
+  padding: 14px;
   border: 1px solid var(--border);
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
   text-align: left;
@@ -568,7 +568,7 @@ button:focus-visible {
   margin: 0;
   padding-left: 20px;
   display: grid;
-  gap: 12px;
+  gap: 8px;
   color: var(--ink-muted);
 }
 
@@ -579,14 +579,14 @@ button:focus-visible {
 .stack-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .stack-card {
   background: var(--accent-soft);
   border: 1px solid #d7deeb;
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
 }
 
 .stack-card .eyebrow {
@@ -598,7 +598,7 @@ button:focus-visible {
   padding-left: 18px;
   color: var(--ink-muted);
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .card h3 {
