@@ -7,7 +7,15 @@ export default function Profile() {
   const [status, setStatus] = useState({ loading: true, user: null, error: null });
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarPayload, setAvatarPayload] = useState(undefined);
+  const [avatarError, setAvatarError] = useState(null);
+  const [isAvatarProcessing, setIsAvatarProcessing] = useState(false);
   const getCityOptions = (region) => CITIES_BY_REGION[region] || [];
+  const MAX_AVATAR_FILE_BYTES = 4 * 1024 * 1024;
+  const MAX_AVATAR_BYTES = 320 * 1024;
+  const MAX_AVATAR_DIMENSION = 360;
+  const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const optionalFields = [
     { key: "firstName", label: "Όνομα", placeholder: "Δεν έχει προστεθεί ακόμα." },
     { key: "lastName", label: "Επώνυμο", placeholder: "Προσθέστε το επώνυμό σας." },
@@ -62,6 +70,58 @@ export default function Profile() {
   const [saveMessage, setSaveMessage] = useState(null);
   const [saveError, setSaveError] = useState(null);
 
+  const getDataUrlSize = (dataUrl) => {
+    if (!dataUrl) return 0;
+    const base64 = dataUrl.split(",")[1] || "";
+    return Math.ceil((base64.length * 3) / 4);
+  };
+
+  const resizeAvatarImage = (file) =>
+    new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const maxDimension = MAX_AVATAR_DIMENSION;
+        const scale = Math.min(1, maxDimension / image.width, maxDimension / image.height);
+        const targetWidth = Math.round(image.width * scale);
+        const targetHeight = Math.round(image.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error("Δεν ήταν δυνατή η επεξεργασία της εικόνας."));
+          return;
+        }
+
+        ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+        let quality = 0.88;
+        let dataUrl = canvas.toDataURL("image/jpeg", quality);
+
+        while (getDataUrlSize(dataUrl) > MAX_AVATAR_BYTES && quality > 0.55) {
+          quality -= 0.08;
+          dataUrl = canvas.toDataURL("image/jpeg", quality);
+        }
+
+        if (getDataUrlSize(dataUrl) > MAX_AVATAR_BYTES) {
+          reject(new Error("Η φωτογραφία είναι πολύ μεγάλη μετά τη συμπίεση."));
+          return;
+        }
+
+        resolve(dataUrl);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Δεν ήταν δυνατή η φόρτωση της εικόνας."));
+      };
+
+      image.src = objectUrl;
+    });
+
   const loadProfile = async () => {
     setStatus((prev) => ({ ...prev, loading: true }));
 
@@ -70,6 +130,9 @@ export default function Profile() {
       setStatus({ loading: false, user: data.user, error: null });
 
       setFormState(buildOptionalState(data.user));
+      setAvatarPreview(data.user?.avatar || "");
+      setAvatarPayload(undefined);
+      setAvatarError(null);
     } catch (error) {
       setStatus({
         loading: false,
@@ -118,14 +181,57 @@ export default function Profile() {
     setSaveError(null);
 
     try {
-      const response = await updateProfile(formState);
+      const payload = { ...formState };
+
+      if (avatarPayload !== undefined) {
+        payload.avatar = avatarPayload;
+      }
+
+      const response = await updateProfile(payload);
       setStatus((prev) => ({ ...prev, user: response.user }));
+      setAvatarPayload(undefined);
       setSaveMessage("Τα στοιχεία σας αποθηκεύτηκαν.");
     } catch (error) {
       setSaveError(error.message || "Δεν ήταν δυνατή η ενημέρωση του προφίλ.");
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setAvatarError(null);
+
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+      setAvatarError("Επιτρέπονται μόνο JPG, PNG ή WebP αρχεία.");
+      return;
+    }
+
+    if (file.size > MAX_AVATAR_FILE_BYTES) {
+      setAvatarError("Η φωτογραφία πρέπει να είναι έως 4MB.");
+      return;
+    }
+
+    setIsAvatarProcessing(true);
+
+    try {
+      const dataUrl = await resizeAvatarImage(file);
+      setAvatarPreview(dataUrl);
+      setAvatarPayload(dataUrl);
+    } catch (error) {
+      setAvatarError(error.message || "Δεν ήταν δυνατή η επεξεργασία της φωτογραφίας.");
+    } finally {
+      setIsAvatarProcessing(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleAvatarRemove = () => {
+    setAvatarPreview("");
+    setAvatarPayload(null);
+    setAvatarError(null);
   };
 
   const { loading, user, error } = status;
@@ -136,8 +242,10 @@ export default function Profile() {
       : "Μέλος"
     : null;
 
+  const displayAvatar = avatarPayload === null ? "" : avatarPreview || user?.avatar || "";
+
   return (
-    <div className="section narrow">
+    <div className="section profile-shell">
       <p className="pill">Προφίλ</p>
       <h1 className="section-title">Το προφίλ σας</h1>
       <p className="muted">Προβάλλετε τα στοιχεία σύνδεσης και την κατάσταση της συνεδρίας σας.</p>
@@ -149,7 +257,7 @@ export default function Profile() {
           <div className="stack profile-stack">
             <div className="profile-header">
               <div className="auth-user">
-                {user.avatar && <img src={user.avatar} alt="Προφίλ" className="auth-avatar" />}
+                {displayAvatar && <img src={displayAvatar} alt="Προφίλ" className="auth-avatar" />}
                 <div>
                   <div className="auth-user-name">{user.displayName || "Χρήστης"}</div>
                   {(user.firstName || user.lastName) && (
@@ -178,6 +286,56 @@ export default function Profile() {
               <div>
                 <p className="label">Πάροχος</p>
                 <p className="pill subtle">{user.provider}</p>
+              </div>
+            </div>
+
+            <div className="profile-section">
+              <div>
+                <h3>Φωτογραφία προφίλ</h3>
+                <p className="muted small">
+                  Αναβαθμίστε το προφίλ σας με μια επαγγελματική φωτογραφία. Επιτρέπονται JPG, PNG ή WebP έως 4MB και
+                  η εικόνα προσαρμόζεται αυτόματα σε έως {MAX_AVATAR_DIMENSION}px.
+                </p>
+              </div>
+              <div className="profile-avatar-card">
+                <div className="profile-avatar-preview">
+                  {displayAvatar ? (
+                    <img src={displayAvatar} alt="Προεπισκόπηση φωτογραφίας" />
+                  ) : (
+                    <span className="muted small">Χωρίς φωτογραφία</span>
+                  )}
+                </div>
+                <div className="profile-avatar-content">
+                  <p className="label">Μεταφόρτωση φωτογραφίας</p>
+                  <p className="muted small">
+                    Θα γίνει συμπίεση για ταχύτερη φόρτωση, με τελικό μέγεθος έως περίπου{" "}
+                    {Math.round(MAX_AVATAR_BYTES / 1024)}KB.
+                  </p>
+                  <div className="actions-row profile-actions">
+                    <label className="btn btn-outline profile-avatar-upload" htmlFor="profile-avatar-input">
+                      {isAvatarProcessing ? "Επεξεργασία..." : "Επιλογή αρχείου"}
+                    </label>
+                    <input
+                      id="profile-avatar-input"
+                      type="file"
+                      accept={ALLOWED_AVATAR_TYPES.join(",")}
+                      onChange={handleAvatarChange}
+                      disabled={isAvatarProcessing}
+                      className="profile-avatar-input"
+                    />
+                    {displayAvatar && (
+                      <button
+                        type="button"
+                        className="btn btn-outline"
+                        onClick={handleAvatarRemove}
+                        disabled={isAvatarProcessing}
+                      >
+                        Αφαίρεση
+                      </button>
+                    )}
+                  </div>
+                  {avatarError && <p className="error-text">{avatarError}</p>}
+                </div>
               </div>
             </div>
 
