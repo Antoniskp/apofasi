@@ -105,33 +105,37 @@ export default function Polls() {
     return sorted;
   }, [polls, searchTerm, sortOption]);
 
+  const showAuthCard = authLoading || authError || !user;
+
   return (
     <div className="section narrow">
       <p className="pill">Ψηφοφορίες</p>
       <h1 className="section-title">Δημόσιες ψηφοφορίες</h1>
       <p className="muted">Δημιουργήστε και ψηφίστε σε θέματα επικαιρότητας με ετικέτες, προαιρετική τοποθεσία και έμφαση στην ιδιωτικότητα.</p>
 
-      <div className="card auth-card stack">
-        {authLoading && <p className="muted">Φόρτωση συνεδρίας...</p>}
+      {showAuthCard && (
+        <div className="card auth-card stack">
+          {authLoading && <p className="muted">Φόρτωση συνεδρίας...</p>}
 
-        {!authLoading && authError && <p className="error-text">{authError}</p>}
+          {!authLoading && authError && <p className="error-text">{authError}</p>}
 
-        {!authLoading && !authError && !user && (
-          <div className="stack">
-            <p className="muted">
-              Χρειάζεται σύνδεση για να ψηφίσετε σε ψηφοφορίες που δεν είναι ανώνυμες για τους ψηφοφόρους.
-            </p>
-            <div className="cta-row">
-              <Link className="btn" to="/auth">
-                Σύνδεση
-              </Link>
-              <Link className="btn btn-outline" to="/register">
-                Δημιουργία λογαριασμού
-              </Link>
+          {!authLoading && !authError && !user && (
+            <div className="stack">
+              <p className="muted">
+                Χρειάζεται σύνδεση για να ψηφίσετε σε ψηφοφορίες που δεν είναι ανώνυμες για τους ψηφοφόρους.
+              </p>
+              <div className="cta-row">
+                <Link className="btn" to="/auth">
+                  Σύνδεση
+                </Link>
+                <Link className="btn btn-outline" to="/register">
+                  Δημιουργία λογαριασμού
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <div className="section">
         <div className="section-header">
