@@ -32,22 +32,29 @@ export const getAuthStatus = async () =>
     })
   );
 
-export const updateProfile = async (payload) =>
-  handleResponse(
+export const updateProfile = async (payload) => {
+  const profilePayload = {
+    firstName: payload.firstName?.trim(),
+    lastName: payload.lastName?.trim(),
+    username: payload.username?.trim(),
+    mobile: payload.mobile?.trim(),
+    country: payload.country?.trim(),
+    occupation: payload.occupation?.trim(),
+    region: payload.region?.trim(),
+    cityOrVillage: payload.cityOrVillage?.trim(),
+  };
+
+  if ("avatar" in payload) {
+    profilePayload.avatar = payload.avatar;
+  }
+
+  return handleResponse(
     await fetch(
       `${API_BASE_URL}/auth/profile`,
-      buildJsonRequest({
-        firstName: payload.firstName?.trim(),
-        lastName: payload.lastName?.trim(),
-        username: payload.username?.trim(),
-        mobile: payload.mobile?.trim(),
-        country: payload.country?.trim(),
-        occupation: payload.occupation?.trim(),
-        region: payload.region?.trim(),
-        cityOrVillage: payload.cityOrVillage?.trim(),
-      }, "PUT")
+      buildJsonRequest(profilePayload, "PUT")
     )
   );
+};
 
 export const registerUser = async (payload) =>
   handleResponse(

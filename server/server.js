@@ -188,7 +188,7 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.options("/auth/*", cors(corsOptions));
 app.options("/api/auth/*", cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
 if (shouldLogRequests) {
   app.use((req, res, next) => {
@@ -712,14 +712,34 @@ authRouter.put("/profile", ensureAuthenticated, async (req, res) => {
     "occupation",
     "region",
     "cityOrVillage",
+    "avatar",
   ];
   const updates = {};
 
   for (const field of allowedFields) {
     if (field in req.body) {
       const rawValue = req.body[field];
-      const trimmedValue = typeof rawValue === "string" ? rawValue.trim() : rawValue;
-      updates[field] = trimmedValue || undefined;
+      if (field === "avatar") {
+        if (rawValue === null || rawValue === "") {
+          updates.avatar = undefined;
+        } else if (typeof rawValue === "string") {
+          const match = rawValue.match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
+          if (!match) {
+            return res.status(400).json({ message: "Η φωτογραφία πρέπει να είναι JPG, PNG ή WebP." });
+          }
+          const imageBuffer = Buffer.from(match[2], "base64");
+          const maxAvatarBytes = 320 * 1024;
+          if (imageBuffer.length > maxAvatarBytes) {
+            return res.status(400).json({ message: "Η φωτογραφία προφίλ είναι πολύ μεγάλη." });
+          }
+          updates.avatar = rawValue;
+        } else {
+          return res.status(400).json({ message: "Η φωτογραφία προφίλ δεν είναι έγκυρη." });
+        }
+      } else {
+        const trimmedValue = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+        updates[field] = trimmedValue || undefined;
+      }
     }
   }
 
