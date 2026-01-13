@@ -288,6 +288,11 @@ export default function Profile() {
                 <p className="muted small">
                   Δείτε τα στοιχεία που έχουμε για εσάς και συμπληρώστε τα προαιρετικά πεδία όταν γίνουν διαθέσιμα.
                 </p>
+                <div className="cta-row" style={{ marginTop: "1rem" }}>
+                  <Link className="btn btn-outline" to="/polls/my-polls">
+                    Οι ψηφοφορίες μου
+                  </Link>
+                </div>
               </div>
             </div>
 
