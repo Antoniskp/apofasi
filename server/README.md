@@ -56,8 +56,8 @@ Key fields you must set:
 - `SESSION_SECRET`: long random string for signing the session cookie.
 - `SESSION_NAME` (optional): override the default `apofasi.sid` session cookie name.
 - `SESSION_MAX_AGE_DAYS` (optional): customize the cookie/session lifetime (defaults to 7 days).
-- `SESSION_SECURE` (optional): override session cookie secure flag (`true` or `false`). If not set, defaults to `true` in production (assumes HTTPS), `false` in development.
-- `SESSION_SAMESITE` (optional): override session cookie SameSite attribute (`none`, `lax`, or `strict`). If not set, defaults to `none` in production (with `secure=true`), `lax` in development. **Important**: `SameSite=None` requires `Secure=true` (HTTPS). For HTTP-only deployments, explicitly set `SESSION_SECURE=false` and `SESSION_SAMESITE=lax`.
+- `SESSION_SECURE` (optional): override session cookie secure flag (`true` or `false`). If not set, defaults to `true` in production (assumes HTTPS), `false` in development. Invalid values will cause the server to fail at startup.
+- `SESSION_SAMESITE` (optional): override session cookie SameSite attribute (`none`, `lax`, or `strict`). If not set, defaults to `none` in production (with `secure=true`), `lax` in development. **Important**: `SameSite=None` requires `Secure=true` (HTTPS). For HTTP-only deployments, explicitly set `SESSION_SECURE=false` and `SESSION_SAMESITE=lax`. Invalid values will cause the server to fail at startup.
 - `CLIENT_ORIGIN`: the base URL of the frontend that will initiate OAuth and receive redirects.
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: from the Google Cloud OAuth client.
 - `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET`: from your Facebook app.

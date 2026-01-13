@@ -201,11 +201,42 @@ if (shouldLogRequests) {
 // Determine session cookie configuration
 // SameSite=None requires Secure=true (HTTPS), so we need to coordinate these settings
 const getSessionCookieConfig = () => {
+  const hasSecureOverride = process.env.SESSION_SECURE !== undefined;
+  const hasSameSiteOverride = process.env.SESSION_SAMESITE !== undefined;
+
   // Allow explicit override via environment variables
-  if (process.env.SESSION_SECURE !== undefined || process.env.SESSION_SAMESITE !== undefined) {
+  if (hasSecureOverride || hasSameSiteOverride) {
+    const secure = hasSecureOverride 
+      ? process.env.SESSION_SECURE === "true" 
+      : false;
+    const sameSite = process.env.SESSION_SAMESITE || "lax";
+
+    // Validate SESSION_SECURE value
+    if (hasSecureOverride && !["true", "false"].includes(process.env.SESSION_SECURE)) {
+      throw new Error(
+        `Invalid SESSION_SECURE value: "${process.env.SESSION_SECURE}". Must be "true" or "false".`
+      );
+    }
+
+    // Validate SESSION_SAMESITE value
+    if (hasSameSiteOverride && !["none", "lax", "strict"].includes(sameSite)) {
+      throw new Error(
+        `Invalid SESSION_SAMESITE value: "${sameSite}". Must be "none", "lax", or "strict".`
+      );
+    }
+
+    // Warn about potentially insecure configuration
+    if (sameSite === "none" && !secure) {
+      console.warn(
+        "[session-config-warning] SameSite=None requires Secure=true (HTTPS). " +
+        "Browsers will reject cookies with SameSite=None over HTTP. " +
+        "Consider using SESSION_SAMESITE=lax for HTTP deployments."
+      );
+    }
+
     return {
-      secure: process.env.SESSION_SECURE === "true",
-      sameSite: process.env.SESSION_SAMESITE || "lax",
+      secure,
+      sameSite,
       httpOnly: true,
       maxAge: sessionMaxAgeMs,
     };
