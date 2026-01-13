@@ -177,6 +177,11 @@ export default function Polls() {
             <Link className="btn" to="/polls/new">
               Νέα ψηφοφορία
             </Link>
+            {user && (
+              <Link className="btn btn-outline" to="/polls/my-polls">
+                Οι ψηφοφορίες μου
+              </Link>
+            )}
           </div>
         </div>
 

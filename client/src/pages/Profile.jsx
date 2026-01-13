@@ -30,6 +30,19 @@ export default function Profile() {
       title: "Χρησιμοποιήστε μόνο αριθμούς και προαιρετικό πρόθεμα +",
     },
     { key: "occupation", label: "Επάγγελμα", placeholder: "Προαιρετική επαγγελματική πληροφορία." },
+    {
+      key: "gender",
+      label: "Φύλο",
+      placeholder: "Επιλέξτε το φύλο σας.",
+      type: "select",
+      options: ["male", "female", "other", "prefer_not_to_say"],
+      optionLabels: {
+        male: "Άνδρας",
+        female: "Γυναίκα",
+        other: "Άλλο",
+        prefer_not_to_say: "Προτιμώ να μην πω"
+      }
+    },
   ];
 
   const locationFields = [
@@ -275,6 +288,11 @@ export default function Profile() {
                 <p className="muted small">
                   Δείτε τα στοιχεία που έχουμε για εσάς και συμπληρώστε τα προαιρετικά πεδία όταν γίνουν διαθέσιμα.
                 </p>
+                <div className="cta-row" style={{ marginTop: "1rem" }}>
+                  <Link className="btn btn-outline" to="/polls/my-polls">
+                    Οι ψηφοφορίες μου
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -372,7 +390,7 @@ export default function Profile() {
                           <option value="">{field.placeholder}</option>
                           {options.map((option) => (
                             <option key={option} value={option}>
-                              {option}
+                              {field.optionLabels?.[option] || option}
                             </option>
                           ))}
                         </select>

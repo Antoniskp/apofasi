@@ -42,6 +42,7 @@ export const updateProfile = async (payload) => {
     occupation: payload.occupation?.trim(),
     region: payload.region?.trim(),
     cityOrVillage: payload.cityOrVillage?.trim(),
+    gender: payload.gender,
   };
 
   if ("avatar" in payload) {
@@ -183,6 +184,32 @@ export const cancelVoteOnPoll = async (pollId) =>
   handleResponse(
     await fetch(
       `${API_BASE_URL}/polls/${pollId}/vote`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    )
+  );
+
+export const getMyPolls = async () =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/polls/my-polls`, {
+      credentials: "include",
+    })
+  );
+
+export const getPollStatistics = async (pollId) =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/polls/${pollId}/statistics`, {
+      credentials: "include",
+    })
+  );
+
+export const deletePoll = async (pollId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/polls/${pollId}`,
       {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
