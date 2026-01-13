@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getAuthStatus } from "../lib/api.js";
+import UserMenu from "./UserMenu.jsx";
 
 const pollRegions = [
   { label: "Ανατολική Μακεδονία και Θράκη" },
@@ -89,25 +90,6 @@ export default function MenuBars() {
     }
   }, [isOpen]);
 
-  const isAuthenticated = Boolean(authStatus.user);
-  const userName =
-    authStatus.user?.displayName ||
-    authStatus.user?.firstName ||
-    authStatus.user?.email ||
-    "Χρήστης";
-  const authGreeting = (
-    <div className="menu-auth-summary" aria-label="Προφίλ">
-      <span className="menu-auth-hello">Hello,</span>
-      <Link
-        to="/profile"
-        className="menu-auth-name menu-auth-link"
-        onClick={closeMenu}
-      >
-        {userName}
-      </Link>
-    </div>
-  );
-
   return (
     <div className={`menu-shell${isMenuHidden ? " menu-hidden" : ""}`}>
       <div className="menu-top">
@@ -181,88 +163,12 @@ export default function MenuBars() {
             )}
 
             <div className="menu-actions menu-actions-mobile">
-              {isAuthenticated ? (
-                authGreeting
-              ) : (
-                <>
-                  <Link
-                    to="/auth"
-                    className="menu-auth-btn primary"
-                    aria-label="Σύνδεση"
-                    onClick={closeMenu}
-                  >
-                    <span className="menu-auth-icon" aria-hidden>
-                      <i className="fa-solid fa-right-to-bracket" />
-                    </span>
-                    <span className="sr-only">Σύνδεση</span>
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="menu-auth-btn"
-                    aria-label="Εγγραφή"
-                    onClick={closeMenu}
-                  >
-                    <span className="menu-auth-icon" aria-hidden>
-                      <i className="fa-solid fa-user-plus" />
-                    </span>
-                    <span className="sr-only">Εγγραφή</span>
-                  </Link>
-                  <Link
-                    to="/profile"
-                    className="menu-auth-btn"
-                    aria-label="Προφίλ"
-                    onClick={closeMenu}
-                  >
-                    <span className="menu-auth-icon" aria-hidden>
-                      <i className="fa-solid fa-circle-user" />
-                    </span>
-                    <span className="sr-only">Προφίλ</span>
-                  </Link>
-                </>
-              )}
+              <UserMenu user={authStatus.user} onLogout={loadAuthStatus} />
             </div>
           </nav>
 
-        <div className="menu-actions menu-actions-desktop">
-          {isAuthenticated ? (
-            authGreeting
-          ) : (
-            <>
-              <Link
-                  to="/auth"
-                  className="menu-auth-btn primary"
-                  aria-label="Σύνδεση"
-                  onClick={closeMenu}
-                >
-                  <span className="menu-auth-icon" aria-hidden>
-                    <i className="fa-solid fa-right-to-bracket" />
-                  </span>
-                  <span className="sr-only">Σύνδεση</span>
-                </Link>
-                <Link
-                  to="/register"
-                  className="menu-auth-btn"
-                  aria-label="Εγγραφή"
-                  onClick={closeMenu}
-                >
-                  <span className="menu-auth-icon" aria-hidden>
-                    <i className="fa-solid fa-user-plus" />
-                  </span>
-                  <span className="sr-only">Εγγραφή</span>
-                </Link>
-                <Link
-                  to="/profile"
-                  className="menu-auth-btn"
-                  aria-label="Προφίλ"
-                  onClick={closeMenu}
-                >
-                  <span className="menu-auth-icon" aria-hidden>
-                    <i className="fa-solid fa-circle-user" />
-                  </span>
-                  <span className="sr-only">Προφίλ</span>
-                </Link>
-              </>
-            )}
+          <div className="menu-actions menu-actions-desktop">
+            <UserMenu user={authStatus.user} onLogout={loadAuthStatus} />
           </div>
         </div>
       </div>
