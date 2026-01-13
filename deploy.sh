@@ -31,8 +31,13 @@ sudo systemctl reload nginx
 
 # 5) Deploy Server build
 cd server
-npm i
+if [ -f package-lock.json ]; then
+  npm ci --omit=dev
+else
+  npm install --omit=dev
+fi
 sudo systemctl restart apofasi.service
+sudo systemctl is-active --quiet apofasi.service
 
 # 6) Verification
 echo "== Deployment finished =="
