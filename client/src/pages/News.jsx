@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { API_BASE_URL, createNews, getAuthStatus, listNews } from "../lib/api.js";
+import { API_BASE_URL, createNews, getAuthStatus, listNews, listArticles } from "../lib/api.js";
 
 const hasReporterAccess = (user) => user && ["reporter", "admin"].includes(user.role);
 
@@ -37,8 +37,26 @@ export default function News() {
     setNewsFeed((prev) => ({ ...prev, loading: true }));
 
     try {
-      const data = await listNews();
-      setNewsFeed({ loading: false, news: data.news || [], error: null });
+      const [newsData, articlesData] = await Promise.all([
+        listNews(),
+        listArticles()
+      ]);
+      
+      // Filter articles that are tagged as news
+      const newsArticles = (articlesData.articles || [])
+        .filter(article => article.isNews)
+        .map(article => ({
+          ...article,
+          isArticle: true  // Mark as article for rendering
+        }));
+      
+      // Combine and sort by date
+      const allNews = [
+        ...(newsData.news || []),
+        ...newsArticles
+      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      setNewsFeed({ loading: false, news: allNews, error: null });
     } catch (error) {
       setNewsFeed({
         loading: false,
@@ -188,12 +206,26 @@ export default function News() {
             <div key={item.id} className="card muted-border">
               <div className="story-header">
                 <div>
-                  <div className="story-title">{item.title}</div>
+                  <div className="story-title">
+                    {item.isArticle ? (
+                      <Link to={`/articles/${item.id}`}>{item.title}</Link>
+                    ) : (
+                      item.title
+                    )}
+                  </div>
                   <div className="muted small">{formatDateTime(item.createdAt)}</div>
                 </div>
-                {item.author?.displayName && <div className="pill pill-soft">{item.author.displayName}</div>}
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  {item.isArticle && <span className="pill pill-soft" style={{ background: "#e3f2fd", color: "#1976d2" }}>Άρθρο</span>}
+                  {item.author?.displayName && <div className="pill pill-soft">{item.author.displayName}</div>}
+                </div>
               </div>
-              <p>{item.content}</p>
+              <p>{item.content.substring(0, 300)}{item.content.length > 300 ? "..." : ""}</p>
+              {item.isArticle && (
+                <Link to={`/articles/${item.id}`} style={{ color: "#0066cc", textDecoration: "none" }}>
+                  Διαβάστε περισσότερα →
+                </Link>
+              )}
             </div>
           ))}
         </div>

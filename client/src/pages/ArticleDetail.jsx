@@ -42,7 +42,7 @@ export default function ArticleDetail() {
   }, [articleId]);
 
   const handleDelete = async () => {
-    if (!window.confirm(`Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το άρθρο;`)) {
+    if (!window.confirm("Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το άρθρο;")) {
       return;
     }
 
