@@ -63,16 +63,18 @@ export default function AuthButtons() {
     }
   };
 
+  const hasEnabledProviders = Object.values(status.providers || {}).some(Boolean);
+
   return (
     <div className="card auth-card">
       <div className="auth-card-header">
         <div>
-          <p className="label">Σύνδεση χρήστη</p>
+          <p className="label">Εναλλακτική σύνδεση</p>
           <h3>Είσοδος με κοινωνικούς λογαριασμούς</h3>
           <p className="muted">
-            Ξεκινήστε με Google ή Facebook για να αποθηκεύσετε συμμετοχές και προτιμήσεις.
+            Μπορείτε επίσης να συνδεθείτε με Google ή Facebook για να αποθηκεύσετε συμμετοχές και προτιμήσεις.
           </p>
-          {!Object.values(status.providers || {}).some(Boolean) && (
+          {!hasEnabledProviders && (
             <p className="muted small">Θα ενεργοποιηθεί μόλις προστεθούν τα κλειδιά OAuth.</p>
           )}
         </div>
@@ -110,39 +112,20 @@ export default function AuthButtons() {
         })}
       </div>
 
-      <div className="auth-status">
-        {status.loading && <p className="muted">Έλεγχος σύνδεσης...</p>}
-        {!status.loading && status.user && (
-          <div className="auth-user">
-            {status.user.avatar && (
-              <img src={status.user.avatar} alt="Προφίλ" className="auth-avatar" />
-            )}
-            <div>
-              <div className="auth-user-name">{status.user.displayName || "Χρήστης"}</div>
-              {status.user.email && <div className="muted">{status.user.email}</div>}
-              <div className="pill subtle">Σύνδεση μέσω {status.user.provider}</div>
-            </div>
-          </div>
-        )}
-        {!status.loading && !status.user && (
-          <p className="muted">Δεν έχετε συνδεθεί ακόμη.</p>
-        )}
-        {status.error && <p className="error-text">{status.error}</p>}
-      </div>
+      {status.user && (
+        <div className="auth-footer">
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+          >
+            {isLoggingOut ? "Αποσύνδεση..." : "Αποσύνδεση"}
+          </button>
+        </div>
+      )}
 
-      <div className="auth-footer">
-        <button
-          type="button"
-          className="btn btn-outline"
-          onClick={handleLogout}
-          disabled={!status.user || isLoggingOut}
-        >
-          {isLoggingOut ? "Αποσύνδεση..." : "Αποσύνδεση"}
-        </button>
-        <p className="muted">
-          Χρησιμοποιούμε ασφαλή cookie συνεδρίας για να διατηρήσουμε τη σύνδεσή σας.
-        </p>
-      </div>
+      {status.error && <p className="error-text small">{status.error}</p>}
     </div>
   );
 }
