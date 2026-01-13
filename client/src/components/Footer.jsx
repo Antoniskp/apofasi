@@ -40,6 +40,7 @@ const footerSections = [
     titleLink: "/social",
     links: [
       { label: "Κοινωνικά δίκτυα", to: "/social" },
+      { label: "Κανόνες κοινότητας", to: "/community-guidelines" },
       { label: "Συμμετοχή στην ανάπτυξη", to: "/contribute" },
       { label: "Προφίλ χρήστη", to: "/profile" },
       { label: "Σύνδεση", to: "/auth" },
