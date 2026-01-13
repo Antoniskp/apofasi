@@ -40,9 +40,9 @@ export default function UserMenu({ user, onLogout }) {
       event.preventDefault();
       setIsOpen(true);
       // Focus first menu item after opening
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         menuRef.current?.querySelector('[role="menuitem"]')?.focus();
-      }, 0);
+      });
     }
   };
 

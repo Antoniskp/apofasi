@@ -5,14 +5,25 @@ const ThemeContext = createContext();
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     // Check localStorage first
-    const stored = localStorage.getItem("theme");
-    if (stored) {
-      return stored;
-    }
-    
-    // Fall back to prefers-color-scheme
-    if (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark";
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("theme");
+        if (stored) {
+          return stored;
+        }
+      } catch (error) {
+        // localStorage may be unavailable (private browsing, SSR, etc.)
+        console.warn("Could not access localStorage:", error);
+      }
+      
+      // Fall back to prefers-color-scheme
+      try {
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          return "dark";
+        }
+      } catch (error) {
+        console.warn("Could not access matchMedia:", error);
+      }
     }
     
     return "light";
@@ -21,8 +32,16 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     // Apply theme to document
     document.documentElement.setAttribute("data-theme", theme);
+    
     // Persist to localStorage
-    localStorage.setItem("theme", theme);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("theme", theme);
+      } catch (error) {
+        // localStorage may be unavailable
+        console.warn("Could not save theme to localStorage:", error);
+      }
+    }
   }, [theme]);
 
   const toggleTheme = () => {
