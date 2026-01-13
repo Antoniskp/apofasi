@@ -9,6 +9,11 @@ import NewPoll from "./pages/NewPoll.jsx";
 import PollDetail from "./pages/PollDetail.jsx";
 import PollStatistics from "./pages/PollStatistics.jsx";
 import MyPolls from "./pages/MyPolls.jsx";
+import Articles from "./pages/Articles.jsx";
+import NewArticle from "./pages/NewArticle.jsx";
+import EditArticle from "./pages/EditArticle.jsx";
+import ArticleDetail from "./pages/ArticleDetail.jsx";
+import MyArticles from "./pages/MyArticles.jsx";
 import AuthStatus from "./pages/AuthStatus.jsx";
 import Mission from "./pages/Mission.jsx";
 import Auth from "./pages/Auth.jsx";
@@ -47,6 +52,11 @@ function App() {
         <Route path="/" element={withLayout(<Home />)} />
         <Route path="/mission" element={withLayout(<Mission />)} />
         <Route path="/news" element={withLayout(<News />)} />
+        <Route path="/articles" element={withLayout(<Articles />)} />
+        <Route path="/articles/new" element={withLayout(<NewArticle />)} />
+        <Route path="/articles/my-articles" element={withLayout(<MyArticles />)} />
+        <Route path="/articles/:articleId" element={withLayout(<ArticleDetail />)} />
+        <Route path="/articles/:articleId/edit" element={withLayout(<EditArticle />)} />
         <Route path="/polls" element={withLayout(<Polls />)} />
         <Route path="/polls/new" element={withLayout(<NewPoll />)} />
         <Route path="/polls/my-polls" element={withLayout(<MyPolls />)} />

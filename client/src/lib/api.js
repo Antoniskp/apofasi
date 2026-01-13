@@ -218,4 +218,82 @@ export const deletePoll = async (pollId) =>
     )
   );
 
+// Articles API
+export const listArticles = async () =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/articles/`, {
+      credentials: "include",
+    })
+  );
+
+export const getMyArticles = async () =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/articles/my-articles`, {
+      credentials: "include",
+    })
+  );
+
+export const getArticle = async (articleId) =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/articles/${articleId}`, {
+      credentials: "include",
+    })
+  );
+
+export const createArticle = async (payload) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/articles/`,
+      buildJsonRequest({
+        title: payload.title?.trim(),
+        content: payload.content?.trim(),
+        tags: payload.tags,
+        region: payload.region?.trim(),
+        cityOrVillage: payload.cityOrVillage?.trim(),
+      })
+    )
+  );
+
+export const updateArticle = async (articleId, payload) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/articles/${articleId}`,
+      buildJsonRequest({
+        title: payload.title?.trim(),
+        content: payload.content?.trim(),
+        tags: payload.tags,
+        region: payload.region?.trim(),
+        cityOrVillage: payload.cityOrVillage?.trim(),
+      }, "PUT")
+    )
+  );
+
+export const deleteArticle = async (articleId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/articles/${articleId}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    )
+  );
+
+export const tagArticleAsNews = async (articleId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/articles/${articleId}/tag-as-news`,
+      buildJsonRequest({}, "PUT")
+    )
+  );
+
+export const untagArticleAsNews = async (articleId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/articles/${articleId}/untag-as-news`,
+      buildJsonRequest({}, "PUT")
+    )
+  );
+
 export { API_BASE_URL };

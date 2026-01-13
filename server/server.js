@@ -17,6 +17,7 @@ import Poll from "./models/Poll.js";
 import User from "./models/User.js";
 import ContactMessage from "./models/ContactMessage.js";
 import AnonymousVote from "./models/AnonymousVote.js";
+import Article from "./models/Article.js";
 import { CITIES_BY_REGION, REGION_NAMES } from "../shared/locations.js";
 import defaultPolls from "./data/defaultPolls.js";
 import { hashPassword, needsPasswordUpgrade, verifyPassword } from "./utils/crypto.js";
@@ -120,6 +121,21 @@ const serializeNews = (news) => ({
   author: serializeAuthor(news.author),
   createdAt: news.createdAt,
   updatedAt: news.updatedAt,
+});
+
+const serializeArticle = (article) => ({
+  id: article.id,
+  title: article.title,
+  content: article.content,
+  author: serializeAuthor(article.author),
+  tags: article.tags || [],
+  region: article.region,
+  cityOrVillage: article.cityOrVillage,
+  isNews: Boolean(article.isNews),
+  taggedAsNewsBy: article.taggedAsNewsBy ? serializeAuthor(article.taggedAsNewsBy) : null,
+  taggedAsNewsAt: article.taggedAsNewsAt,
+  createdAt: article.createdAt,
+  updatedAt: article.updatedAt,
 });
 
 const serializePoll = async (poll, currentUser, session, req) => {
@@ -339,6 +355,7 @@ const ensureRole = (...roles) => (req, res, next) => {
 const newsRouter = express.Router();
 const pollsRouter = express.Router();
 const contactRouter = express.Router();
+const articlesRouter = express.Router();
 
 newsRouter.get("/", async (req, res) => {
   try {
@@ -378,6 +395,286 @@ newsRouter.post("/", ensureAuthenticated, ensureRole("reporter", "admin"), async
   } catch (error) {
     console.error("[news-create-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η προσθήκη της είδησης." });
+  }
+});
+
+// Articles routes
+articlesRouter.get("/", async (req, res) => {
+  try {
+    const articles = await Article.find()
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .populate("author", "displayName username email")
+      .populate("taggedAsNewsBy", "displayName username email");
+
+    return res.json({ articles: articles.map(serializeArticle) });
+  } catch (error) {
+    console.error("[articles-list-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση άρθρων." });
+  }
+});
+
+articlesRouter.get("/my-articles", ensureAuthenticated, async (req, res) => {
+  const userId = req.user?.id;
+
+  try {
+    const articles = await Article.find({ author: userId })
+      .sort({ createdAt: -1 })
+      .populate("author", "displayName username email")
+      .populate("taggedAsNewsBy", "displayName username email");
+
+    return res.json({ articles: articles.map(serializeArticle) });
+  } catch (error) {
+    console.error("[my-articles-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση των άρθρων σας." });
+  }
+});
+
+articlesRouter.get("/:articleId", async (req, res) => {
+  const { articleId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(articleId)) {
+    return res.status(400).json({ message: "Μη έγκυρο άρθρο." });
+  }
+
+  try {
+    const article = await Article.findById(articleId)
+      .populate("author", "displayName username email")
+      .populate("taggedAsNewsBy", "displayName username email");
+
+    if (!article) {
+      return res.status(404).json({ message: "Το άρθρο δεν βρέθηκε." });
+    }
+
+    return res.json({ article: serializeArticle(article) });
+  } catch (error) {
+    console.error("[article-detail-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση του άρθρου." });
+  }
+});
+
+articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
+  const { title, content, tags, region, cityOrVillage } = req.body || {};
+  const trimmedTitle = title?.trim();
+  const trimmedContent = content?.trim();
+
+  if (!trimmedTitle || !trimmedContent) {
+    return res.status(400).json({ message: "Απαιτούνται τίτλος και περιεχόμενο." });
+  }
+
+  const normalizedTags = Array.from(
+    new Set(
+      (Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",") : [])
+        .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+        .filter(Boolean)
+    )
+  ).slice(0, 10);
+
+  const trimmedRegion = region?.trim();
+  const trimmedCity = cityOrVillage?.trim();
+
+  if (trimmedRegion && !REGION_NAMES.includes(trimmedRegion)) {
+    return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
+  }
+
+  if (trimmedCity) {
+    if (!trimmedRegion) {
+      return res
+        .status(400)
+        .json({ message: "Επιλέξτε πρώτα περιφέρεια για να προσθέσετε πόλη ή χωριό." });
+    }
+
+    if (!CITIES_BY_REGION[trimmedRegion]?.includes(trimmedCity)) {
+      return res.status(400).json({ message: "Η πόλη ή το χωριό δεν ανήκει στην επιλεγμένη περιφέρεια." });
+    }
+  }
+
+  try {
+    const createdArticle = await Article.create({
+      title: trimmedTitle,
+      content: trimmedContent,
+      author: req.user._id,
+      tags: normalizedTags,
+      region: trimmedRegion,
+      cityOrVillage: trimmedCity,
+    });
+
+    const populatedArticle = await createdArticle
+      .populate("author", "displayName username email");
+
+    return res.status(201).json({
+      article: serializeArticle(populatedArticle),
+    });
+  } catch (error) {
+    console.error("[article-create-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η δημιουργία του άρθρου." });
+  }
+});
+
+articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
+  const { articleId } = req.params;
+  const { title, content, tags, region, cityOrVillage } = req.body || {};
+  const userId = req.user?.id;
+
+  if (!mongoose.Types.ObjectId.isValid(articleId)) {
+    return res.status(400).json({ message: "Μη έγκυρο άρθρο." });
+  }
+
+  const trimmedTitle = title?.trim();
+  const trimmedContent = content?.trim();
+
+  if (!trimmedTitle || !trimmedContent) {
+    return res.status(400).json({ message: "Απαιτούνται τίτλος και περιεχόμενο." });
+  }
+
+  const normalizedTags = Array.from(
+    new Set(
+      (Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",") : [])
+        .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+        .filter(Boolean)
+    )
+  ).slice(0, 10);
+
+  const trimmedRegion = region?.trim();
+  const trimmedCity = cityOrVillage?.trim();
+
+  if (trimmedRegion && !REGION_NAMES.includes(trimmedRegion)) {
+    return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
+  }
+
+  if (trimmedCity) {
+    if (!trimmedRegion) {
+      return res
+        .status(400)
+        .json({ message: "Επιλέξτε πρώτα περιφέρεια για να προσθέσετε πόλη ή χωριό." });
+    }
+
+    if (!CITIES_BY_REGION[trimmedRegion]?.includes(trimmedCity)) {
+      return res.status(400).json({ message: "Η πόλη ή το χωριό δεν ανήκει στην επιλεγμένη περιφέρεια." });
+    }
+  }
+
+  try {
+    const article = await Article.findById(articleId);
+
+    if (!article) {
+      return res.status(404).json({ message: "Το άρθρο δεν βρέθηκε." });
+    }
+
+    // Check if user is the author
+    if (article.author.toString() !== userId) {
+      return res.status(403).json({ message: "Δεν έχετε δικαίωμα να επεξεργαστείτε αυτό το άρθρο." });
+    }
+
+    article.title = trimmedTitle;
+    article.content = trimmedContent;
+    article.tags = normalizedTags;
+    article.region = trimmedRegion;
+    article.cityOrVillage = trimmedCity;
+
+    await article.save();
+
+    const populatedArticle = await article
+      .populate("author", "displayName username email")
+      .populate("taggedAsNewsBy", "displayName username email");
+
+    return res.json({ article: serializeArticle(populatedArticle) });
+  } catch (error) {
+    console.error("[article-update-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ενημέρωση του άρθρου." });
+  }
+});
+
+articlesRouter.delete("/:articleId", ensureAuthenticated, async (req, res) => {
+  const { articleId } = req.params;
+  const userId = req.user?.id;
+
+  if (!mongoose.Types.ObjectId.isValid(articleId)) {
+    return res.status(400).json({ message: "Μη έγκυρο άρθρο." });
+  }
+
+  try {
+    const article = await Article.findById(articleId);
+
+    if (!article) {
+      return res.status(404).json({ message: "Το άρθρο δεν βρέθηκε." });
+    }
+
+    // Check if user is the author or admin
+    const isAuthor = article.author.toString() === userId;
+    const isAdmin = req.user.role === "admin";
+
+    if (!isAuthor && !isAdmin) {
+      return res.status(403).json({ message: "Δεν έχετε δικαίωμα να διαγράψετε αυτό το άρθρο." });
+    }
+
+    await Article.deleteOne({ _id: article._id });
+
+    return res.json({ message: "Το άρθρο διαγράφηκε επιτυχώς." });
+  } catch (error) {
+    console.error("[article-delete-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η διαγραφή του άρθρου." });
+  }
+});
+
+articlesRouter.put("/:articleId/tag-as-news", ensureAuthenticated, ensureRole("reporter", "admin"), async (req, res) => {
+  const { articleId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(articleId)) {
+    return res.status(400).json({ message: "Μη έγκυρο άρθρο." });
+  }
+
+  try {
+    const article = await Article.findById(articleId);
+
+    if (!article) {
+      return res.status(404).json({ message: "Το άρθρο δεν βρέθηκε." });
+    }
+
+    article.isNews = true;
+    article.taggedAsNewsBy = req.user._id;
+    article.taggedAsNewsAt = new Date();
+
+    await article.save();
+
+    const populatedArticle = await article
+      .populate("author", "displayName username email")
+      .populate("taggedAsNewsBy", "displayName username email");
+
+    return res.json({ article: serializeArticle(populatedArticle) });
+  } catch (error) {
+    console.error("[article-tag-as-news-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η επισήμανση του άρθρου ως είδηση." });
+  }
+});
+
+articlesRouter.put("/:articleId/untag-as-news", ensureAuthenticated, ensureRole("reporter", "admin"), async (req, res) => {
+  const { articleId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(articleId)) {
+    return res.status(400).json({ message: "Μη έγκυρο άρθρο." });
+  }
+
+  try {
+    const article = await Article.findById(articleId);
+
+    if (!article) {
+      return res.status(404).json({ message: "Το άρθρο δεν βρέθηκε." });
+    }
+
+    article.isNews = false;
+    article.taggedAsNewsBy = undefined;
+    article.taggedAsNewsAt = undefined;
+
+    await article.save();
+
+    const populatedArticle = await article
+      .populate("author", "displayName username email");
+
+    return res.json({ article: serializeArticle(populatedArticle) });
+  } catch (error) {
+    console.error("[article-untag-as-news-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η αφαίρεση της επισήμανσης του άρθρου ως είδηση." });
   }
 });
 
@@ -1237,6 +1534,7 @@ authRouter.get("/logout", (req, res, next) => {
 app.use("/auth", authRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/news", newsRouter);
+app.use("/api/articles", articlesRouter);
 app.use("/api/polls", pollsRouter);
 app.use("/users", usersRouter);
 app.use("/api/users", usersRouter);
