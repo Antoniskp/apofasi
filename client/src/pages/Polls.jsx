@@ -60,6 +60,14 @@ export default function Polls() {
   }, []);
 
   const handleVote = async (poll, optionId) => {
+    if (!optionId || typeof optionId !== "string") {
+      setVoteState((prev) => ({
+        ...prev,
+        [poll.id]: { error: "Επιλέξτε μία από τις διαθέσιμες απαντήσεις." },
+      }));
+      return;
+    }
+
     if (!poll.anonymousResponses && !authState.user) {
       setVoteState((prev) => ({ ...prev, [poll.id]: { error: "Χρειάζεται σύνδεση για να ψηφίσετε." } }));
       return;

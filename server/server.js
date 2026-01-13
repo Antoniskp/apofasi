@@ -421,12 +421,13 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
   const { pollId } = req.params;
   const { optionId } = req.body || {};
   const userId = req.user?.id;
+  const normalizedOptionId = typeof optionId === "string" ? optionId : String(optionId || "");
 
   if (!mongoose.Types.ObjectId.isValid(pollId)) {
     return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
   }
 
-  if (!optionId) {
+  if (!normalizedOptionId || !mongoose.Types.ObjectId.isValid(normalizedOptionId)) {
     return res.status(400).json({ message: "Επιλέξτε μία από τις διαθέσιμες απαντήσεις." });
   }
 
@@ -460,8 +461,8 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
       }
     }
 
-    const selectedOption = poll.options.id(optionId) ||
-      poll.options.find((option) => option._id?.toString() === optionId);
+    const selectedOption = poll.options.id(normalizedOptionId) ||
+      poll.options.find((option) => option._id?.toString() === normalizedOptionId);
 
     if (!selectedOption) {
       return res.status(400).json({ message: "Μη έγκυρη επιλογή ψηφοφορίας." });
@@ -653,6 +654,9 @@ authRouter.post("/register", ensureDatabaseReady, async (req, res) => {
       return res.status(201).json({ user: sanitizeUser(newUser) });
     });
   } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(409).json({ message: "Το email χρησιμοποιείται ήδη." });
+    }
     console.error("[register-error]", error);
     return res.status(500).json({ message: "Κάτι πήγε στραβά. Προσπαθήστε ξανά." });
   }
