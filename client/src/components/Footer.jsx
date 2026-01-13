@@ -8,7 +8,6 @@ const footerSections = [
     titleLink: "/contact",
     links: [
       { label: "Σελίδα επικοινωνίας", to: "/contact" },
-      { label: "Φόρμα επικοινωνίας", to: "/contact#contact-form" },
       { label: "Υποστήριξη", to: "/contact#support" },
       { label: "Συνεργασίες", to: "/contact#collaboration" },
       { label: "Discord", href: "https://discord.gg/pvJftR4T98" }
@@ -32,7 +31,8 @@ const footerSections = [
       { label: "Οδηγός ενημέρωσης", to: "/documentation" },
       { label: "Χάρτης σελίδων", to: "/documentation#sitemap" },
       { label: "DB schema", to: "/documentation#db-schema" },
-      { label: "Πού αλλάζουν τα κείμενα", to: "/documentation#content-updates" }
+      { label: "Πού αλλάζουν τα κείμενα", to: "/documentation#content-updates" },
+      { label: "Κανονισμοί", to: "/rules" }
     ]
   },
   {
@@ -41,7 +41,6 @@ const footerSections = [
     links: [
       { label: "Κοινωνικά δίκτυα", to: "/social" },
       { label: "Συμμετοχή στην ανάπτυξη", to: "/contribute" },
-      { label: "Προφίλ χρήστη", to: "/profile" },
       { label: "Σύνδεση", to: "/auth" },
       { label: "Εγγραφή με email", to: "/register" }
     ]
