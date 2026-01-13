@@ -7,6 +7,8 @@ import News from "./pages/News.jsx";
 import Polls from "./pages/Polls.jsx";
 import NewPoll from "./pages/NewPoll.jsx";
 import PollDetail from "./pages/PollDetail.jsx";
+import PollStatistics from "./pages/PollStatistics.jsx";
+import MyPolls from "./pages/MyPolls.jsx";
 import AuthStatus from "./pages/AuthStatus.jsx";
 import Mission from "./pages/Mission.jsx";
 import Auth from "./pages/Auth.jsx";
@@ -46,7 +48,9 @@ function App() {
         <Route path="/news" element={withLayout(<News />)} />
         <Route path="/polls" element={withLayout(<Polls />)} />
         <Route path="/polls/new" element={withLayout(<NewPoll />)} />
+        <Route path="/polls/my-polls" element={withLayout(<MyPolls />)} />
         <Route path="/polls/:pollId" element={withLayout(<PollDetail />)} />
+        <Route path="/polls/:pollId/statistics" element={withLayout(<PollStatistics />)} />
         <Route path="/contribute" element={withLayout(<Contribute />)} />
         <Route path="/contact" element={withLayout(<Contact />)} />
         <Route path="/about" element={withLayout(<About />)} />

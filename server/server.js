@@ -399,6 +399,26 @@ pollsRouter.get("/", async (req, res) => {
   }
 });
 
+// Get user's own polls
+pollsRouter.get("/my-polls", ensureAuthenticated, async (req, res) => {
+  const userId = req.user?.id;
+
+  try {
+    const polls = await Poll.find({ createdBy: userId })
+      .sort({ createdAt: -1 })
+      .populate("createdBy", "displayName username email");
+
+    const serializedPolls = await Promise.all(
+      polls.map((poll) => serializePoll(poll, req.user, req.session, req))
+    );
+
+    return res.json({ polls: serializedPolls });
+  } catch (error) {
+    console.error("[my-polls-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση των ψηφοφοριών σας." });
+  }
+});
+
 pollsRouter.get("/:pollId", async (req, res) => {
   const { pollId } = req.params;
 
@@ -749,6 +769,123 @@ pollsRouter.delete("/:pollId/vote", async (req, res) => {
   }
 });
 
+// Get poll statistics
+pollsRouter.get("/:pollId/statistics", async (req, res) => {
+  const { pollId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(pollId)) {
+    return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    // If the poll has anonymous responses, we cannot provide detailed statistics
+    if (poll.anonymousResponses) {
+      return res.json({
+        statistics: {
+          totalVotes: poll.options.reduce((sum, opt) => sum + (opt.votes || 0), 0),
+          byUser: [],
+          byGender: {},
+          message: "Οι λεπτομερείς στατιστικές δεν είναι διαθέσιμες για ανώνυμες ψηφοφορίες."
+        }
+      });
+    }
+
+    // Get all users who voted (from userVotes array)
+    const userIds = (poll.userVotes || []).map(uv => uv.userId);
+    const votedUsers = await User.find({ _id: { $in: userIds } }).select("displayName username email gender");
+
+    // Build statistics by user
+    const byUser = poll.userVotes.map(uv => {
+      const user = votedUsers.find(u => u._id.toString() === uv.userId.toString());
+      const option = poll.options.id(uv.optionId);
+      return {
+        user: {
+          displayName: user?.displayName || "Unknown",
+          username: user?.username,
+          email: user?.email
+        },
+        option: option?.text || "Unknown option"
+      };
+    });
+
+    // Build statistics by gender
+    const byGender = {};
+    poll.options.forEach(option => {
+      byGender[option.text] = {
+        male: 0,
+        female: 0,
+        other: 0,
+        prefer_not_to_say: 0,
+        unknown: 0
+      };
+    });
+
+    poll.userVotes.forEach(uv => {
+      const user = votedUsers.find(u => u._id.toString() === uv.userId.toString());
+      const option = poll.options.id(uv.optionId);
+      if (option) {
+        const gender = user?.gender || "unknown";
+        byGender[option.text][gender] = (byGender[option.text][gender] || 0) + 1;
+      }
+    });
+
+    return res.json({
+      statistics: {
+        totalVotes: poll.options.reduce((sum, opt) => sum + (opt.votes || 0), 0),
+        byUser,
+        byGender
+      }
+    });
+  } catch (error) {
+    console.error("[polls-statistics-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση στατιστικών." });
+  }
+});
+
+// Delete a poll (only by creator or admin)
+pollsRouter.delete("/:pollId", ensureAuthenticated, async (req, res) => {
+  const { pollId } = req.params;
+  const userId = req.user?.id;
+
+  if (!mongoose.Types.ObjectId.isValid(pollId)) {
+    return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId);
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    // Check if user is the creator or admin
+    const isCreator = poll.createdBy && poll.createdBy.toString() === userId;
+    const isAdmin = req.user.role === "admin";
+
+    if (!isCreator && !isAdmin) {
+      return res.status(403).json({ message: "Δεν έχετε δικαίωμα να διαγράψετε αυτή την ψηφοφορία." });
+    }
+
+    // Delete associated anonymous votes if any
+    if (poll.anonymousResponses) {
+      await AnonymousVote.deleteMany({ pollId: poll._id });
+    }
+
+    await Poll.deleteOne({ _id: poll._id });
+
+    return res.json({ message: "Η ψηφοφορία διαγράφηκε επιτυχώς." });
+  } catch (error) {
+    console.error("[polls-delete-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η διαγραφή της ψηφοφορίας." });
+  }
+});
+
 const usersRouter = express.Router();
 
 usersRouter.use(ensureAuthenticated);
@@ -976,6 +1113,7 @@ authRouter.put("/profile", ensureAuthenticated, async (req, res) => {
     "occupation",
     "region",
     "cityOrVillage",
+    "gender",
     "avatar",
   ];
   const updates = {};
@@ -1032,6 +1170,13 @@ authRouter.put("/profile", ensureAuthenticated, async (req, res) => {
 
   if (updates.region && req.user.cityOrVillage && !CITIES_BY_REGION[updates.region]?.includes(req.user.cityOrVillage)) {
     updates.cityOrVillage = undefined;
+  }
+
+  if ("gender" in updates && updates.gender) {
+    const validGenders = ["male", "female", "other", "prefer_not_to_say"];
+    if (!validGenders.includes(updates.gender)) {
+      return res.status(400).json({ message: "Το φύλο δεν είναι έγκυρο." });
+    }
   }
 
   try {

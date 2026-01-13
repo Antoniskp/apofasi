@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { API_BASE_URL, getAuthStatus, getPoll, voteOnPoll, cancelVoteOnPoll } from "../lib/api.js";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { API_BASE_URL, getAuthStatus, getPoll, voteOnPoll, cancelVoteOnPoll, deletePoll } from "../lib/api.js";
 
 const formatDateTime = (value) => {
   if (!value) return "";
@@ -9,10 +9,12 @@ const formatDateTime = (value) => {
 
 export default function PollDetail() {
   const { pollId } = useParams();
+  const navigate = useNavigate();
   const [authState, setAuthState] = useState({ loading: true, user: null, error: null });
   const [pollState, setPollState] = useState({ loading: true, poll: null, error: null });
   const [voteState, setVoteState] = useState({ submitting: false, error: null });
   const [cancelState, setCancelState] = useState({ cancelling: false, error: null });
+  const [deleteState, setDeleteState] = useState({ deleting: false, error: null });
 
   const totalVotes = useMemo(() => pollState.poll?.totalVotes || 0, [pollState.poll]);
 
@@ -102,7 +104,25 @@ export default function PollDetail() {
     }
   };
 
-  const { loading: authLoading, error: authError } = authState;
+  const handleDelete = async () => {
+    if (!confirm("Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την ψηφοφορία;")) {
+      return;
+    }
+
+    setDeleteState({ deleting: true, error: null });
+
+    try {
+      await deletePoll(pollId);
+      navigate("/polls");
+    } catch (error) {
+      setDeleteState({
+        deleting: false,
+        error: error.message || "Η διαγραφή απέτυχε.",
+      });
+    }
+  };
+
+  const { loading: authLoading, user, error: authError } = authState;
   const { loading: pollLoading, poll, error: pollError } = pollState;
 
   return (
@@ -220,6 +240,23 @@ export default function PollDetail() {
           )}
           {voteState.error && <p className="error-text">{voteState.error}</p>}
           {cancelState.error && <p className="error-text">{cancelState.error}</p>}
+
+          <div className="cta-row" style={{ marginTop: "1rem" }}>
+            <Link className="btn btn-outline" to={`/polls/${pollId}/statistics`}>
+              Στατιστικά
+            </Link>
+            {user && poll.createdBy && poll.createdBy.email === user.email && (
+              <button
+                className="btn btn-subtle"
+                type="button"
+                disabled={deleteState.deleting}
+                onClick={handleDelete}
+              >
+                {deleteState.deleting ? "Διαγραφή..." : "Διαγραφή ψηφοφορίας"}
+              </button>
+            )}
+          </div>
+          {deleteState.error && <p className="error-text">{deleteState.error}</p>}
         </div>
       )}
     </div>
