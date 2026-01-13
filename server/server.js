@@ -398,6 +398,44 @@ newsRouter.post("/", ensureAuthenticated, ensureRole("reporter", "admin"), async
   }
 });
 
+// Helper functions for article validation
+const normalizeArticleTags = (tags) => {
+  return Array.from(
+    new Set(
+      (Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",") : [])
+        .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+        .filter(Boolean)
+    )
+  ).slice(0, 10);
+};
+
+const validateArticleLocation = (region, cityOrVillage) => {
+  const trimmedRegion = region?.trim();
+  const trimmedCity = cityOrVillage?.trim();
+
+  if (trimmedRegion && !REGION_NAMES.includes(trimmedRegion)) {
+    return { valid: false, error: "Η περιφέρεια δεν είναι διαθέσιμη." };
+  }
+
+  if (trimmedCity) {
+    if (!trimmedRegion) {
+      return {
+        valid: false,
+        error: "Επιλέξτε πρώτα περιφέρεια για να προσθέσετε πόλη ή χωριό.",
+      };
+    }
+
+    if (!CITIES_BY_REGION[trimmedRegion]?.includes(trimmedCity)) {
+      return {
+        valid: false,
+        error: "Η πόλη ή το χωριό δεν ανήκει στην επιλεγμένη περιφέρεια.",
+      };
+    }
+  }
+
+  return { valid: true, region: trimmedRegion, cityOrVillage: trimmedCity };
+};
+
 // Articles routes
 articlesRouter.get("/", async (req, res) => {
   try {
@@ -462,31 +500,11 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
     return res.status(400).json({ message: "Απαιτούνται τίτλος και περιεχόμενο." });
   }
 
-  const normalizedTags = Array.from(
-    new Set(
-      (Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",") : [])
-        .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
-        .filter(Boolean)
-    )
-  ).slice(0, 10);
+  const normalizedTags = normalizeArticleTags(tags);
+  const locationValidation = validateArticleLocation(region, cityOrVillage);
 
-  const trimmedRegion = region?.trim();
-  const trimmedCity = cityOrVillage?.trim();
-
-  if (trimmedRegion && !REGION_NAMES.includes(trimmedRegion)) {
-    return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
-  }
-
-  if (trimmedCity) {
-    if (!trimmedRegion) {
-      return res
-        .status(400)
-        .json({ message: "Επιλέξτε πρώτα περιφέρεια για να προσθέσετε πόλη ή χωριό." });
-    }
-
-    if (!CITIES_BY_REGION[trimmedRegion]?.includes(trimmedCity)) {
-      return res.status(400).json({ message: "Η πόλη ή το χωριό δεν ανήκει στην επιλεγμένη περιφέρεια." });
-    }
+  if (!locationValidation.valid) {
+    return res.status(400).json({ message: locationValidation.error });
   }
 
   try {
@@ -495,15 +513,14 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
       content: trimmedContent,
       author: req.user._id,
       tags: normalizedTags,
-      region: trimmedRegion,
-      cityOrVillage: trimmedCity,
+      region: locationValidation.region,
+      cityOrVillage: locationValidation.cityOrVillage,
     });
 
-    const populatedArticle = await createdArticle
-      .populate("author", "displayName username email");
+    await createdArticle.populate("author", "displayName username email");
 
     return res.status(201).json({
-      article: serializeArticle(populatedArticle),
+      article: serializeArticle(createdArticle),
     });
   } catch (error) {
     console.error("[article-create-error]", error);
@@ -527,31 +544,11 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
     return res.status(400).json({ message: "Απαιτούνται τίτλος και περιεχόμενο." });
   }
 
-  const normalizedTags = Array.from(
-    new Set(
-      (Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",") : [])
-        .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
-        .filter(Boolean)
-    )
-  ).slice(0, 10);
+  const normalizedTags = normalizeArticleTags(tags);
+  const locationValidation = validateArticleLocation(region, cityOrVillage);
 
-  const trimmedRegion = region?.trim();
-  const trimmedCity = cityOrVillage?.trim();
-
-  if (trimmedRegion && !REGION_NAMES.includes(trimmedRegion)) {
-    return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
-  }
-
-  if (trimmedCity) {
-    if (!trimmedRegion) {
-      return res
-        .status(400)
-        .json({ message: "Επιλέξτε πρώτα περιφέρεια για να προσθέσετε πόλη ή χωριό." });
-    }
-
-    if (!CITIES_BY_REGION[trimmedRegion]?.includes(trimmedCity)) {
-      return res.status(400).json({ message: "Η πόλη ή το χωριό δεν ανήκει στην επιλεγμένη περιφέρεια." });
-    }
+  if (!locationValidation.valid) {
+    return res.status(400).json({ message: locationValidation.error });
   }
 
   try {
@@ -569,16 +566,15 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
     article.title = trimmedTitle;
     article.content = trimmedContent;
     article.tags = normalizedTags;
-    article.region = trimmedRegion;
-    article.cityOrVillage = trimmedCity;
+    article.region = locationValidation.region;
+    article.cityOrVillage = locationValidation.cityOrVillage;
 
     await article.save();
 
-    const populatedArticle = await article
-      .populate("author", "displayName username email")
-      .populate("taggedAsNewsBy", "displayName username email");
+    await article.populate("author", "displayName username email");
+    await article.populate("taggedAsNewsBy", "displayName username email");
 
-    return res.json({ article: serializeArticle(populatedArticle) });
+    return res.json({ article: serializeArticle(article) });
   } catch (error) {
     console.error("[article-update-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η ενημέρωση του άρθρου." });
@@ -637,11 +633,10 @@ articlesRouter.put("/:articleId/tag-as-news", ensureAuthenticated, ensureRole("r
 
     await article.save();
 
-    const populatedArticle = await article
-      .populate("author", "displayName username email")
-      .populate("taggedAsNewsBy", "displayName username email");
+    await article.populate("author", "displayName username email");
+    await article.populate("taggedAsNewsBy", "displayName username email");
 
-    return res.json({ article: serializeArticle(populatedArticle) });
+    return res.json({ article: serializeArticle(article) });
   } catch (error) {
     console.error("[article-tag-as-news-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η επισήμανση του άρθρου ως είδηση." });
@@ -668,10 +663,9 @@ articlesRouter.put("/:articleId/untag-as-news", ensureAuthenticated, ensureRole(
 
     await article.save();
 
-    const populatedArticle = await article
-      .populate("author", "displayName username email");
+    await article.populate("author", "displayName username email");
 
-    return res.json({ article: serializeArticle(populatedArticle) });
+    return res.json({ article: serializeArticle(article) });
   } catch (error) {
     console.error("[article-untag-as-news-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η αφαίρεση της επισήμανσης του άρθρου ως είδηση." });
