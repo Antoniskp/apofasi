@@ -18,7 +18,6 @@ const anonymousVoteSchema = new mongoose.Schema(
     },
     ipAddress: {
       type: String,
-      required: true,
       index: true,
     },
   },

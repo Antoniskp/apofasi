@@ -77,22 +77,22 @@ const oauthProviders = {
 const sanitizeUser = (user) =>
   user
     ? {
-        id: user.id,
-        displayName: user.displayName,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        provider: user.provider,
-        avatar: user.avatar,
-        role: user.role,
-        username: user.username,
-        mobile: user.mobile,
-        country: user.country,
-        occupation: user.occupation,
-        region: user.region,
-        cityOrVillage: user.cityOrVillage,
-        createdAt: user.createdAt,
-      }
+      id: user.id,
+      displayName: user.displayName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      provider: user.provider,
+      avatar: user.avatar,
+      role: user.role,
+      username: user.username,
+      mobile: user.mobile,
+      country: user.country,
+      occupation: user.occupation,
+      region: user.region,
+      cityOrVillage: user.cityOrVillage,
+      createdAt: user.createdAt,
+    }
     : null;
 
 const escapeRegex = (value = "") => {
@@ -143,17 +143,22 @@ const serializePoll = async (poll, currentUser, session, req) => {
     const sessionId = session?.id;
     const ipAddress = req?.ip;
     
-    const anonymousVote = await AnonymousVote.findOne({
-      pollId: poll._id,
-      $or: [
-        sessionId ? { sessionId } : null,
-        ipAddress ? { ipAddress } : null,
-      ].filter(Boolean),
-    });
+    // Build query conditions
+    const orConditions = [];
+    if (sessionId) orConditions.push({ sessionId });
+    if (ipAddress) orConditions.push({ ipAddress });
     
-    if (anonymousVote) {
-      hasVoted = true;
-      votedOptionId = anonymousVote.optionId.toString();
+    // Only query if we have at least one condition
+    if (orConditions.length > 0) {
+      const anonymousVote = await AnonymousVote.findOne({
+        pollId: poll._id,
+        $or: orConditions,
+      });
+      
+      if (anonymousVote) {
+        hasVoted = true;
+        votedOptionId = anonymousVote.optionId.toString();
+      }
     }
   }
 
@@ -212,9 +217,9 @@ if (shouldLogRequests) {
     const safeBody =
       req.method !== "GET" && req.body
         ? {
-            ...req.body,
-            password: req.body.password ? "<redacted>" : undefined,
-          }
+          ...req.body,
+          password: req.body.password ? "<redacted>" : undefined,
+        }
         : undefined;
 
     console.log(
@@ -534,14 +539,19 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
       const sessionId = req.session?.id;
       const ipAddress = req.ip;
 
+      // Build query conditions
+      const orConditions = [];
+      if (sessionId) orConditions.push({ sessionId });
+      if (ipAddress) orConditions.push({ ipAddress });
+
       // Check if user has already voted (by session OR IP)
-      const existingVote = await AnonymousVote.findOne({
-        pollId: poll._id,
-        $or: [
-          sessionId ? { sessionId } : null,
-          ipAddress ? { ipAddress } : null,
-        ].filter(Boolean),
-      });
+      let existingVote = null;
+      if (orConditions.length > 0) {
+        existingVote = await AnonymousVote.findOne({
+          pollId: poll._id,
+          $or: orConditions,
+        });
+      }
 
       if (existingVote) {
         const oldOptionId = existingVote.optionId.toString();
@@ -593,10 +603,11 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
       }
 
       // Check if user has already voted
-      const existingVoteIndex = poll.userVotes?.findIndex((uv) => uv.userId.toString() === userId);
+      const userVotes = poll.userVotes || [];
+      const existingVoteIndex = userVotes.findIndex((uv) => uv.userId.toString() === userId);
 
       if (existingVoteIndex !== -1) {
-        const existingVote = poll.userVotes[existingVoteIndex];
+        const existingVote = userVotes[existingVoteIndex];
         const oldOptionId = existingVote.optionId.toString();
         
         // If voting for the same option, just return current state
@@ -613,7 +624,8 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
         selectedOption.votes += 1;
         
         // Update the user vote record
-        poll.userVotes[existingVoteIndex].optionId = normalizedOptionId;
+        userVotes[existingVoteIndex].optionId = normalizedOptionId;
+        poll.userVotes = userVotes;
         
         await poll.save();
         return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
@@ -665,13 +677,19 @@ pollsRouter.delete("/:pollId/vote", async (req, res) => {
       const sessionId = req.session?.id;
       const ipAddress = req.ip;
 
-      const existingVote = await AnonymousVote.findOne({
-        pollId: poll._id,
-        $or: [
-          sessionId ? { sessionId } : null,
-          ipAddress ? { ipAddress } : null,
-        ].filter(Boolean),
-      });
+      // Build query conditions
+      const orConditions = [];
+      if (sessionId) orConditions.push({ sessionId });
+      if (ipAddress) orConditions.push({ ipAddress });
+
+      // Check if user has voted
+      let existingVote = null;
+      if (orConditions.length > 0) {
+        existingVote = await AnonymousVote.findOne({
+          pollId: poll._id,
+          $or: orConditions,
+        });
+      }
 
       if (!existingVote) {
         return res.status(400).json({ message: "Δεν έχετε ψηφίσει σε αυτή την ψηφοφορία." });
@@ -696,13 +714,14 @@ pollsRouter.delete("/:pollId/vote", async (req, res) => {
         return res.status(401).json({ message: "Χρειάζεται σύνδεση για να ακυρώσετε την ψήφο σας." });
       }
 
-      const existingVoteIndex = poll.userVotes?.findIndex((uv) => uv.userId.toString() === userId);
+      const userVotes = poll.userVotes || [];
+      const existingVoteIndex = userVotes.findIndex((uv) => uv.userId.toString() === userId);
 
-      if (existingVoteIndex === -1 || existingVoteIndex === undefined) {
+      if (existingVoteIndex === -1) {
         return res.status(400).json({ message: "Δεν έχετε ψηφίσει σε αυτή την ψηφοφορία." });
       }
 
-      const existingVote = poll.userVotes[existingVoteIndex];
+      const existingVote = userVotes[existingVoteIndex];
       const votedOptionId = existingVote.optionId.toString();
       
       // Decrement the vote count
@@ -712,7 +731,8 @@ pollsRouter.delete("/:pollId/vote", async (req, res) => {
       }
 
       // Remove from userVotes
-      poll.userVotes.splice(existingVoteIndex, 1);
+      userVotes.splice(existingVoteIndex, 1);
+      poll.userVotes = userVotes;
       
       // Also remove from votedUsers for backwards compatibility
       const votedUserIndex = poll.votedUsers.findIndex((uid) => uid.toString() === userId);
@@ -738,14 +758,14 @@ usersRouter.get("/", async (req, res) => {
   const rawSearch = req.query.search?.trim();
   const filter = rawSearch
     ? {
-        $or: [
-          { email: { $regex: escapeRegex(rawSearch), $options: "i" } },
-          { displayName: { $regex: escapeRegex(rawSearch), $options: "i" } },
-          { username: { $regex: escapeRegex(rawSearch), $options: "i" } },
-          { firstName: { $regex: escapeRegex(rawSearch), $options: "i" } },
-          { lastName: { $regex: escapeRegex(rawSearch), $options: "i" } },
-        ],
-      }
+      $or: [
+        { email: { $regex: escapeRegex(rawSearch), $options: "i" } },
+        { displayName: { $regex: escapeRegex(rawSearch), $options: "i" } },
+        { username: { $regex: escapeRegex(rawSearch), $options: "i" } },
+        { firstName: { $regex: escapeRegex(rawSearch), $options: "i" } },
+        { lastName: { $regex: escapeRegex(rawSearch), $options: "i" } },
+      ],
+    }
     : {};
 
   try {
@@ -809,13 +829,13 @@ contactRouter.post("/", async (req, res) => {
 
   const userSnapshot = req.user
     ? {
-        id: req.user.id,
-        displayName: req.user.displayName,
-        email: req.user.email,
-        username: req.user.username,
-        provider: req.user.provider,
-        role: req.user.role,
-      }
+      id: req.user.id,
+      displayName: req.user.displayName,
+      email: req.user.email,
+      username: req.user.username,
+      provider: req.user.provider,
+      role: req.user.role,
+    }
     : undefined;
 
   try {

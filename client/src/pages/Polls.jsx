@@ -116,11 +116,11 @@ export default function Polls() {
     const query = searchTerm.trim().toLowerCase();
     const searched = query
       ? polls.filter((poll) => {
-          const question = poll.question?.toLowerCase() || "";
-          const tags = (poll.tags || []).join(" ").toLowerCase();
-          const creator = poll.createdBy?.displayName?.toLowerCase() || "";
-          return question.includes(query) || tags.includes(query) || creator.includes(query);
-        })
+        const question = poll.question?.toLowerCase() || "";
+        const tags = (poll.tags || []).join(" ").toLowerCase();
+        const creator = poll.createdBy?.displayName?.toLowerCase() || "";
+        return question.includes(query) || tags.includes(query) || creator.includes(query);
+      })
       : polls;
 
     const sorted = [...searched].sort((a, b) => {
