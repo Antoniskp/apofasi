@@ -16,6 +16,7 @@ const footerSections = [
   },
   {
     title: "Σχετικά",
+    titleLink: "/about",
     links: [
       { label: "Αποστολή", to: "/mission" },
       { label: "Πώς δουλεύουμε", to: "/how-we-do-it" },
@@ -36,11 +37,13 @@ const footerSections = [
   },
   {
     title: "Κοινότητα",
+    titleLink: "/social",
     links: [
       { label: "Κοινωνικά δίκτυα", to: "/social" },
       { label: "Συμμετοχή στην ανάπτυξη", to: "/contribute" },
       { label: "Προφίλ χρήστη", to: "/profile" },
-      { label: "Σύνδεση/Εγγραφή", to: "/auth" }
+      { label: "Σύνδεση", to: "/auth" },
+      { label: "Εγγραφή με email", to: "/register" }
     ]
   }
 ];
