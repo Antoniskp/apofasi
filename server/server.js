@@ -198,6 +198,33 @@ if (shouldLogRequests) {
     next();
   });
 }
+// Determine session cookie configuration
+// SameSite=None requires Secure=true (HTTPS), so we need to coordinate these settings
+const getSessionCookieConfig = () => {
+  // Allow explicit override via environment variables
+  if (process.env.SESSION_SECURE !== undefined || process.env.SESSION_SAMESITE !== undefined) {
+    return {
+      secure: process.env.SESSION_SECURE === "true",
+      sameSite: process.env.SESSION_SAMESITE || "lax",
+      httpOnly: true,
+      maxAge: sessionMaxAgeMs,
+    };
+  }
+
+  // Auto-detect based on NODE_ENV and assume HTTPS in production
+  // In production behind a reverse proxy with HTTPS, use secure=true and sameSite=none
+  // In development or HTTP-only deployments, use secure=false and sameSite=lax
+  const isProduction = process.env.NODE_ENV === "production";
+  const useSecureCookies = isProduction; // Assume HTTPS in production
+
+  return {
+    secure: useSecureCookies,
+    sameSite: useSecureCookies ? "none" : "lax",
+    httpOnly: true,
+    maxAge: sessionMaxAgeMs,
+  };
+};
+
 app.use(
   session({
     name: process.env.SESSION_NAME || "apofasi.sid",
@@ -206,12 +233,7 @@ app.use(
     saveUninitialized: false,
     proxy: true,
     store: sessionStore,
-    cookie: {
-      secure: false,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      httpOnly: true,
-      maxAge: sessionMaxAgeMs,
-    },
+    cookie: getSessionCookieConfig(),
   })
 );
 app.use(passport.initialize());
