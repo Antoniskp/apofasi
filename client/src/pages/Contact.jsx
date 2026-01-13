@@ -278,7 +278,7 @@ export default function Contact() {
             </a>
           </div>
           <div className="social-icons">
-            {socialLinks.map((link) => (
+            {contactContent.socials.map((link) => (
               <a key={link.label} className="social-btn" href={link.href} target="_blank" rel="noreferrer">
                 <span className="social-icon" aria-hidden>
                   {link.icon}
