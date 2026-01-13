@@ -148,6 +148,13 @@ const serializePoll = (poll, currentUser, session) => {
   };
 };
 
+const ensureDatabaseReady = (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ message: "Η βάση δεδομένων δεν είναι διαθέσιμη." });
+  }
+  return next();
+};
+
 const seedDefaultPolls = async () => {
   if (process.env.SEED_DEFAULT_POLLS === "false") return;
 
@@ -597,7 +604,7 @@ contactRouter.post("/", async (req, res) => {
   }
 });
 
-authRouter.post("/register", async (req, res) => {
+authRouter.post("/register", ensureDatabaseReady, async (req, res) => {
   const { email, password, displayName, firstName, lastName, mobile, country, occupation } = req.body || {};
 
   if (!email || !password) {
@@ -651,7 +658,7 @@ authRouter.post("/register", async (req, res) => {
   }
 });
 
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login", ensureDatabaseReady, async (req, res) => {
   const { email, password } = req.body || {};
 
   if (!email || !password) {
