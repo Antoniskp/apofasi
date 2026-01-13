@@ -59,6 +59,11 @@ export default function PollDetail() {
   const handleVote = async (optionId) => {
     if (!pollState.poll) return;
 
+    if (!optionId || typeof optionId !== "string") {
+      setVoteState({ submitting: false, error: "Επιλέξτε μία από τις διαθέσιμες απαντήσεις." });
+      return;
+    }
+
     if (!pollState.poll.anonymousResponses && !authState.user) {
       setVoteState({ submitting: false, error: "Χρειάζεται σύνδεση για να ψηφίσετε." });
       return;
