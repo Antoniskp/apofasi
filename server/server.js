@@ -686,6 +686,7 @@ authRouter.post("/login", async (req, res) => {
       return res.json({ user: sanitizeUser(user) });
     });
   } catch (error) {
+    console.error("[login-error]", error);
     return res.status(500).json({ message: "Κάτι πήγε στραβά. Προσπαθήστε ξανά." });
   }
 });
