@@ -36,8 +36,6 @@ Sentry.init({
 });
 
 const app = express();
-// The Sentry request handler must be the first middleware on the app
-Sentry.setupExpressErrorHandler(app);
 const authRouter = express.Router();
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 const sessionMaxAgeDays = Number(process.env.SESSION_MAX_AGE_DAYS);
@@ -63,6 +61,10 @@ const corsOptions = {
   },
   credentials: true,
 };
+
+// CORS must be the first middleware on the app
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 const shouldLogRequests = process.env.REQUEST_LOGGING === "true";
 const oauthProviders = {
   google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
@@ -174,10 +176,6 @@ mongoose.connection.once("open", () => {
   });
 });
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-app.options("/auth/*", cors(corsOptions));
-app.options("/api/auth/*", cors(corsOptions));
 app.use(express.json({ limit: "1mb" }));
 
 if (shouldLogRequests) {
