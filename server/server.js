@@ -35,8 +35,6 @@ Sentry.init({
   // debug: true, // log in the terminal console sentry service logs
 });
 
-const app = express();
-const authRouter = express.Router();
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 const sessionMaxAgeDays = Number(process.env.SESSION_MAX_AGE_DAYS);
 const sessionMaxAgeMs =
@@ -62,9 +60,13 @@ const corsOptions = {
   credentials: true,
 };
 
+const app = express();
+app.set("trust proxy", 1);
+
 // CORS must be the first middleware on the app
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
+const authRouter = express.Router();
 const shouldLogRequests = process.env.REQUEST_LOGGING === "true";
 const oauthProviders = {
   google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
@@ -196,7 +198,6 @@ if (shouldLogRequests) {
     next();
   });
 }
-app.set("trust proxy", 1);
 app.use(
   session({
     name: process.env.SESSION_NAME || "apofasi.sid",
