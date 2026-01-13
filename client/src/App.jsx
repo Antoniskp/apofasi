@@ -28,6 +28,7 @@ import GovernmentApps from "./pages/GovernmentApps.jsx";
 import GovernmentStatistics from "./pages/GovernmentStatistics.jsx";
 import GreekLawSystem from "./pages/GreekLawSystem.jsx";
 import Documentation from "./pages/Documentation.jsx";
+import Rules from "./pages/Rules.jsx";
 
 
 const withLayout = (page) => (
@@ -73,6 +74,7 @@ function App() {
         <Route path="/recommendations" element={withLayout(<Recommendations />)} />
         <Route path="/top-choices" element={withLayout(<TopChoices />)} />
         <Route path="/documentation" element={withLayout(<Documentation />)} />
+        <Route path="/rules" element={withLayout(<Rules />)} />
         <Route path="/auth" element={withLayout(<Auth />)} />
         <Route path="/register" element={withLayout(<Register />)} />
         <Route path="/profile" element={withLayout(<Profile />)} />

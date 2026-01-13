@@ -8,7 +8,6 @@ const footerSections = [
     titleLink: "/contact",
     links: [
       { label: "Σελίδα επικοινωνίας", to: "/contact" },
-      { label: "Φόρμα επικοινωνίας", to: "/contact#contact-form" },
       { label: "Υποστήριξη", to: "/contact#support" },
       { label: "Συνεργασίες", to: "/contact#collaboration" },
       { label: "Discord", href: "https://discord.gg/pvJftR4T98" }
@@ -40,6 +39,7 @@ const footerSections = [
     titleLink: "/social",
     links: [
       { label: "Κοινωνικά δίκτυα", to: "/social" },
+      { label: "Κανόνες κοινότητας", to: "/rules" },
       { label: "Συμμετοχή στην ανάπτυξη", to: "/contribute" },
       { label: "Προφίλ χρήστη", to: "/profile" },
       { label: "Σύνδεση", to: "/auth" },
