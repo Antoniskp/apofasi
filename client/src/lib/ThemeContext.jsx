@@ -11,7 +11,7 @@ export function ThemeProvider({ children }) {
     }
     
     // Fall back to prefers-color-scheme
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    if (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
       return "dark";
     }
     

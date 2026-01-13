@@ -52,15 +52,23 @@ export default function UserMenu({ user, onLogout }) {
       action();
     } else if (event.key === "ArrowDown") {
       event.preventDefault();
-      const nextItem = event.target.nextElementSibling;
-      if (nextItem && nextItem.getAttribute("role") === "menuitem") {
-        nextItem.focus();
+      // Find next menuitem, skipping separators
+      let nextElement = event.target.nextElementSibling;
+      while (nextElement && nextElement.getAttribute("role") !== "menuitem") {
+        nextElement = nextElement.nextElementSibling;
+      }
+      if (nextElement) {
+        nextElement.focus();
       }
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      const prevItem = event.target.previousElementSibling;
-      if (prevItem && prevItem.getAttribute("role") === "menuitem") {
-        prevItem.focus();
+      // Find previous menuitem, skipping separators
+      let prevElement = event.target.previousElementSibling;
+      while (prevElement && prevElement.getAttribute("role") !== "menuitem") {
+        prevElement = prevElement.previousElementSibling;
+      }
+      if (prevElement) {
+        prevElement.focus();
       }
     }
   };
