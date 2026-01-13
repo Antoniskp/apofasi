@@ -198,6 +198,64 @@ if (shouldLogRequests) {
     next();
   });
 }
+// Determine session cookie configuration
+// SameSite=None requires Secure=true (HTTPS), so we need to coordinate these settings
+const getSessionCookieConfig = () => {
+  const hasSecureOverride = process.env.SESSION_SECURE !== undefined;
+  const hasSameSiteOverride = process.env.SESSION_SAMESITE !== undefined;
+
+  // Allow explicit override via environment variables
+  if (hasSecureOverride || hasSameSiteOverride) {
+    const secure = hasSecureOverride 
+      ? process.env.SESSION_SECURE === "true" 
+      : false;
+    const sameSite = process.env.SESSION_SAMESITE || "lax";
+
+    // Validate SESSION_SECURE value
+    if (hasSecureOverride && !["true", "false"].includes(process.env.SESSION_SECURE)) {
+      throw new Error(
+        `Invalid SESSION_SECURE value: "${process.env.SESSION_SECURE}". Must be "true" or "false".`
+      );
+    }
+
+    // Validate SESSION_SAMESITE value
+    if (hasSameSiteOverride && !["none", "lax", "strict"].includes(sameSite)) {
+      throw new Error(
+        `Invalid SESSION_SAMESITE value: "${sameSite}". Must be "none", "lax", or "strict".`
+      );
+    }
+
+    // Warn about potentially insecure configuration
+    if (sameSite === "none" && !secure) {
+      console.warn(
+        "[session-config-warning] SameSite=None requires Secure=true (HTTPS). " +
+        "Browsers will reject cookies with SameSite=None over HTTP. " +
+        "Consider using SESSION_SAMESITE=lax for HTTP deployments."
+      );
+    }
+
+    return {
+      secure,
+      sameSite,
+      httpOnly: true,
+      maxAge: sessionMaxAgeMs,
+    };
+  }
+
+  // Auto-detect based on NODE_ENV and assume HTTPS in production
+  // In production behind a reverse proxy with HTTPS, use secure=true and sameSite=none
+  // In development or HTTP-only deployments, use secure=false and sameSite=lax
+  const isProduction = process.env.NODE_ENV === "production";
+  const useSecureCookies = isProduction; // Assume HTTPS in production
+
+  return {
+    secure: useSecureCookies,
+    sameSite: useSecureCookies ? "none" : "lax",
+    httpOnly: true,
+    maxAge: sessionMaxAgeMs,
+  };
+};
+
 app.use(
   session({
     name: process.env.SESSION_NAME || "apofasi.sid",
@@ -206,12 +264,7 @@ app.use(
     saveUninitialized: false,
     proxy: true,
     store: sessionStore,
-    cookie: {
-      secure: false,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      httpOnly: true,
-      maxAge: sessionMaxAgeMs,
-    },
+    cookie: getSessionCookieConfig(),
   })
 );
 app.use(passport.initialize());

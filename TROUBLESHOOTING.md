@@ -157,13 +157,30 @@ Common issues and solutions for the Apofasi application.
    - Ensure `SESSION_SECRET` is set in `server/.env`
    - Check cookie settings in browser (should allow cookies)
 
-2. **CORS issues**:
-   - Ensure `CLIENT_ORIGIN` matches your client URL
-   - Check that credentials are enabled in requests
+2. **HTTP vs HTTPS cookie issues**:
+   - **Symptom**: Cookies rejected in production but work in development
+   - **Cause**: `SameSite=None` requires `Secure=true` (HTTPS)
+   - **Solution for HTTP deployments**: Add to `server/.env`:
+     ```bash
+     SESSION_SECURE=false
+     SESSION_SAMESITE=lax
+     ```
+   - **Solution for HTTPS**: Ensure reverse proxy sets `X-Forwarded-Proto: https`
 
-3. **Proxy issues** (production):
-   - Ensure `trust proxy` is enabled in server.js
+3. **CORS issues**:
+   - Ensure `CLIENT_ORIGIN` matches your client URL exactly
+   - Check that credentials are enabled in fetch requests (`credentials: 'include'`)
+   - For multiple origins, separate with commas: `http://localhost:5173,https://app.example.com`
+
+4. **Proxy issues** (production):
+   - Ensure `trust proxy` is enabled in server.js (already configured)
    - Check nginx/reverse proxy configuration
+   - Verify `X-Forwarded-Proto` header is set correctly
+
+5. **Browser cookie restrictions**:
+   - Check browser console for cookie warnings
+   - Ensure third-party cookies are not blocked (needed for cross-origin)
+   - Test in incognito mode to rule out extension interference
 
 ### OAuth login not working
 

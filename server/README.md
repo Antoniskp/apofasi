@@ -56,6 +56,8 @@ Key fields you must set:
 - `SESSION_SECRET`: long random string for signing the session cookie.
 - `SESSION_NAME` (optional): override the default `apofasi.sid` session cookie name.
 - `SESSION_MAX_AGE_DAYS` (optional): customize the cookie/session lifetime (defaults to 7 days).
+- `SESSION_SECURE` (optional): override session cookie secure flag (`true` or `false`). If not set, defaults to `true` in production (assumes HTTPS), `false` in development. Invalid values will cause the server to fail at startup.
+- `SESSION_SAMESITE` (optional): override session cookie SameSite attribute (`none`, `lax`, or `strict`). If not set, defaults to `none` in production (with `secure=true`), `lax` in development. **Important**: `SameSite=None` requires `Secure=true` (HTTPS). For HTTP-only deployments, explicitly set `SESSION_SECURE=false` and `SESSION_SAMESITE=lax`. Invalid values will cause the server to fail at startup.
 - `CLIENT_ORIGIN`: the base URL of the frontend that will initiate OAuth and receive redirects.
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: from the Google Cloud OAuth client.
 - `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET`: from your Facebook app.
@@ -105,4 +107,30 @@ The server will expose these endpoints:
 
 ## 5) Frontend coordination
 
-Set `VITE_API_BASE_URL` in the client to point to this server (e.g., `http://localhost:5000`) and make sure `CLIENT_ORIGIN` matches the URL the browser uses to load the frontend. The session cookie is issued with `SameSite=None` when `NODE_ENV=production`, so configure HTTPS and trust proxy appropriately in that environment.
+Set `VITE_API_BASE_URL` in the client to point to this server (e.g., `http://localhost:5000`) and make sure `CLIENT_ORIGIN` matches the URL the browser uses to load the frontend.
+
+## 6) Session cookie configuration
+
+The server automatically configures session cookies based on your deployment environment:
+
+**Default behavior:**
+- **Development** (`NODE_ENV=development` or not set): Uses `secure=false` and `sameSite=lax` for HTTP compatibility.
+- **Production** (`NODE_ENV=production`): Uses `secure=true` and `sameSite=none`, assuming HTTPS is configured.
+
+**HTTP-only deployments in production:**
+
+If you're running the app in production over HTTP (without SSL/TLS), browsers will reject cookies with `SameSite=None` because that requires `Secure=true`. To fix this, explicitly configure the session cookies in your `.env`:
+
+```bash
+NODE_ENV=production
+SESSION_SECURE=false
+SESSION_SAMESITE=lax
+```
+
+**HTTPS deployments:**
+
+When running behind a reverse proxy with HTTPS (recommended for production), the defaults work correctly. Ensure your nginx or other reverse proxy sets the `X-Forwarded-Proto` header and that the Express app trusts the proxy (already configured with `app.set('trust proxy', 1)`).
+
+**Cross-origin cookies:**
+
+If your frontend and backend are on different domains (e.g., `app.example.com` and `api.example.com`), you must use HTTPS with `SESSION_SECURE=true` and `SESSION_SAMESITE=none`. Browsers do not allow cross-site cookies over HTTP.
