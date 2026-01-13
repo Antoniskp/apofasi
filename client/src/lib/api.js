@@ -179,4 +179,16 @@ export const voteOnPoll = async (pollId, optionId) =>
     )
   );
 
+export const cancelVoteOnPoll = async (pollId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/polls/${pollId}/vote`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    )
+  );
+
 export { API_BASE_URL };

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { API_BASE_URL, getAuthStatus, getPoll, voteOnPoll } from "../lib/api.js";
+import { API_BASE_URL, getAuthStatus, getPoll, voteOnPoll, cancelVoteOnPoll } from "../lib/api.js";
 
 const formatDateTime = (value) => {
   if (!value) return "";
@@ -12,6 +12,7 @@ export default function PollDetail() {
   const [authState, setAuthState] = useState({ loading: true, user: null, error: null });
   const [pollState, setPollState] = useState({ loading: true, poll: null, error: null });
   const [voteState, setVoteState] = useState({ submitting: false, error: null });
+  const [cancelState, setCancelState] = useState({ cancelling: false, error: null });
 
   const totalVotes = useMemo(() => pollState.poll?.totalVotes || 0, [pollState.poll]);
 
@@ -83,6 +84,24 @@ export default function PollDetail() {
     }
   };
 
+  const handleCancelVote = async () => {
+    if (!pollState.poll) return;
+
+    setCancelState({ cancelling: true, error: null });
+
+    try {
+      const response = await cancelVoteOnPoll(pollState.poll.id);
+      setPollState((prev) => ({ ...prev, poll: response.poll }));
+      setCancelState({ cancelling: false, error: null });
+      setVoteState({ submitting: false, error: null });
+    } catch (error) {
+      setCancelState({
+        cancelling: false,
+        error: error.message || "Η ακύρωση της ψήφου απέτυχε.",
+      });
+    }
+  };
+
   const { loading: authLoading, error: authError } = authState;
   const { loading: pollLoading, poll, error: pollError } = pollState;
 
@@ -143,12 +162,16 @@ export default function PollDetail() {
           <div className="poll-options-list">
             {poll.options.map((option) => {
               const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
-              const disabled = poll.hasVoted || voteState.submitting;
+              const disabled = voteState.submitting || cancelState.cancelling;
+              const isVotedOption = poll.votedOptionId === option.id;
 
               return (
                 <div key={option.id} className="poll-option">
                   <div className="poll-option-header">
-                    <div className="poll-option-title">{option.text}</div>
+                    <div className="poll-option-title">
+                      {option.text}
+                      {isVotedOption && <span className="muted"> (Η ψήφος σας)</span>}
+                    </div>
                     <div className="muted small">
                       {option.votes} ψήφοι {totalVotes > 0 ? `• ${percentage}%` : ""}
                     </div>
@@ -156,7 +179,18 @@ export default function PollDetail() {
                   <div className="progress-track" aria-hidden>
                     <div className="progress-bar" style={{ width: `${percentage}%` }} />
                   </div>
-                  {!poll.hasVoted && (
+                  {poll.hasVoted ? (
+                    !isVotedOption && (
+                      <button
+                        className="btn btn-outline"
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => handleVote(option.id)}
+                      >
+                        {voteState.submitting ? "Αλλαγή..." : "Αλλαγή ψήφου"}
+                      </button>
+                    )
+                  ) : (
                     <button
                       className="btn btn-outline"
                       type="button"
@@ -171,8 +205,21 @@ export default function PollDetail() {
             })}
           </div>
 
-          {poll.hasVoted && <p className="positive-text small">Έχετε ήδη ψηφίσει.</p>}
+          {poll.hasVoted && (
+            <div>
+              <p className="positive-text small">Έχετε ήδη ψηφίσει.</p>
+              <button
+                className="btn btn-subtle"
+                type="button"
+                disabled={cancelState.cancelling || voteState.submitting}
+                onClick={handleCancelVote}
+              >
+                {cancelState.cancelling ? "Ακύρωση..." : "Ακύρωση ψήφου"}
+              </button>
+            </div>
+          )}
           {voteState.error && <p className="error-text">{voteState.error}</p>}
+          {cancelState.error && <p className="error-text">{cancelState.error}</p>}
         </div>
       )}
     </div>

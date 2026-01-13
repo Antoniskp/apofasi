@@ -16,6 +16,7 @@ import News from "./models/News.js";
 import Poll from "./models/Poll.js";
 import User from "./models/User.js";
 import ContactMessage from "./models/ContactMessage.js";
+import AnonymousVote from "./models/AnonymousVote.js";
 import { CITIES_BY_REGION, REGION_NAMES } from "../shared/locations.js";
 import defaultPolls from "./data/defaultPolls.js";
 import { hashPassword, needsPasswordUpgrade, verifyPassword } from "./utils/crypto.js";
@@ -76,22 +77,22 @@ const oauthProviders = {
 const sanitizeUser = (user) =>
   user
     ? {
-        id: user.id,
-        displayName: user.displayName,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        provider: user.provider,
-        avatar: user.avatar,
-        role: user.role,
-        username: user.username,
-        mobile: user.mobile,
-        country: user.country,
-        occupation: user.occupation,
-        region: user.region,
-        cityOrVillage: user.cityOrVillage,
-        createdAt: user.createdAt,
-      }
+      id: user.id,
+      displayName: user.displayName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      provider: user.provider,
+      avatar: user.avatar,
+      role: user.role,
+      username: user.username,
+      mobile: user.mobile,
+      country: user.country,
+      occupation: user.occupation,
+      region: user.region,
+      cityOrVillage: user.cityOrVillage,
+      createdAt: user.createdAt,
+    }
     : null;
 
 const escapeRegex = (value = "") => {
@@ -121,15 +122,45 @@ const serializeNews = (news) => ({
   updatedAt: news.updatedAt,
 });
 
-const serializePoll = (poll, currentUser, session) => {
+const serializePoll = async (poll, currentUser, session, req) => {
   const totalVotes =
     poll.options?.reduce((sum, option) => sum + (option.votes || 0), 0) || 0;
-  const hasVoted = currentUser
-    ? poll.votedUsers?.some((userId) => userId.toString() === currentUser.id)
-    : false;
-  const hasVotedAnonymously = poll.anonymousResponses
-    ? session?.anonymousPollVotes?.includes(poll.id?.toString())
-    : false;
+  
+  // For logged-in users, check userVotes array
+  let hasVoted = false;
+  let votedOptionId = null;
+  
+  if (currentUser && !poll.anonymousResponses) {
+    const userVote = poll.userVotes?.find((uv) => uv.userId.toString() === currentUser.id);
+    if (userVote) {
+      hasVoted = true;
+      votedOptionId = userVote.optionId.toString();
+    }
+  }
+  
+  // For anonymous polls, check both session and IP
+  if (poll.anonymousResponses) {
+    const sessionId = session?.id;
+    const ipAddress = req?.ip;
+    
+    // Build query conditions
+    const orConditions = [];
+    if (sessionId) orConditions.push({ sessionId });
+    if (ipAddress) orConditions.push({ ipAddress });
+    
+    // Only query if we have at least one condition
+    if (orConditions.length > 0) {
+      const anonymousVote = await AnonymousVote.findOne({
+        pollId: poll._id,
+        $or: orConditions,
+      });
+      
+      if (anonymousVote) {
+        hasVoted = true;
+        votedOptionId = anonymousVote.optionId.toString();
+      }
+    }
+  }
 
   return {
     id: poll.id,
@@ -148,7 +179,8 @@ const serializePoll = (poll, currentUser, session) => {
     createdAt: poll.createdAt,
     updatedAt: poll.updatedAt,
     totalVotes,
-    hasVoted: hasVoted || hasVotedAnonymously,
+    hasVoted,
+    votedOptionId,
   };
 };
 
@@ -185,9 +217,9 @@ if (shouldLogRequests) {
     const safeBody =
       req.method !== "GET" && req.body
         ? {
-            ...req.body,
-            password: req.body.password ? "<redacted>" : undefined,
-          }
+          ...req.body,
+          password: req.body.password ? "<redacted>" : undefined,
+        }
         : undefined;
 
     console.log(
@@ -356,7 +388,11 @@ pollsRouter.get("/", async (req, res) => {
       .limit(100)
       .populate("createdBy", "displayName username email");
 
-    return res.json({ polls: polls.map((poll) => serializePoll(poll, req.user, req.session)) });
+    const serializedPolls = await Promise.all(
+      polls.map((poll) => serializePoll(poll, req.user, req.session, req))
+    );
+
+    return res.json({ polls: serializedPolls });
   } catch (error) {
     console.error("[polls-list-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση ψηφοφοριών." });
@@ -377,7 +413,7 @@ pollsRouter.get("/:pollId", async (req, res) => {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
     }
 
-    return res.json({ poll: serializePoll(poll, req.user, req.session) });
+    return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
   } catch (error) {
     console.error("[polls-detail-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση της ψηφοφορίας." });
@@ -462,7 +498,7 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
 
     const populatedPoll = await createdPoll.populate("createdBy", "displayName username email");
 
-    return res.status(201).json({ poll: serializePoll(populatedPoll, req.user, req.session) });
+    return res.status(201).json({ poll: await serializePoll(populatedPoll, req.user, req.session, req) });
   } catch (error) {
     console.error("[polls-create-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η δημιουργία ψηφοφορίας." });
@@ -490,29 +526,7 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
     }
 
-    const pollIdStr = poll.id?.toString();
-
-    if (!poll.anonymousResponses && !userId) {
-      return res.status(401).json({ message: "Χρειάζεται σύνδεση για να ψηφίσετε." });
-    }
-
-    const alreadyVoted = !poll.anonymousResponses
-      ? poll.votedUsers?.some((storedId) => storedId.toString() === userId)
-      : false;
-
-    if (alreadyVoted) {
-      return res.status(400).json({ message: "Έχετε ήδη ψηφίσει σε αυτή την ψηφοφορία." });
-    }
-
-    if (poll.anonymousResponses) {
-      const anonymousVotes = req.session.anonymousPollVotes || [];
-      if (pollIdStr && anonymousVotes.includes(pollIdStr)) {
-        return res
-          .status(400)
-          .json({ message: "Έχετε ήδη ψηφίσει ανώνυμα σε αυτή την ψηφοφορία." });
-      }
-    }
-
+    // Check if option exists
     const selectedOption = poll.options.id(normalizedOptionId) ||
       poll.options.find((option) => option._id?.toString() === normalizedOptionId);
 
@@ -520,24 +534,218 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
       return res.status(400).json({ message: "Μη έγκυρη επιλογή ψηφοφορίας." });
     }
 
-    selectedOption.votes += 1;
-
     if (poll.anonymousResponses) {
-      if (pollIdStr) {
-        const anonymousVotes = new Set(req.session.anonymousPollVotes || []);
-        anonymousVotes.add(pollIdStr);
-        req.session.anonymousPollVotes = Array.from(anonymousVotes);
+      // Anonymous voting logic
+      const sessionId = req.session?.id;
+      const ipAddress = req.ip;
+
+      // Build query conditions
+      const orConditions = [];
+      if (sessionId) orConditions.push({ sessionId });
+      if (ipAddress) orConditions.push({ ipAddress });
+
+      // Check if user has already voted (by session OR IP)
+      let existingVote = null;
+      if (orConditions.length > 0) {
+        existingVote = await AnonymousVote.findOne({
+          pollId: poll._id,
+          $or: orConditions,
+        });
       }
+
+      if (existingVote) {
+        const oldOptionId = existingVote.optionId.toString();
+        
+        // If voting for the same option, just return current state
+        if (oldOptionId === normalizedOptionId) {
+          return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
+        }
+
+        // Change vote: decrement old option, increment new option
+        const oldOption = poll.options.id(oldOptionId);
+        if (oldOption && oldOption.votes > 0) {
+          oldOption.votes -= 1;
+        }
+        
+        selectedOption.votes += 1;
+        
+        // Update the anonymous vote record
+        existingVote.optionId = normalizedOptionId;
+        if (sessionId && !existingVote.sessionId) {
+          existingVote.sessionId = sessionId;
+        }
+        if (ipAddress && !existingVote.ipAddress) {
+          existingVote.ipAddress = ipAddress;
+        }
+        
+        await existingVote.save();
+        await poll.save();
+        
+        return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
+      }
+
+      // New vote
+      selectedOption.votes += 1;
+
+      await AnonymousVote.create({
+        pollId: poll._id,
+        optionId: normalizedOptionId,
+        sessionId,
+        ipAddress,
+      });
+
+      await poll.save();
+      return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
     } else {
-      poll.votedUsers.push(req.user._id);
+      // Logged-in voting logic
+      if (!userId) {
+        return res.status(401).json({ message: "Χρειάζεται σύνδεση για να ψηφίσετε." });
+      }
+
+      // Check if user has already voted
+      const userVotes = poll.userVotes || [];
+      const existingVoteIndex = userVotes.findIndex((uv) => uv.userId.toString() === userId);
+
+      if (existingVoteIndex !== -1) {
+        const existingVote = userVotes[existingVoteIndex];
+        const oldOptionId = existingVote.optionId.toString();
+        
+        // If voting for the same option, just return current state
+        if (oldOptionId === normalizedOptionId) {
+          return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
+        }
+
+        // Change vote: decrement old option, increment new option
+        const oldOption = poll.options.id(oldOptionId);
+        if (oldOption && oldOption.votes > 0) {
+          oldOption.votes -= 1;
+        }
+        
+        selectedOption.votes += 1;
+        
+        // Update the user vote record
+        userVotes[existingVoteIndex].optionId = normalizedOptionId;
+        poll.userVotes = userVotes;
+        
+        await poll.save();
+        return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
+      }
+
+      // New vote
+      selectedOption.votes += 1;
+      
+      // Add to userVotes array
+      if (!poll.userVotes) {
+        poll.userVotes = [];
+      }
+      poll.userVotes.push({
+        userId: req.user._id,
+        optionId: normalizedOptionId,
+      });
+      
+      // Maintain backwards compatibility with votedUsers
+      if (!poll.votedUsers.some((uid) => uid.toString() === userId)) {
+        poll.votedUsers.push(req.user._id);
+      }
+
+      await poll.save();
+      return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
     }
-
-    await poll.save();
-
-    return res.json({ poll: serializePoll(poll, req.user, req.session) });
   } catch (error) {
     console.error("[polls-vote-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η καταχώρηση της ψήφου." });
+  }
+});
+
+pollsRouter.delete("/:pollId/vote", async (req, res) => {
+  const { pollId } = req.params;
+  const userId = req.user?.id;
+
+  if (!mongoose.Types.ObjectId.isValid(pollId)) {
+    return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    if (poll.anonymousResponses) {
+      // Anonymous vote cancellation
+      const sessionId = req.session?.id;
+      const ipAddress = req.ip;
+
+      // Build query conditions
+      const orConditions = [];
+      if (sessionId) orConditions.push({ sessionId });
+      if (ipAddress) orConditions.push({ ipAddress });
+
+      // Check if user has voted
+      let existingVote = null;
+      if (orConditions.length > 0) {
+        existingVote = await AnonymousVote.findOne({
+          pollId: poll._id,
+          $or: orConditions,
+        });
+      }
+
+      if (!existingVote) {
+        return res.status(400).json({ message: "Δεν έχετε ψηφίσει σε αυτή την ψηφοφορία." });
+      }
+
+      // Decrement the vote count
+      const votedOptionId = existingVote.optionId.toString();
+      const votedOption = poll.options.id(votedOptionId);
+      
+      if (votedOption && votedOption.votes > 0) {
+        votedOption.votes -= 1;
+      }
+
+      // Remove the anonymous vote record
+      await AnonymousVote.deleteOne({ _id: existingVote._id });
+      await poll.save();
+
+      return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
+    } else {
+      // Logged-in vote cancellation
+      if (!userId) {
+        return res.status(401).json({ message: "Χρειάζεται σύνδεση για να ακυρώσετε την ψήφο σας." });
+      }
+
+      const userVotes = poll.userVotes || [];
+      const existingVoteIndex = userVotes.findIndex((uv) => uv.userId.toString() === userId);
+
+      if (existingVoteIndex === -1) {
+        return res.status(400).json({ message: "Δεν έχετε ψηφίσει σε αυτή την ψηφοφορία." });
+      }
+
+      const existingVote = userVotes[existingVoteIndex];
+      const votedOptionId = existingVote.optionId.toString();
+      
+      // Decrement the vote count
+      const votedOption = poll.options.id(votedOptionId);
+      if (votedOption && votedOption.votes > 0) {
+        votedOption.votes -= 1;
+      }
+
+      // Remove from userVotes
+      userVotes.splice(existingVoteIndex, 1);
+      poll.userVotes = userVotes;
+      
+      // Also remove from votedUsers for backwards compatibility
+      const votedUserIndex = poll.votedUsers.findIndex((uid) => uid.toString() === userId);
+      if (votedUserIndex !== -1) {
+        poll.votedUsers.splice(votedUserIndex, 1);
+      }
+
+      await poll.save();
+      return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
+    }
+  } catch (error) {
+    console.error("[polls-cancel-vote-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ακύρωση της ψήφου." });
   }
 });
 
@@ -550,14 +758,14 @@ usersRouter.get("/", async (req, res) => {
   const rawSearch = req.query.search?.trim();
   const filter = rawSearch
     ? {
-        $or: [
-          { email: { $regex: escapeRegex(rawSearch), $options: "i" } },
-          { displayName: { $regex: escapeRegex(rawSearch), $options: "i" } },
-          { username: { $regex: escapeRegex(rawSearch), $options: "i" } },
-          { firstName: { $regex: escapeRegex(rawSearch), $options: "i" } },
-          { lastName: { $regex: escapeRegex(rawSearch), $options: "i" } },
-        ],
-      }
+      $or: [
+        { email: { $regex: escapeRegex(rawSearch), $options: "i" } },
+        { displayName: { $regex: escapeRegex(rawSearch), $options: "i" } },
+        { username: { $regex: escapeRegex(rawSearch), $options: "i" } },
+        { firstName: { $regex: escapeRegex(rawSearch), $options: "i" } },
+        { lastName: { $regex: escapeRegex(rawSearch), $options: "i" } },
+      ],
+    }
     : {};
 
   try {
@@ -621,13 +829,13 @@ contactRouter.post("/", async (req, res) => {
 
   const userSnapshot = req.user
     ? {
-        id: req.user.id,
-        displayName: req.user.displayName,
-        email: req.user.email,
-        username: req.user.username,
-        provider: req.user.provider,
-        role: req.user.role,
-      }
+      id: req.user.id,
+      displayName: req.user.displayName,
+      email: req.user.email,
+      username: req.user.username,
+      provider: req.user.provider,
+      role: req.user.role,
+    }
     : undefined;
 
   try {
