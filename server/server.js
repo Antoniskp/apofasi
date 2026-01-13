@@ -1,7 +1,6 @@
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import cors from "cors";
-import crypto from "crypto";
 import dotenv from "dotenv";
 import express from "express";
 import session from "express-session";
@@ -19,6 +18,7 @@ import User from "./models/User.js";
 import ContactMessage from "./models/ContactMessage.js";
 import { CITIES_BY_REGION, REGION_NAMES } from "../shared/locations.js";
 import defaultPolls from "./data/defaultPolls.js";
+import { hashPassword, needsPasswordUpgrade, verifyPassword } from "./utils/crypto.js";
 
 dotenv.config();
 connectDB();
@@ -93,23 +93,6 @@ const sanitizeUser = (user) =>
 const escapeRegex = (value = "") => {
   const pattern = /[.*+?^${}()|[\]\\]/g;
   return value.replace(pattern, "\\$&");
-};
-
-const hashPassword = (password) => {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const derivedKey = crypto.scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${derivedKey}`;
-};
-
-const verifyPassword = (password, storedValue) => {
-  const [salt, key] = storedValue.split(":");
-  if (!salt || !key) return false;
-  const derivedKey = crypto.scryptSync(password, salt, 64);
-  try {
-    return crypto.timingSafeEqual(Buffer.from(key, "hex"), derivedKey);
-  } catch {
-    return false;
-  }
 };
 
 const serializeAuthor = (user) => {
@@ -685,6 +668,15 @@ authRouter.post("/login", async (req, res) => {
 
     if (!verifyPassword(password, user.password)) {
       return res.status(401).json({ message: "Λανθασμένα στοιχεία σύνδεσης." });
+    }
+
+    if (needsPasswordUpgrade(user.password)) {
+      try {
+        user.password = hashPassword(password);
+        await user.save();
+      } catch (error) {
+        console.warn("[login-password-upgrade-error]", error);
+      }
     }
 
     req.login(user, (error) => {
