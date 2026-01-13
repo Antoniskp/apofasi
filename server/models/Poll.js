@@ -25,6 +25,19 @@ const pollSchema = new mongoose.Schema(
         ref: "User"
       }
     ],
+    userVotes: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        optionId: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+        },
+      }
+    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"

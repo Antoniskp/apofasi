@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { API_BASE_URL, getAuthStatus, listPolls, voteOnPoll } from "../lib/api.js";
+import { API_BASE_URL, getAuthStatus, listPolls, voteOnPoll, cancelVoteOnPoll } from "../lib/api.js";
 
 const formatDateTime = (value) => {
   if (!value) return "";
@@ -16,6 +16,7 @@ export default function Polls() {
   const [authState, setAuthState] = useState({ loading: true, user: null, error: null });
   const [pollsState, setPollsState] = useState({ loading: true, polls: [], error: null });
   const [voteState, setVoteState] = useState({});
+  const [cancelState, setCancelState] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("newest");
 
@@ -86,6 +87,25 @@ export default function Polls() {
       setVoteState((prev) => ({
         ...prev,
         [poll.id]: { submitting: false, error: error.message || "Η ψήφος δεν καταχωρήθηκε." },
+      }));
+    }
+  };
+
+  const handleCancelVote = async (poll) => {
+    setCancelState((prev) => ({ ...prev, [poll.id]: { cancelling: true, error: null } }));
+
+    try {
+      const response = await cancelVoteOnPoll(poll.id);
+      setPollsState((prev) => ({
+        ...prev,
+        polls: prev.polls.map((item) => (item.id === poll.id ? response.poll : item)),
+      }));
+      setCancelState((prev) => ({ ...prev, [poll.id]: { cancelling: false, error: null } }));
+      setVoteState((prev) => ({ ...prev, [poll.id]: { submitting: false, error: null } }));
+    } catch (error) {
+      setCancelState((prev) => ({
+        ...prev,
+        [poll.id]: { cancelling: false, error: error.message || "Η ακύρωση της ψήφου απέτυχε." },
       }));
     }
   };
@@ -197,6 +217,7 @@ export default function Polls() {
           {filteredPolls.map((poll) => {
             const totalVotes = getTotalVotes(poll);
             const voteStatus = voteState[poll.id] || {};
+            const cancelStatus = cancelState[poll.id] || {};
 
             return (
               <div key={poll.id} className="card poll-card modern-card">
@@ -239,12 +260,16 @@ export default function Polls() {
                 <div className="poll-options-list">
                   {poll.options.map((option) => {
                     const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
-                    const disabled = poll.hasVoted || voteStatus.submitting;
+                    const disabled = voteStatus.submitting || cancelStatus.cancelling;
+                    const isVotedOption = poll.votedOptionId === option.id;
 
                     return (
                       <div key={option.id} className="poll-option">
                         <div className="poll-option-header">
-                          <div className="poll-option-title">{option.text}</div>
+                          <div className="poll-option-title">
+                            {option.text}
+                            {isVotedOption && <span className="muted"> (Η ψήφος σας)</span>}
+                          </div>
                           <div className="muted small">
                             {option.votes} ψήφοι {totalVotes > 0 ? `• ${percentage}%` : ""}
                           </div>
@@ -252,7 +277,18 @@ export default function Polls() {
                         <div className="progress-track" aria-hidden>
                           <div className="progress-bar" style={{ width: `${percentage}%` }} />
                         </div>
-                        {!poll.hasVoted && (
+                        {poll.hasVoted ? (
+                          !isVotedOption && (
+                            <button
+                              className="btn btn-outline"
+                              type="button"
+                              disabled={disabled}
+                              onClick={() => handleVote(poll, option.id)}
+                            >
+                              {voteStatus.submitting ? "Αλλαγή..." : "Αλλαγή ψήφου"}
+                            </button>
+                          )
+                        ) : (
                           <button
                             className="btn btn-outline"
                             type="button"
@@ -267,8 +303,21 @@ export default function Polls() {
                   })}
                 </div>
 
-                {poll.hasVoted && <p className="positive-text small">Έχετε ήδη ψηφίσει.</p>}
+                {poll.hasVoted && (
+                  <div>
+                    <p className="positive-text small">Έχετε ήδη ψηφίσει.</p>
+                    <button
+                      className="btn btn-subtle"
+                      type="button"
+                      disabled={cancelStatus.cancelling || voteStatus.submitting}
+                      onClick={() => handleCancelVote(poll)}
+                    >
+                      {cancelStatus.cancelling ? "Ακύρωση..." : "Ακύρωση ψήφου"}
+                    </button>
+                  </div>
+                )}
                 {voteStatus.error && <p className="error-text">{voteStatus.error}</p>}
+                {cancelStatus.error && <p className="error-text">{cancelStatus.error}</p>}
               </div>
             );
           })}
