@@ -1,0 +1,309 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { CITIES_BY_REGION, REGION_NAMES } from "../../../shared/locations.js";
+import { API_BASE_URL, createArticle, getAuthStatus } from "../lib/api.js";
+
+const uniqueTags = (rawTags = "") =>
+  Array.from(
+    new Set(
+      rawTags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    )
+  ).slice(0, 10);
+
+export default function NewArticle() {
+  const [authState, setAuthState] = useState({ loading: true, user: null, error: null });
+  const [formState, setFormState] = useState({
+    title: "",
+    content: "",
+    tags: "",
+    region: "",
+    cityOrVillage: "",
+  });
+  const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
+  const navigate = useNavigate();
+
+  const availableCities = useMemo(() => CITIES_BY_REGION[formState.region] || [], [formState.region]);
+
+  const loadAuthStatus = async () => {
+    setAuthState((prev) => ({ ...prev, loading: true }));
+
+    try {
+      const data = await getAuthStatus();
+      setAuthState({ loading: false, user: data.user, error: null });
+    } catch (error) {
+      setAuthState({
+        loading: false,
+        user: null,
+        error:
+          API_BASE_URL
+            ? error.message || "Δεν ήταν δυνατή η ανάκτηση συνεδρίας."
+            : "Ορίστε το VITE_API_BASE_URL για να λειτουργήσει η ανάκτηση συνεδρίας.",
+      });
+    }
+  };
+
+  useEffect(() => {
+    loadAuthStatus();
+  }, []);
+
+  const handleRegionChange = (value) => {
+    setFormState((prev) => ({ ...prev, region: value, cityOrVillage: "" }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!authState.user) {
+      setSubmission({ submitting: false, success: null, error: "Χρειάζεται σύνδεση για να δημιουργήσετε άρθρο." });
+      return;
+    }
+
+    const trimmedTitle = formState.title.trim();
+    const trimmedContent = formState.content.trim();
+
+    if (!trimmedTitle || !trimmedContent) {
+      setSubmission({ submitting: false, success: null, error: "Συμπληρώστε τίτλο και περιεχόμενο." });
+      return;
+    }
+
+    const tags = uniqueTags(formState.tags);
+
+    setSubmission({ submitting: true, success: null, error: null });
+
+    try {
+      const result = await createArticle({
+        title: trimmedTitle,
+        content: trimmedContent,
+        tags,
+        region: formState.region,
+        cityOrVillage: formState.cityOrVillage,
+      });
+
+      setSubmission({ submitting: false, success: "Το άρθρο δημιουργήθηκε επιτυχώς!", error: null });
+      
+      setTimeout(() => {
+        navigate(`/articles/${result.article.id}`);
+      }, 1000);
+    } catch (error) {
+      setSubmission({
+        submitting: false,
+        success: null,
+        error: error.message || "Δεν ήταν δυνατή η δημιουργία του άρθρου.",
+      });
+    }
+  };
+
+  if (authState.loading) {
+    return (
+      <div className="container">
+        <p>Φόρτωση...</p>
+      </div>
+    );
+  }
+
+  if (!authState.user) {
+    return (
+      <div className="container">
+        <h1>Νέο Άρθρο</h1>
+        <div className="message error">
+          Πρέπει να συνδεθείτε για να δημιουργήσετε άρθρο.{" "}
+          <Link to="/auth">Σύνδεση</Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container">
+      <h1>Νέο Άρθρο</h1>
+
+      <form onSubmit={handleSubmit} className="article-form">
+        <div className="form-group">
+          <label htmlFor="title">Τίτλος *</label>
+          <input
+            type="text"
+            id="title"
+            value={formState.title}
+            onChange={(e) => setFormState((prev) => ({ ...prev, title: e.target.value }))}
+            placeholder="Εισάγετε τον τίτλο του άρθρου"
+            maxLength={200}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="content">Περιεχόμενο *</label>
+          <textarea
+            id="content"
+            value={formState.content}
+            onChange={(e) => setFormState((prev) => ({ ...prev, content: e.target.value }))}
+            placeholder="Γράψτε το περιεχόμενο του άρθρου σας..."
+            rows={15}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="tags">Ετικέτες (χωρισμένες με κόμμα)</label>
+          <input
+            type="text"
+            id="tags"
+            value={formState.tags}
+            onChange={(e) => setFormState((prev) => ({ ...prev, tags: e.target.value }))}
+            placeholder="πχ. πολιτική, οικονομία, τεχνολογία"
+          />
+          <small>Μέχρι 10 ετικέτες</small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="region">Περιφέρεια (προαιρετικό)</label>
+          <select
+            id="region"
+            value={formState.region}
+            onChange={(e) => handleRegionChange(e.target.value)}
+          >
+            <option value="">-- Επιλέξτε περιφέρεια --</option>
+            {REGION_NAMES.map((region) => (
+              <option key={region} value={region}>
+                {region}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {formState.region && (
+          <div className="form-group">
+            <label htmlFor="cityOrVillage">Πόλη ή Χωριό (προαιρετικό)</label>
+            <select
+              id="cityOrVillage"
+              value={formState.cityOrVillage}
+              onChange={(e) => setFormState((prev) => ({ ...prev, cityOrVillage: e.target.value }))}
+            >
+              <option value="">-- Επιλέξτε πόλη ή χωριό --</option>
+              {availableCities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {submission.error && (
+          <div className="message error">{submission.error}</div>
+        )}
+
+        {submission.success && (
+          <div className="message success">{submission.success}</div>
+        )}
+
+        <div className="form-actions">
+          <button type="submit" disabled={submission.submitting} className="button primary">
+            {submission.submitting ? "Δημιουργία..." : "Δημιουργία Άρθρου"}
+          </button>
+          <Link to="/articles" className="button secondary">
+            Ακύρωση
+          </Link>
+        </div>
+      </form>
+
+      <style>{`
+        .article-form {
+          max-width: 800px;
+        }
+
+        .form-group {
+          margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 1rem;
+          font-family: inherit;
+        }
+
+        .form-group textarea {
+          resize: vertical;
+        }
+
+        .form-group small {
+          display: block;
+          margin-top: 0.25rem;
+          color: #666;
+          font-size: 0.85rem;
+        }
+
+        .form-actions {
+          display: flex;
+          gap: 1rem;
+          margin-top: 2rem;
+        }
+
+        .button {
+          padding: 0.75rem 1.5rem;
+          border: none;
+          border-radius: 4px;
+          font-size: 1rem;
+          cursor: pointer;
+          text-decoration: none;
+          display: inline-block;
+        }
+
+        .button.primary {
+          background: #0066cc;
+          color: white;
+        }
+
+        .button.primary:hover:not(:disabled) {
+          background: #0052a3;
+        }
+
+        .button.primary:disabled {
+          background: #ccc;
+          cursor: not-allowed;
+        }
+
+        .button.secondary {
+          background: #f5f5f5;
+          color: #333;
+        }
+
+        .button.secondary:hover {
+          background: #e0e0e0;
+        }
+
+        .message {
+          padding: 1rem;
+          border-radius: 4px;
+          margin-bottom: 1rem;
+        }
+
+        .message.error {
+          background: #ffebee;
+          color: #c62828;
+          border: 1px solid #ef5350;
+        }
+
+        .message.success {
+          background: #e8f5e9;
+          color: #2e7d32;
+          border: 1px solid #66bb6a;
+        }
+      `}</style>
+    </div>
+  );
+}

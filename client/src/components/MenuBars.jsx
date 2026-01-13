@@ -21,6 +21,7 @@ const pollRegions = [
 
 const topMenu = [
   { label: "Ειδήσεις", to: "/news", icon: "fa-newspaper" },
+  { label: "Άρθρα", to: "/articles", icon: "fa-file-lines" },
   {
     label: "Ψηφοφορίες",
     to: "/polls",
