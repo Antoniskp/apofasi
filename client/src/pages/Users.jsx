@@ -36,7 +36,7 @@ export default function Users() {
   };
 
   useEffect(() => {
-    loadUsers(currentPage);
+    loadUsers(1);
   }, []);
 
   const handlePageChange = (newPage) => {

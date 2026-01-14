@@ -1638,6 +1638,8 @@ publicUsersRouter.get("/statistics", ensureAuthenticated, async (req, res) => {
     const totalUsers = await User.countDocuments();
 
     // Online users (users with active sessions in last 15 minutes)
+    // Note: For optimal performance in production, consider adding an index on 'expires' field
+    // in the sessions collection: db.sessions.createIndex({ "expires": 1, "session.passport.user": 1 })
     const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
     const activeSessions = await sessionStore.db.collection(sessionStore.collectionName)
       .countDocuments({
@@ -1651,6 +1653,7 @@ publicUsersRouter.get("/statistics", ensureAuthenticated, async (req, res) => {
 
     // Votes from registered users
     const votesFromRegistered = await Poll.aggregate([
+      { $match: { userVotes: { $exists: true, $ne: null, $not: { $size: 0 } } } },
       { $unwind: "$userVotes" },
       { $count: "total" }
     ]);
