@@ -1048,7 +1048,7 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
       if (isNaN(closingDate.getTime())) {
         return res.status(400).json({ message: "Μη έγκυρη ημερομηνία λήξης ψηφοφορίας." });
       }
-      if (closingDate <= new Date()) {
+      if (closingDate < new Date()) {
         return res.status(400).json({ message: "Η ημερομηνία λήξης πρέπει να είναι στο μέλλον." });
       }
       pollData.voteClosingDate = closingDate;
