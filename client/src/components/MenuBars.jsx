@@ -148,8 +148,7 @@ export default function MenuBars() {
                     </div>
                     <div 
                       id={generateSubmenuId(item.label)}
-                      className={`menu-submenu${openSubmenu === item.label ? ' open' : ''}`} 
-                      aria-label={`${item.label} submenu`}
+                      className={`menu-submenu${openSubmenu === item.label ? ' open' : ''}`}
                     >
                       {item.subItems.map((subItem) =>
                         subItem.to ? (
