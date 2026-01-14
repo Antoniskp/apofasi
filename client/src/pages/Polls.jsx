@@ -267,12 +267,66 @@ export default function Polls() {
                     const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
                     const disabled = voteStatus.submitting || cancelStatus.cancelling;
                     const isVotedOption = poll.votedOptionId === option.id;
+                    const isPending = option.status === "pending";
 
+                    if (poll.optionsArePeople) {
+                      // Render person card
+                      const photoSrc = option.photo || option.photoUrl;
+                      return (
+                        <div key={option.id} className={`poll-option person-option ${isPending ? "pending" : ""}`}>
+                          {photoSrc && <img src={photoSrc} alt={option.text} className="person-photo" />}
+                          <div className="poll-option-content">
+                            <div className="poll-option-header">
+                              <div className="poll-option-title">
+                                {option.text}
+                                {isPending && <span className="pending-badge">Εκκρεμεί</span>}
+                                {isVotedOption && <span className="muted"> (Η ψήφος σας)</span>}
+                              </div>
+                              <div className="muted small">
+                                {option.votes} ψήφοι {totalVotes > 0 ? `• ${percentage}%` : ""}
+                              </div>
+                            </div>
+                            {option.profileUrl && (
+                              <a href={option.profileUrl} target="_blank" rel="noopener noreferrer" className="person-link">
+                                {option.profileUrl}
+                              </a>
+                            )}
+                            <div className="progress-track" aria-hidden>
+                              <div className="progress-bar" style={{ width: `${percentage}%` }} />
+                            </div>
+                            {!isPending && (poll.hasVoted ? (
+                              !isVotedOption && (
+                                <button
+                                  className="btn btn-outline"
+                                  type="button"
+                                  disabled={disabled}
+                                  onClick={() => handleVote(poll, option.id)}
+                                >
+                                  {voteStatus.submitting ? "Αλλαγή..." : "Αλλαγή ψήφου"}
+                                </button>
+                              )
+                            ) : (
+                              <button
+                                className="btn btn-outline"
+                                type="button"
+                                disabled={disabled}
+                                onClick={() => handleVote(poll, option.id)}
+                              >
+                                {voteStatus.submitting ? "Καταχώρηση..." : "Ψήφισε"}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // Normal mode rendering
                     return (
                       <div key={option.id} className="poll-option">
                         <div className="poll-option-header">
                           <div className="poll-option-title">
                             {option.text}
+                            {isPending && <span className="pending-badge">Εκκρεμεί</span>}
                             {isVotedOption && <span className="muted"> (Η ψήφος σας)</span>}
                           </div>
                           <div className="muted small">
@@ -282,7 +336,7 @@ export default function Polls() {
                         <div className="progress-track" aria-hidden>
                           <div className="progress-bar" style={{ width: `${percentage}%` }} />
                         </div>
-                        {poll.hasVoted ? (
+                        {!isPending && (poll.hasVoted ? (
                           !isVotedOption && (
                             <button
                               className="btn btn-outline"
@@ -302,7 +356,7 @@ export default function Polls() {
                           >
                             {voteStatus.submitting ? "Καταχώρηση..." : "Ψήφισε"}
                           </button>
-                        )}
+                        ))}
                       </div>
                     );
                   })}

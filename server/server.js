@@ -139,8 +139,19 @@ const serializeArticle = (article) => ({
 });
 
 const serializePoll = async (poll, currentUser, session, req) => {
+  // Check if current user is the poll creator or admin
+  const isCreatorOrAdmin = currentUser && (
+    (poll.createdBy && poll.createdBy.toString() === currentUser.id) ||
+    currentUser.role === "admin"
+  );
+
+  // Filter options based on status
+  const visibleOptions = isCreatorOrAdmin 
+    ? poll.options 
+    : poll.options?.filter(opt => opt.status === "approved") || [];
+
   const totalVotes =
-    poll.options?.reduce((sum, option) => sum + (option.votes || 0), 0) || 0;
+    visibleOptions.reduce((sum, option) => sum + (option.votes || 0), 0) || 0;
   
   // For logged-in users, check userVotes array
   let hasVoted = false;
@@ -181,10 +192,15 @@ const serializePoll = async (poll, currentUser, session, req) => {
   return {
     id: poll.id,
     question: poll.question,
-    options: (poll.options || []).map((option) => ({
+    options: visibleOptions.map((option) => ({
       id: option._id?.toString() || String(option.text),
       text: option.text,
       votes: option.votes || 0,
+      status: option.status,
+      createdBy: option.createdBy ? serializeAuthor(option.createdBy) : null,
+      photoUrl: option.photoUrl,
+      photo: option.photo,
+      profileUrl: option.profileUrl,
     })),
     tags: poll.tags || [],
     region: poll.region,
@@ -192,11 +208,16 @@ const serializePoll = async (poll, currentUser, session, req) => {
     createdBy: poll.isAnonymousCreator ? null : serializeAuthor(poll.createdBy),
     isAnonymousCreator: Boolean(poll.isAnonymousCreator),
     anonymousResponses: Boolean(poll.anonymousResponses),
+    allowUserOptions: Boolean(poll.allowUserOptions),
+    userOptionApproval: poll.userOptionApproval || "auto",
+    optionsArePeople: Boolean(poll.optionsArePeople),
+    linkPolicy: poll.linkPolicy || { mode: "any", allowedDomains: [] },
     createdAt: poll.createdAt,
     updatedAt: poll.updatedAt,
     totalVotes,
     hasVoted,
     votedOptionId,
+    isCreatorOrAdmin,
   };
 };
 
@@ -740,6 +761,10 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
     cityOrVillage,
     isAnonymousCreator,
     anonymousResponses,
+    allowUserOptions,
+    userOptionApproval,
+    optionsArePeople,
+    linkPolicy,
   } = req.body || {};
   const trimmedQuestion = question?.trim();
 
@@ -749,12 +774,32 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
       ? options.split(",")
       : [];
 
-  const cleanedOptions = normalizedOptions
-    .map((option) => (typeof option === "string" ? option : option?.text))
-    .map((text) => text?.trim())
-    .filter(Boolean);
+  // Handle both string[] and object[] options
+  let processedOptions;
+  if (optionsArePeople) {
+    // In people mode, options must be objects with required fields
+    processedOptions = normalizedOptions
+      .filter((option) => option && typeof option === "object")
+      .map((option) => ({
+        text: option.text?.trim() || "",
+        photoUrl: option.photoUrl?.trim() || "",
+        photo: option.photo || "",
+        profileUrl: option.profileUrl?.trim() || "",
+      }))
+      .filter((option) => option.text);
+  } else {
+    // Legacy mode: accept string[] or extract text from objects
+    const cleanedOptions = normalizedOptions
+      .map((option) => (typeof option === "string" ? option : option?.text))
+      .map((text) => text?.trim())
+      .filter(Boolean);
 
-  const uniqueOptions = Array.from(new Set(cleanedOptions));
+    processedOptions = cleanedOptions.map((text) => ({ text }));
+  }
+
+  const uniqueOptions = Array.from(
+    new Map(processedOptions.map((opt) => [opt.text, opt])).values()
+  );
 
   if (!trimmedQuestion || uniqueOptions.length < 2) {
     return res
@@ -762,8 +807,21 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
       .json({ message: "Χρειάζονται ερώτηση και τουλάχιστον δύο μοναδικές επιλογές." });
   }
 
-  if (uniqueOptions.length !== cleanedOptions.length) {
+  if (uniqueOptions.length !== processedOptions.length) {
     return res.status(400).json({ message: "Οι επιλογές πρέπει να είναι διαφορετικές μεταξύ τους." });
+  }
+
+  // Validate people mode options if enabled
+  if (optionsArePeople) {
+    const { validatePeopleOption } = await import("./utils/pollValidation.js");
+    const normalizedLinkPolicy = linkPolicy || { mode: "any", allowedDomains: [] };
+    
+    for (const option of uniqueOptions) {
+      const validation = validatePeopleOption(option, normalizedLinkPolicy);
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.error });
+      }
+    }
   }
 
   const normalizedTags = Array.from(
@@ -796,16 +854,37 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
   }
 
   try {
-    const createdPoll = await Poll.create({
+    const pollData = {
       question: trimmedQuestion,
-      options: uniqueOptions.map((text) => ({ text })),
+      options: uniqueOptions,
       tags: normalizedTags,
       region: trimmedRegion,
       cityOrVillage: trimmedCity,
       isAnonymousCreator: shouldHideCreator,
       anonymousResponses: shouldHideResponders,
       createdBy: req.user._id,
-    });
+    };
+
+    // Add new fields if provided
+    if (allowUserOptions !== undefined) {
+      pollData.allowUserOptions = Boolean(allowUserOptions);
+    }
+    if (userOptionApproval) {
+      pollData.userOptionApproval = userOptionApproval;
+    }
+    if (optionsArePeople !== undefined) {
+      pollData.optionsArePeople = Boolean(optionsArePeople);
+    }
+    if (linkPolicy) {
+      const { validateLinkPolicy } = await import("./utils/pollValidation.js");
+      const policyValidation = validateLinkPolicy(linkPolicy);
+      if (!policyValidation.valid) {
+        return res.status(400).json({ message: policyValidation.error });
+      }
+      pollData.linkPolicy = policyValidation.sanitized;
+    }
+
+    const createdPoll = await Poll.create(pollData);
 
     const populatedPoll = await createdPoll.populate("createdBy", "displayName username email");
 
@@ -1174,6 +1253,224 @@ pollsRouter.delete("/:pollId", ensureAuthenticated, async (req, res) => {
   } catch (error) {
     console.error("[polls-delete-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η διαγραφή της ψηφοφορίας." });
+  }
+});
+
+// Add option to poll (user-submitted)
+pollsRouter.post("/:pollId/options", async (req, res) => {
+  const { pollId } = req.params;
+  const { option } = req.body || {};
+
+  if (!mongoose.Types.ObjectId.isValid(pollId)) {
+    return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId);
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    if (!poll.allowUserOptions) {
+      return res.status(403).json({ message: "Αυτή η ψηφοφορία δεν επιτρέπει προσθήκη επιλογών από χρήστες." });
+    }
+
+    // Check if user is authenticated (unless anonymous responses are allowed)
+    const userId = req.user?.id;
+    if (!poll.anonymousResponses && !userId) {
+      return res.status(401).json({ message: "Απαιτείται σύνδεση για να προσθέσετε επιλογή." });
+    }
+
+    // Validate option
+    if (!option || typeof option !== "object") {
+      return res.status(400).json({ message: "Μη έγκυρη επιλογή." });
+    }
+
+    const optionText = option.text?.trim();
+    if (!optionText) {
+      return res.status(400).json({ message: "Το κείμενο της επιλογής είναι υποχρεωτικό." });
+    }
+
+    // Check for duplicate text
+    const isDuplicate = poll.options.some((opt) => opt.text === optionText);
+    if (isDuplicate) {
+      return res.status(400).json({ message: "Η επιλογή υπάρχει ήδη." });
+    }
+
+    // Validate people mode option if needed
+    if (poll.optionsArePeople) {
+      const { validatePeopleOption } = await import("./utils/pollValidation.js");
+      const validation = validatePeopleOption(option, poll.linkPolicy);
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.error });
+      }
+    }
+
+    // Determine status based on approval mode
+    const status = poll.userOptionApproval === "creator" ? "pending" : "approved";
+
+    // Create new option
+    const newOption = {
+      text: optionText,
+      votes: 0,
+      status,
+      createdBy: userId || null,
+    };
+
+    // Add people mode fields if applicable
+    if (poll.optionsArePeople) {
+      newOption.photoUrl = option.photoUrl?.trim() || "";
+      newOption.photo = option.photo || "";
+      newOption.profileUrl = option.profileUrl?.trim() || "";
+    }
+
+    poll.options.push(newOption);
+    await poll.save();
+
+    // Populate and serialize
+    await poll.populate("createdBy", "displayName username email");
+    const serialized = await serializePoll(poll, req.user, req.session, req);
+
+    return res.status(201).json({ 
+      poll: serialized,
+      message: status === "pending" 
+        ? "Η επιλογή σας υποβλήθηκε και εκκρεμεί έγκριση." 
+        : "Η επιλογή προστέθηκε επιτυχώς."
+    });
+  } catch (error) {
+    console.error("[add-option-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η προσθήκη της επιλογής." });
+  }
+});
+
+// Get pending options (creator/admin only)
+pollsRouter.get("/:pollId/options/pending", ensureAuthenticated, async (req, res) => {
+  const { pollId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(pollId)) {
+    return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    const userId = req.user?.id;
+    const isCreator = poll.createdBy && poll.createdBy._id.toString() === userId;
+    const isAdmin = req.user.role === "admin";
+
+    if (!isCreator && !isAdmin) {
+      return res.status(403).json({ message: "Δεν έχετε δικαίωμα πρόσβασης σε αυτό το περιεχόμενο." });
+    }
+
+    const pendingOptions = poll.options
+      .filter((opt) => opt.status === "pending")
+      .map((opt) => ({
+        id: opt._id.toString(),
+        text: opt.text,
+        createdBy: opt.createdBy ? serializeAuthor(opt.createdBy) : null,
+        photoUrl: opt.photoUrl,
+        photo: opt.photo,
+        profileUrl: opt.profileUrl,
+      }));
+
+    return res.json({ options: pendingOptions });
+  } catch (error) {
+    console.error("[pending-options-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση των εκκρεμών επιλογών." });
+  }
+});
+
+// Approve pending option (creator/admin only)
+pollsRouter.post("/:pollId/options/:optionId/approve", ensureAuthenticated, async (req, res) => {
+  const { pollId, optionId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(pollId) || !mongoose.Types.ObjectId.isValid(optionId)) {
+    return res.status(400).json({ message: "Μη έγκυρο αναγνωριστικό." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    const userId = req.user?.id;
+    const isCreator = poll.createdBy && poll.createdBy._id.toString() === userId;
+    const isAdmin = req.user.role === "admin";
+
+    if (!isCreator && !isAdmin) {
+      return res.status(403).json({ message: "Δεν έχετε δικαίωμα να εγκρίνετε επιλογές." });
+    }
+
+    const option = poll.options.id(optionId);
+    if (!option) {
+      return res.status(404).json({ message: "Η επιλογή δεν βρέθηκε." });
+    }
+
+    if (option.status !== "pending") {
+      return res.status(400).json({ message: "Η επιλογή έχει ήδη εγκριθεί." });
+    }
+
+    option.status = "approved";
+    await poll.save();
+
+    const serialized = await serializePoll(poll, req.user, req.session, req);
+    return res.json({ poll: serialized, message: "Η επιλογή εγκρίθηκε επιτυχώς." });
+  } catch (error) {
+    console.error("[approve-option-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η έγκριση της επιλογής." });
+  }
+});
+
+// Delete option (creator/admin only)
+pollsRouter.delete("/:pollId/options/:optionId", ensureAuthenticated, async (req, res) => {
+  const { pollId, optionId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(pollId) || !mongoose.Types.ObjectId.isValid(optionId)) {
+    return res.status(400).json({ message: "Μη έγκυρο αναγνωριστικό." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    const userId = req.user?.id;
+    const isCreator = poll.createdBy && poll.createdBy._id.toString() === userId;
+    const isAdmin = req.user.role === "admin";
+
+    if (!isCreator && !isAdmin) {
+      return res.status(403).json({ message: "Δεν έχετε δικαίωμα να διαγράψετε επιλογές." });
+    }
+
+    const option = poll.options.id(optionId);
+    if (!option) {
+      return res.status(404).json({ message: "Η επιλογή δεν βρέθηκε." });
+    }
+
+    // Remove the option
+    poll.options.pull(optionId);
+    
+    // Also remove any votes for this option
+    poll.userVotes = poll.userVotes.filter(
+      (vote) => vote.optionId.toString() !== optionId
+    );
+
+    await poll.save();
+
+    const serialized = await serializePoll(poll, req.user, req.session, req);
+    return res.json({ poll: serialized, message: "Η επιλογή διαγράφηκε επιτυχώς." });
+  } catch (error) {
+    console.error("[delete-option-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η διαγραφή της επιλογής." });
   }
 });
 

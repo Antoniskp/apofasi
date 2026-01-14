@@ -16,6 +16,26 @@ const pollSchema = new mongoose.Schema(
         votes: {
           type: Number,
           default: 0
+        },
+        createdBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User"
+        },
+        status: {
+          type: String,
+          enum: ["approved", "pending"],
+          default: "approved"
+        },
+        photoUrl: {
+          type: String,
+          trim: true,
+        },
+        photo: {
+          type: String,
+        },
+        profileUrl: {
+          type: String,
+          trim: true,
         }
       }
     ],
@@ -69,6 +89,30 @@ const pollSchema = new mongoose.Schema(
     anonymousResponses: {
       type: Boolean,
       default: false,
+    },
+    allowUserOptions: {
+      type: Boolean,
+      default: false,
+    },
+    userOptionApproval: {
+      type: String,
+      enum: ["auto", "creator"],
+      default: "auto"
+    },
+    optionsArePeople: {
+      type: Boolean,
+      default: false,
+    },
+    linkPolicy: {
+      mode: {
+        type: String,
+        enum: ["any", "allowlist"],
+        default: "any"
+      },
+      allowedDomains: {
+        type: [String],
+        default: []
+      }
     },
   },
   { timestamps: true }

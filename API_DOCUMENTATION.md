@@ -236,12 +236,22 @@ GET /api/polls
         {
           "id": "option_id",
           "text": "Option 1",
-          "votes": 5
+          "votes": 5,
+          "status": "approved",
+          "createdBy": null,
+          "photoUrl": null,
+          "photo": null,
+          "profileUrl": null
         },
         {
           "id": "option_id",
           "text": "Option 2",
-          "votes": 3
+          "votes": 3,
+          "status": "approved",
+          "createdBy": null,
+          "photoUrl": null,
+          "photo": null,
+          "profileUrl": null
         }
       ],
       "tags": ["tag1", "tag2"],
@@ -253,8 +263,16 @@ GET /api/polls
       },
       "isAnonymousCreator": false,
       "anonymousResponses": true,
+      "allowUserOptions": false,
+      "userOptionApproval": "auto",
+      "optionsArePeople": false,
+      "linkPolicy": {
+        "mode": "any",
+        "allowedDomains": []
+      },
       "totalVotes": 8,
       "hasVoted": false,
+      "isCreatorOrAdmin": false,
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z"
     }
@@ -289,7 +307,44 @@ POST /api/polls
   "region": "Αττική",
   "cityOrVillage": "Αθήνα",
   "isAnonymousCreator": false,
-  "anonymousResponses": true
+  "anonymousResponses": true,
+  "allowUserOptions": false,
+  "userOptionApproval": "auto",
+  "optionsArePeople": false,
+  "linkPolicy": {
+    "mode": "any",
+    "allowedDomains": []
+  }
+}
+```
+
+**Note**: 
+- `options` can be an array of strings (legacy) or an array of objects for people mode
+- People mode options require: `{text, photoUrl or photo, profileUrl}`
+- `userOptionApproval`: "auto" | "creator" (default: "auto")
+- `linkPolicy.mode`: "any" | "allowlist" (default: "any")
+
+**People Mode Example:**
+```json
+{
+  "question": "Who should be the next mayor?",
+  "options": [
+    {
+      "text": "John Doe",
+      "photoUrl": "https://example.com/john.jpg",
+      "profileUrl": "https://linkedin.com/in/johndoe"
+    },
+    {
+      "text": "Jane Smith",
+      "photo": "data:image/jpeg;base64,...",
+      "profileUrl": "https://twitter.com/janesmith"
+    }
+  ],
+  "optionsArePeople": true,
+  "linkPolicy": {
+    "mode": "allowlist",
+    "allowedDomains": ["linkedin.com", "twitter.com", "facebook.com"]
+  }
 }
 ```
 
@@ -317,6 +372,93 @@ POST /api/polls/:pollId/vote
 ```json
 {
   "poll": { /* updated poll object with new vote counts */ }
+}
+```
+
+#### Add Option to Poll
+```
+POST /api/polls/:pollId/options
+```
+**Authentication Required**: Optional (required unless poll allows anonymous responses)
+
+**Request Body:**
+```json
+{
+  "option": {
+    "text": "New option text"
+  }
+}
+```
+
+**People Mode Example:**
+```json
+{
+  "option": {
+    "text": "Alex Johnson",
+    "photoUrl": "https://example.com/alex.jpg",
+    "profileUrl": "https://linkedin.com/in/alexj"
+  }
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "poll": { /* updated poll object */ },
+  "message": "Η επιλογή προστέθηκε επιτυχώς." | "Η επιλογή σας υποβλήθηκε και εκκρεμεί έγκριση."
+}
+```
+
+#### Get Pending Options (Creator/Admin Only)
+```
+GET /api/polls/:pollId/options/pending
+```
+**Authentication Required**: Yes  
+**Required**: Poll creator or admin
+
+**Response:** `200 OK`
+```json
+{
+  "options": [
+    {
+      "id": "option_id",
+      "text": "Pending option",
+      "createdBy": { /* user object or null */ },
+      "photoUrl": "https://...",
+      "photo": "data:image/...",
+      "profileUrl": "https://..."
+    }
+  ]
+}
+```
+
+#### Approve Pending Option (Creator/Admin Only)
+```
+POST /api/polls/:pollId/options/:optionId/approve
+```
+**Authentication Required**: Yes  
+**Required**: Poll creator or admin
+
+**Response:** `200 OK`
+```json
+{
+  "poll": { /* updated poll object */ },
+  "message": "Η επιλογή εγκρίθηκε επιτυχώς."
+}
+```
+
+#### Delete Option (Creator/Admin Only)
+```
+DELETE /api/polls/:pollId/options/:optionId
+```
+**Authentication Required**: Yes  
+**Required**: Poll creator or admin
+
+**Response:** `200 OK`
+```json
+{
+  "poll": { /* updated poll object */ },
+  "message": "Η επιλογή διαγράφηκε επιτυχώς."
 }
 ```
 
