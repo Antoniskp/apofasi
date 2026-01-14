@@ -498,10 +498,45 @@ const validateLocationHierarchy = (locationCountry, locationJurisdiction, locati
 
   return { 
     valid: true, 
-    locationCountry: trimmedCountry, 
-    locationJurisdiction: trimmedJurisdiction, 
-    locationCity: trimmedCity 
+    locationCountry: trimmedCountry || "", 
+    locationJurisdiction: trimmedJurisdiction || "", 
+    locationCity: trimmedCity || "" 
   };
+};
+
+// Helper function to process location fields from request
+const processLocationFields = (req) => {
+  const { region, cityOrVillage, locationCountry, locationJurisdiction, locationCity } = req.body || {};
+  
+  // Support both old and new location fields
+  if (locationCountry || locationJurisdiction || locationCity) {
+    // Use new hierarchy
+    const locationValidation = validateLocationHierarchy(locationCountry, locationJurisdiction, locationCity);
+    if (!locationValidation.valid) {
+      return { error: locationValidation.error };
+    }
+    return {
+      data: {
+        locationCountry: locationValidation.locationCountry || undefined,
+        locationJurisdiction: locationValidation.locationJurisdiction || undefined,
+        locationCity: locationValidation.locationCity || undefined,
+      }
+    };
+  } else if (region || cityOrVillage) {
+    // Use old fields for backward compatibility
+    const locationValidation = validateArticleLocation(region, cityOrVillage);
+    if (!locationValidation.valid) {
+      return { error: locationValidation.error };
+    }
+    return {
+      data: {
+        region: locationValidation.region || undefined,
+        cityOrVillage: locationValidation.cityOrVillage || undefined,
+      }
+    };
+  }
+  
+  return { data: {} };
 };
 
 // Articles routes
@@ -560,7 +595,7 @@ articlesRouter.get("/:articleId", async (req, res) => {
 });
 
 articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
-  const { title, content, tags, region, cityOrVillage, locationCountry, locationJurisdiction, locationCity } = req.body || {};
+  const { title, content, tags } = req.body || {};
   const trimmedTitle = title?.trim();
   const trimmedContent = content?.trim();
 
@@ -570,29 +605,9 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
 
   const normalizedTags = normalizeArticleTags(tags);
   
-  // Support both old and new location fields
-  let locationData = {};
-  if (locationCountry || locationJurisdiction || locationCity) {
-    // Use new hierarchy
-    const locationValidation = validateLocationHierarchy(locationCountry, locationJurisdiction, locationCity);
-    if (!locationValidation.valid) {
-      return res.status(400).json({ message: locationValidation.error });
-    }
-    locationData = {
-      locationCountry: locationValidation.locationCountry,
-      locationJurisdiction: locationValidation.locationJurisdiction,
-      locationCity: locationValidation.locationCity,
-    };
-  } else if (region || cityOrVillage) {
-    // Use old fields for backward compatibility
-    const locationValidation = validateArticleLocation(region, cityOrVillage);
-    if (!locationValidation.valid) {
-      return res.status(400).json({ message: locationValidation.error });
-    }
-    locationData = {
-      region: locationValidation.region,
-      cityOrVillage: locationValidation.cityOrVillage,
-    };
+  const locationResult = processLocationFields(req);
+  if (locationResult.error) {
+    return res.status(400).json({ message: locationResult.error });
   }
 
   try {
@@ -601,7 +616,7 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
       content: trimmedContent,
       author: req.user._id,
       tags: normalizedTags,
-      ...locationData,
+      ...locationResult.data,
     });
 
     await createdArticle.populate("author", "displayName username email");
@@ -617,7 +632,7 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
 
 articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
   const { articleId } = req.params;
-  const { title, content, tags, region, cityOrVillage, locationCountry, locationJurisdiction, locationCity } = req.body || {};
+  const { title, content, tags } = req.body || {};
   const userId = req.user?.id;
 
   if (!mongoose.Types.ObjectId.isValid(articleId)) {
@@ -633,29 +648,9 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
 
   const normalizedTags = normalizeArticleTags(tags);
   
-  // Support both old and new location fields
-  let locationData = {};
-  if (locationCountry || locationJurisdiction || locationCity) {
-    // Use new hierarchy
-    const locationValidation = validateLocationHierarchy(locationCountry, locationJurisdiction, locationCity);
-    if (!locationValidation.valid) {
-      return res.status(400).json({ message: locationValidation.error });
-    }
-    locationData = {
-      locationCountry: locationValidation.locationCountry,
-      locationJurisdiction: locationValidation.locationJurisdiction,
-      locationCity: locationValidation.locationCity,
-    };
-  } else if (region || cityOrVillage) {
-    // Use old fields for backward compatibility
-    const locationValidation = validateArticleLocation(region, cityOrVillage);
-    if (!locationValidation.valid) {
-      return res.status(400).json({ message: locationValidation.error });
-    }
-    locationData = {
-      region: locationValidation.region,
-      cityOrVillage: locationValidation.cityOrVillage,
-    };
+  const locationResult = processLocationFields(req);
+  if (locationResult.error) {
+    return res.status(400).json({ message: locationResult.error });
   }
 
   try {
@@ -675,7 +670,7 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
     article.tags = normalizedTags;
     
     // Update location fields
-    Object.assign(article, locationData);
+    Object.assign(article, locationResult.data);
 
     await article.save();
 
@@ -933,44 +928,9 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
     )
   ).slice(0, 10);
 
-  // Support both old and new location fields
-  let locationData = {};
-  if (locationCountry || locationJurisdiction || locationCity) {
-    // Use new hierarchy
-    const locationValidation = validateLocationHierarchy(locationCountry, locationJurisdiction, locationCity);
-    if (!locationValidation.valid) {
-      return res.status(400).json({ message: locationValidation.error });
-    }
-    locationData = {
-      locationCountry: locationValidation.locationCountry,
-      locationJurisdiction: locationValidation.locationJurisdiction,
-      locationCity: locationValidation.locationCity,
-    };
-  } else if (region || cityOrVillage) {
-    // Use old fields for backward compatibility
-    const trimmedRegion = region?.trim();
-    const trimmedCity = cityOrVillage?.trim();
-
-    if (trimmedRegion && !REGION_NAMES.includes(trimmedRegion)) {
-      return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
-    }
-
-    if (trimmedCity) {
-      if (!trimmedRegion) {
-        return res
-          .status(400)
-          .json({ message: "Επιλέξτε πρώτα περιφέρεια για να προσθέσετε πόλη ή χωριό." });
-      }
-
-      if (!CITIES_BY_REGION[trimmedRegion]?.includes(trimmedCity)) {
-        return res.status(400).json({ message: "Η πόλη ή το χωριό δεν ανήκει στην επιλεγμένη περιφέρεια." });
-      }
-    }
-    
-    locationData = {
-      region: trimmedRegion,
-      cityOrVillage: trimmedCity,
-    };
+  const locationResult = processLocationFields(req);
+  if (locationResult.error) {
+    return res.status(400).json({ message: locationResult.error });
   }
 
   const shouldHideCreator = Boolean(isAnonymousCreator);
@@ -981,7 +941,7 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
       question: trimmedQuestion,
       options: uniqueOptions,
       tags: normalizedTags,
-      ...locationData,
+      ...locationResult.data,
       isAnonymousCreator: shouldHideCreator,
       anonymousResponses: shouldHideResponders,
       createdBy: req.user._id,

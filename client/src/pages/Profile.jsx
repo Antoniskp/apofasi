@@ -46,6 +46,8 @@ export default function Profile() {
     },
   ];
 
+  const COUNTRY_OPTION_LABELS = Object.fromEntries(COUNTRIES.map(c => [c.value, c.label]));
+
   const locationFields = [
     {
       key: "locationCountry",
@@ -53,7 +55,7 @@ export default function Profile() {
       placeholder: "Επιλέξτε χώρα",
       type: "select",
       options: COUNTRIES.map(c => c.value),
-      optionLabels: Object.fromEntries(COUNTRIES.map(c => [c.value, c.label])),
+      optionLabels: COUNTRY_OPTION_LABELS,
     },
     {
       key: "locationJurisdiction",
