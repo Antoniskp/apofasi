@@ -107,7 +107,7 @@ export const handlePhotoFile = async (file) => {
   if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
     return { 
       valid: false, 
-      error: `Μη έγκυρος τύπος εικόνας. Επιτρέπονται: ${ALLOWED_PHOTO_TYPES.map(t => t.split('/')[1]).join(", ")}` 
+      error: `Μη έγκυρος τύπος εικόνας. Επιτρέπονται: ${ALLOWED_PHOTO_TYPES.map(t => t.split("/")[1]).join(", ")}` 
     };
   }
 

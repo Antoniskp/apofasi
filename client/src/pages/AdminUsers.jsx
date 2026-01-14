@@ -121,7 +121,7 @@ export default function AdminUsers() {
   };
 
   return (
-    <div className="section">
+    <div className="section narrow">
       <p className="pill">{adminUsersCopy.hero.pill}</p>
       <h1 className="section-title">{adminUsersCopy.hero.title}</h1>
       <p className="muted">{adminUsersCopy.hero.subtitle}</p>
@@ -151,24 +151,29 @@ export default function AdminUsers() {
 
         {!session.loading && isAdmin && (
           <div className="stack">
-            <form className="admin-search" onSubmit={handleSearchSubmit}>
-              <div className="admin-search-field">
-                <label className="label" htmlFor="search">
-                  Αναζήτηση χρήστη
-                </label>
+            <div className="toolbar-container">
+              <div className="toolbar-left">
                 <input
                   id="search"
                   type="search"
                   name="search"
-                  placeholder="Email, όνομα, username"
+                  className="input-modern compact"
+                  placeholder="🔍 Email, όνομα, username..."
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      handleSearchSubmit(event);
+                    }
+                  }}
                 />
               </div>
-              <button className="btn" type="submit" disabled={usersState.loading}>
-                {usersState.loading ? "Αναζήτηση..." : "Αναζήτηση"}
-              </button>
-            </form>
+              <div className="toolbar-right">
+                <button className="btn btn-primary" type="button" onClick={handleSearchSubmit} disabled={usersState.loading}>
+                  {usersState.loading ? "Αναζήτηση..." : "Αναζήτηση"}
+                </button>
+              </div>
+            </div>
 
             {usersState.error && <p className="error-text">{usersState.error}</p>}
 
@@ -179,7 +184,7 @@ export default function AdminUsers() {
             {usersState.loading && <p className="muted">Φόρτωση χρηστών...</p>}
 
             {!usersState.loading && usersState.data.length > 0 && (
-              <div className="user-table-wrapper">
+              <div className="user-table-wrapper compact-table">
                 <table className="user-table">
                   <thead>
                     <tr>
@@ -200,17 +205,18 @@ export default function AdminUsers() {
                         <tr key={user.id}>
                           <td>
                             <div className="user-cell-primary">{user.displayName || user.username || "Χρήστης"}</div>
-                            {user.username && <div className="muted">@{user.username}</div>}
+                            {user.username && <div className="muted small">@{user.username}</div>}
                           </td>
                           <td>
                             <div className="user-cell-primary">{user.email || "—"}</div>
                           </td>
                           <td>
-                            <span className="pill subtle">{user.provider}</span>
+                            <span className="pill subtle compact-pill">{user.provider}</span>
                           </td>
                           <td>
-                            <div className="role-controls">
+                            <div className="role-controls compact-controls">
                               <select
+                                className="compact-select"
                                 value={draftRole}
                                 onChange={(event) => handleRoleChange(user.id, event.target.value)}
                                 disabled={updateState.saving}
@@ -223,17 +229,17 @@ export default function AdminUsers() {
                               </select>
                               <button
                                 type="button"
-                                className="btn btn-outline"
+                                className="btn btn-outline btn-sm"
                                 onClick={() => handleRoleSave(user.id)}
                                 disabled={updateState.saving || !roleChanged}
                               >
-                                {updateState.saving ? "Αποθήκευση..." : "Αποθήκευση"}
+                                {updateState.saving ? "..." : "Αποθήκευση"}
                               </button>
                               {updateState.error && <div className="error-text small">{updateState.error}</div>}
-                              {updateState.success && <div className="success-text">{updateState.success}</div>}
+                              {updateState.success && <div className="success-text small">{updateState.success}</div>}
                             </div>
                           </td>
-                          <td>{formatDate(user.createdAt)}</td>
+                          <td className="muted small">{formatDate(user.createdAt)}</td>
                         </tr>
                       );
                     })}

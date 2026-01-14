@@ -189,7 +189,24 @@ export default function News() {
       <div className="section">
         <div className="section-header">
           <h2 className="section-title">Πρόσφατες δημοσιεύσεις</h2>
-          <p className="muted">Οι τελευταίες ειδήσεις που έχουν καταχωρηθεί από συντάκτες.</p>
+        </div>
+
+        <div className="toolbar-container">
+          <div className="toolbar-right ml-auto">
+            {canSubmitNews && (
+              <button 
+                type="button" 
+                className="btn btn-outline" 
+                onClick={() => {
+                  setForm({ title: "", content: "" });
+                  setSubmission({ submitting: false, success: null, error: null });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              >
+                ✚ Νέα είδηση
+              </button>
+            )}
+          </div>
         </div>
 
         {newsFeed.loading && <p className="muted">Φόρτωση ειδήσεων...</p>}
@@ -201,9 +218,9 @@ export default function News() {
           </div>
         )}
 
-        <div className="stack">
+        <div className="compact-list">
           {newsFeed.news.map((item) => (
-            <div key={item.id} className="card muted-border">
+            <div key={item.id} className="card compact-card">
               <div className="story-header">
                 <div>
                   <div className="story-title">
