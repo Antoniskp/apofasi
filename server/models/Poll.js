@@ -74,6 +74,20 @@ const pollSchema = new mongoose.Schema(
           )
         ),
     },
+    // Location hierarchy
+    locationCountry: {
+      type: String,
+      trim: true,
+    },
+    locationJurisdiction: {
+      type: String,
+      trim: true,
+    },
+    locationCity: {
+      type: String,
+      trim: true,
+    },
+    // Legacy fields for backward compatibility
     region: {
       type: String,
       trim: true,
