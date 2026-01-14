@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { API_BASE_URL, getAuthStatus, registerUser } from "../lib/api.js";
+import { API_BASE_URL, registerUser } from "../lib/api.js";
+import { useAuth } from "../lib/AuthContext.jsx";
 import AuthButtons from "../components/AuthButtons.jsx";
 
 export default function Register() {
@@ -9,33 +10,12 @@ export default function Register() {
     email: "",
     password: ""
   });
-  const [status, setStatus] = useState({ loading: true, user: null });
+  const { user: currentUser, loading: statusLoading, refreshAuth } = useAuth();
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const apiConfigured = Boolean(API_BASE_URL);
   const navigate = useNavigate();
-
-  const loadStatus = async () => {
-    setStatus((prev) => ({ ...prev, loading: true }));
-    setError("");
-    setFeedback("");
-    try {
-      const data = await getAuthStatus();
-      setStatus({ loading: false, user: data.user });
-    } catch (err) {
-      setStatus({ loading: false, user: null });
-      setError(
-        API_BASE_URL
-          ? err.message || "Δεν ήταν δυνατή η φόρτωση της κατάστασης."
-          : "Ορίστε το VITE_API_BASE_URL για να γίνει η σύνδεση με τον server."
-      );
-    }
-  };
-
-  useEffect(() => {
-    loadStatus();
-  }, []);
 
   const handleRegister = async (event) => {
     event.preventDefault();
@@ -48,8 +28,8 @@ export default function Register() {
         throw new Error("Δεν έχει ρυθμιστεί το VITE_API_BASE_URL για το API.");
       }
 
-      const data = await registerUser(registerForm);
-      setStatus({ loading: false, user: data.user });
+      await registerUser(registerForm);
+      await refreshAuth();
       setFeedback("Η εγγραφή ολοκληρώθηκε! Συνδεθήκατε αυτόματα.");
       setRegisterForm({
         displayName: "",
@@ -63,8 +43,6 @@ export default function Register() {
       setSubmitting(false);
     }
   };
-
-  const currentUser = status.user;
 
   return (
     <div className="section narrow">
@@ -135,8 +113,8 @@ export default function Register() {
       <AuthButtons />
 
       <div className="card auth-status">
-        {status.loading && <p className="muted">Έλεγχος συνεδρίας...</p>}
-        {!status.loading && currentUser && (
+        {statusLoading && <p className="muted">Έλεγχος συνεδρίας...</p>}
+        {!statusLoading && currentUser && (
           <div>
             <p className="pill subtle">Συνδεθήκατε</p>
             <h3>{currentUser.displayName || "Χρήστης"}</h3>
@@ -144,7 +122,7 @@ export default function Register() {
             <p className="muted small">Πάροχος: {currentUser.provider}</p>
           </div>
         )}
-        {!status.loading && !currentUser && (
+        {!statusLoading && !currentUser && (
           <p className="muted">Δεν έχει πραγματοποιηθεί σύνδεση ακόμα.</p>
         )}
       </div>

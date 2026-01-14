@@ -1,37 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { API_BASE_URL, getAuthStatus, loginUser } from "../lib/api.js";
+import { API_BASE_URL, loginUser } from "../lib/api.js";
+import { useAuth } from "../lib/AuthContext.jsx";
 import AuthButtons from "../components/AuthButtons.jsx";
 
 export default function Auth() {
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
-  const [status, setStatus] = useState({ loading: true, user: null });
+  const { user: currentUser, loading: statusLoading, refreshAuth } = useAuth();
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const apiConfigured = Boolean(API_BASE_URL);
   const navigate = useNavigate();
-
-  const loadStatus = async () => {
-    setStatus((prev) => ({ ...prev, loading: true }));
-    setError("");
-    setFeedback("");
-    try {
-      const data = await getAuthStatus();
-      setStatus({ loading: false, user: data.user });
-    } catch (err) {
-      setStatus({ loading: false, user: null });
-      setError(
-        API_BASE_URL
-          ? err.message || "Δεν ήταν δυνατή η φόρτωση της κατάστασης."
-          : "Ορίστε το VITE_API_BASE_URL για να γίνει η σύνδεση με τον server."
-      );
-    }
-  };
-
-  useEffect(() => {
-    loadStatus();
-  }, []);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -46,7 +26,7 @@ export default function Auth() {
 
       await loginUser(loginForm);
       setFeedback("Επιτυχής σύνδεση.");
-      await loadStatus();
+      await refreshAuth();
       navigate("/");
     } catch (err) {
       setError(err.message || "Η σύνδεση απέτυχε.");
@@ -54,8 +34,6 @@ export default function Auth() {
       setSubmitting(false);
     }
   };
-
-  const currentUser = status.user;
 
   return (
     <div className="section narrow">
@@ -113,8 +91,8 @@ export default function Auth() {
       <AuthButtons />
 
       <div className="card auth-status">
-        {status.loading && <p className="muted">Έλεγχος συνεδρίας...</p>}
-        {!status.loading && currentUser && (
+        {statusLoading && <p className="muted">Έλεγχος συνεδρίας...</p>}
+        {!statusLoading && currentUser && (
           <div>
             <p className="pill subtle">Συνδεθήκατε</p>
             <h3>{currentUser.displayName || "Χρήστης"}</h3>
@@ -122,7 +100,7 @@ export default function Auth() {
             <p className="muted small">Πάροχος: {currentUser.provider}</p>
           </div>
         )}
-        {!status.loading && !currentUser && (
+        {!statusLoading && !currentUser && (
           <p className="muted">Δεν έχει πραγματοποιηθεί σύνδεση ακόμα.</p>
         )}
       </div>

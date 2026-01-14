@@ -2,17 +2,19 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { logoutUser } from "../lib/api.js";
 import { useTheme } from "../lib/ThemeContext.jsx";
+import { useAuth } from "../lib/AuthContext.jsx";
 
 // Mobile breakpoint - must match CSS media query in index.css
 const MOBILE_BREAKPOINT = 680;
 
-export default function UserMenu({ user, onLogout }) {
+export default function UserMenu({ user }) {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownStyle, setDropdownStyle] = useState({});
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { refreshAuth } = useAuth();
 
   // Calculate dropdown position on mobile
   useEffect(() => {
@@ -112,9 +114,7 @@ export default function UserMenu({ user, onLogout }) {
     try {
       await logoutUser();
       setIsOpen(false);
-      if (onLogout) {
-        onLogout();
-      }
+      await refreshAuth();
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
