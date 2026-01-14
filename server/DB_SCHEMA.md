@@ -9,16 +9,20 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
 - **firstName** (`String`, optional, trimmed)
 - **lastName** (`String`, optional, trimmed)
 - **mobile** (`String`, optional, trimmed)
-- **country** (`String`, optional, trimmed)
 - **occupation** (`String`, optional, trimmed)
-- **region** (`String`, optional, trimmed)
-- **cityOrVillage** (`String`, optional, trimmed)
+- **locationCountry** (`String`, optional, trimmed) - New hierarchical location field (e.g., "greece", "international")
+- **locationJurisdiction** (`String`, optional, trimmed) - New hierarchical location field for region/prefecture (only for Greece)
+- **locationCity** (`String`, optional, trimmed) - New hierarchical location field for city or community
+- **country** (`String`, optional, trimmed) - Legacy field for backward compatibility
+- **region** (`String`, optional, trimmed) - Legacy field for backward compatibility
+- **cityOrVillage** (`String`, optional, trimmed) - Legacy field for backward compatibility
 - **gender** (`String`, optional, enum `male|female|other|prefer_not_to_say`, trimmed)
 - **username** (`String`, unique, sparse, trimmed, optional)
 - **email** (`String`, unique, sparse, lowercased, optional)
 - **password** (`String`, optional; only present for local accounts)
 - **avatar** (`String`, optional)
 - **role** (`String`, enum `user|reporter|editor|admin`, default `user`)
+- **visibleToOtherUsers** (`Boolean`, default `false`)
 - **timestamps**: `createdAt`, `updatedAt` (auto-managed)
 
 **Indexes**
@@ -41,8 +45,11 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
   - **optionId** (`ObjectId`, required)
 - **createdBy** (`ObjectId` referencing `users`)
 - **tags** (`Array<String>`, trimmed, unique per poll)
-- **region** (`String`, optional)
-- **cityOrVillage** (`String`, optional; must match selected region when present)
+- **locationCountry** (`String`, optional) - New hierarchical location field (e.g., "greece", "international")
+- **locationJurisdiction** (`String`, optional) - New hierarchical location field for region/prefecture (only for Greece)
+- **locationCity** (`String`, optional) - New hierarchical location field for city or community
+- **region** (`String`, optional) - Legacy field for backward compatibility
+- **cityOrVillage** (`String`, optional) - Legacy field for backward compatibility (must match selected region when present)
 - **isAnonymousCreator** (`Boolean`, default `false`; hides creator identity from readers)
 - **anonymousResponses** (`Boolean`, default `false`; allows voters to remain anonymous and vote without logging in once per session)
 - **allowUserOptions** (`Boolean`, default `false`; enables users to add their own options)
@@ -66,8 +73,11 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
 - **content** (`String`, required)
 - **author** (`ObjectId` referencing `users`, required)
 - **tags** (`Array<String>`, trimmed, unique per article, max 10)
-- **region** (`String`, optional)
-- **cityOrVillage** (`String`, optional; must match selected region when present)
+- **locationCountry** (`String`, optional) - New hierarchical location field (e.g., "greece", "international")
+- **locationJurisdiction** (`String`, optional) - New hierarchical location field for region/prefecture (only for Greece)
+- **locationCity** (`String`, optional) - New hierarchical location field for city or community
+- **region** (`String`, optional) - Legacy field for backward compatibility
+- **cityOrVillage** (`String`, optional) - Legacy field for backward compatibility (must match selected region when present)
 - **isNews** (`Boolean`, default `false`; marks article as news)
 - **taggedAsNewsBy** (`ObjectId` referencing `users`, optional; user who tagged as news)
 - **taggedAsNewsAt** (`Date`, optional; timestamp when tagged as news)

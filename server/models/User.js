@@ -27,11 +27,25 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
-    country: {
+    occupation: {
       type: String,
       trim: true
     },
-    occupation: {
+    // Location hierarchy
+    locationCountry: {
+      type: String,
+      trim: true,
+    },
+    locationJurisdiction: {
+      type: String,
+      trim: true,
+    },
+    locationCity: {
+      type: String,
+      trim: true,
+    },
+    // Legacy fields for backward compatibility
+    country: {
       type: String,
       trim: true
     },

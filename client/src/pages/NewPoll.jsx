@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { CITIES_BY_REGION, REGION_NAMES } from "../../../shared/locations.js";
+import { COUNTRIES, GREEK_JURISDICTION_NAMES, CITIES_BY_JURISDICTION } from "../../../shared/locations.js";
 import { API_BASE_URL, createPoll, getAuthStatus } from "../lib/api.js";
 
 const DEFAULT_OPTIONS = ["Ναι", "Όχι"];
@@ -21,8 +21,9 @@ export default function NewPoll() {
     question: "",
     options: DEFAULT_OPTIONS,
     tags: "",
-    region: "",
-    cityOrVillage: "",
+    locationCountry: "",
+    locationJurisdiction: "",
+    locationCity: "",
     isAnonymousCreator: false,
     anonymousResponses: false,
     allowUserOptions: false,
@@ -34,7 +35,12 @@ export default function NewPoll() {
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
   const navigate = useNavigate();
 
-  const availableCities = useMemo(() => CITIES_BY_REGION[formState.region] || [], [formState.region]);
+  const availableCities = useMemo(() => 
+    formState.locationCountry === "greece" && formState.locationJurisdiction
+      ? CITIES_BY_JURISDICTION[formState.locationJurisdiction] || []
+      : [], 
+    [formState.locationCountry, formState.locationJurisdiction]
+  );
 
   const loadAuthStatus = async () => {
     setAuthState((prev) => ({ ...prev, loading: true }));
@@ -165,8 +171,21 @@ export default function NewPoll() {
     return Math.ceil((base64.length * 3) / 4);
   };
 
-  const handleRegionChange = (value) => {
-    setFormState((prev) => ({ ...prev, region: value, cityOrVillage: "" }));
+  const handleCountryChange = (value) => {
+    setFormState((prev) => ({ 
+      ...prev, 
+      locationCountry: value, 
+      locationJurisdiction: "", 
+      locationCity: "" 
+    }));
+  };
+
+  const handleJurisdictionChange = (value) => {
+    setFormState((prev) => ({ 
+      ...prev, 
+      locationJurisdiction: value, 
+      locationCity: "" 
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -256,8 +275,9 @@ export default function NewPoll() {
         question: trimmedQuestion,
         options: distinctOptions,
         tags,
-        region: formState.region,
-        cityOrVillage: formState.cityOrVillage,
+        locationCountry: formState.locationCountry,
+        locationJurisdiction: formState.locationJurisdiction,
+        locationCity: formState.locationCity,
         isAnonymousCreator: formState.isAnonymousCreator,
         anonymousResponses: formState.anonymousResponses,
         allowUserOptions: formState.allowUserOptions,
@@ -271,8 +291,9 @@ export default function NewPoll() {
         question: "",
         options: DEFAULT_OPTIONS,
         tags: "",
-        region: "",
-        cityOrVillage: "",
+        locationCountry: "",
+        locationJurisdiction: "",
+        locationCity: "",
         isAnonymousCreator: false,
         anonymousResponses: false,
         allowUserOptions: false,
@@ -443,37 +464,54 @@ export default function NewPoll() {
 
             <div className="info-grid">
               <div>
-                <p className="label">Περιφέρεια (προαιρετικό)</p>
+                <p className="label">Χώρα (προαιρετικό)</p>
                 <select
                   className="input-modern"
-                  value={formState.region}
-                  onChange={(event) => handleRegionChange(event.target.value)}
+                  value={formState.locationCountry}
+                  onChange={(event) => handleCountryChange(event.target.value)}
                 >
                   <option value="">Χωρίς τοποθεσία</option>
-                  {REGION_NAMES.map((regionName) => (
-                    <option key={regionName} value={regionName}>
-                      {regionName}
+                  {COUNTRIES.map((country) => (
+                    <option key={country.value} value={country.value}>
+                      {country.label}
                     </option>
                   ))}
                 </select>
               </div>
-              <div>
-                <p className="label">Πόλη ή χωριό (προαιρετικό)</p>
-                <select
-                  className="input-modern"
-                  value={formState.cityOrVillage}
-                  onChange={(event) => setFormState((prev) => ({ ...prev, cityOrVillage: event.target.value }))}
-                  disabled={!formState.region}
-                >
-                  <option value="">Χωρίς επιλογή</option>
-                  {availableCities.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
-                {!formState.region && <p className="muted small">Επιλέξτε πρώτα περιφέρεια για να ενεργοποιηθεί.</p>}
-              </div>
+              {formState.locationCountry === "greece" && (
+                <div>
+                  <p className="label">Περιφέρεια (προαιρετικό)</p>
+                  <select
+                    className="input-modern"
+                    value={formState.locationJurisdiction}
+                    onChange={(event) => handleJurisdictionChange(event.target.value)}
+                  >
+                    <option value="">Χωρίς επιλογή</option>
+                    {GREEK_JURISDICTION_NAMES.map((jurisdiction) => (
+                      <option key={jurisdiction} value={jurisdiction}>
+                        {jurisdiction}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {formState.locationJurisdiction && (
+                <div>
+                  <p className="label">Πόλη ή Κοινότητα (προαιρετικό)</p>
+                  <select
+                    className="input-modern"
+                    value={formState.locationCity}
+                    onChange={(event) => setFormState((prev) => ({ ...prev, locationCity: event.target.value }))}
+                  >
+                    <option value="">Χωρίς επιλογή</option>
+                    {availableCities.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="privacy-grid">

@@ -1,60 +1,77 @@
-export const REGIONAL_LOCATIONS = [
+// Countries
+export const COUNTRIES = [
+  { value: "greece", label: "Ελλάδα" },
+  { value: "international", label: "Διεθνές" },
+];
+
+// Greek jurisdictions (regions/prefectures)
+export const GREEK_JURISDICTIONS = [
   {
-    region: "Αττική",
-    citiesOrVillages: ["Αθήνα", "Πειραιάς", "Μαρούσι", "Γλυφάδα", "Περιστέρι"],
+    jurisdiction: "Αττική",
+    citiesOrCommunities: ["Αθήνα", "Πειραιάς", "Μαρούσι", "Γλυφάδα", "Περιστέρι"],
   },
   {
-    region: "Κεντρική Μακεδονία",
-    citiesOrVillages: ["Θεσσαλονίκη", "Κατερίνη", "Σέρρες", "Βέροια", "Έδεσσα"],
+    jurisdiction: "Κεντρική Μακεδονία",
+    citiesOrCommunities: ["Θεσσαλονίκη", "Κατερίνη", "Σέρρες", "Βέροια", "Έδεσσα"],
   },
   {
-    region: "Δυτική Μακεδονία",
-    citiesOrVillages: ["Κοζάνη", "Καστοριά", "Φλώρινα", "Γρεβενά"],
+    jurisdiction: "Δυτική Μακεδονία",
+    citiesOrCommunities: ["Κοζάνη", "Καστοριά", "Φλώρινα", "Γρεβενά"],
   },
   {
-    region: "Ανατολική Μακεδονία και Θράκη",
-    citiesOrVillages: ["Καβάλα", "Ξάνθη", "Δράμα", "Κομοτηνή", "Αλεξανδρούπολη"],
+    jurisdiction: "Ανατολική Μακεδονία και Θράκη",
+    citiesOrCommunities: ["Καβάλα", "Ξάνθη", "Δράμα", "Κομοτηνή", "Αλεξανδρούπολη"],
   },
   {
-    region: "Ήπειρος",
-    citiesOrVillages: ["Ιωάννινα", "Άρτα", "Πρέβεζα", "Ηγουμενίτσα", "Μέτσοβο"],
+    jurisdiction: "Ήπειρος",
+    citiesOrCommunities: ["Ιωάννινα", "Άρτα", "Πρέβεζα", "Ηγουμενίτσα", "Μέτσοβο"],
   },
   {
-    region: "Θεσσαλία",
-    citiesOrVillages: ["Λάρισα", "Βόλος", "Καρδίτσα", "Τρίκαλα", "Ελασσόνα"],
+    jurisdiction: "Θεσσαλία",
+    citiesOrCommunities: ["Λάρισα", "Βόλος", "Καρδίτσα", "Τρίκαλα", "Ελασσόνα"],
   },
   {
-    region: "Ιόνιοι Νήσοι",
-    citiesOrVillages: ["Κέρκυρα", "Ζάκυνθος", "Κεφαλονιά", "Λευκάδα", "Παξοί"],
+    jurisdiction: "Ιόνιοι Νήσοι",
+    citiesOrCommunities: ["Κέρκυρα", "Ζάκυνθος", "Κεφαλονιά", "Λευκάδα", "Παξοί"],
   },
   {
-    region: "Δυτική Ελλάδα",
-    citiesOrVillages: ["Πάτρα", "Αγρίνιο", "Πύργος", "Αίγιο", "Μεσολόγγι"],
+    jurisdiction: "Δυτική Ελλάδα",
+    citiesOrCommunities: ["Πάτρα", "Αγρίνιο", "Πύργος", "Αίγιο", "Μεσολόγγι"],
   },
   {
-    region: "Στερεά Ελλάδα",
-    citiesOrVillages: ["Λαμία", "Χαλκίδα", "Άμφισσα", "Θήβα", "Καρπενήσι"],
+    jurisdiction: "Στερεά Ελλάδα",
+    citiesOrCommunities: ["Λαμία", "Χαλκίδα", "Άμφισσα", "Θήβα", "Καρπενήσι"],
   },
   {
-    region: "Πελοπόννησος",
-    citiesOrVillages: ["Τρίπολη", "Καλαμάτα", "Σπάρτη", "Κόρινθος", "Ναύπλιο"],
+    jurisdiction: "Πελοπόννησος",
+    citiesOrCommunities: ["Τρίπολη", "Καλαμάτα", "Σπάρτη", "Κόρινθος", "Ναύπλιο"],
   },
   {
-    region: "Κρήτη",
-    citiesOrVillages: ["Ηράκλειο", "Χανιά", "Ρέθυμνο", "Άγιος Νικόλαος", "Σητεία"],
+    jurisdiction: "Κρήτη",
+    citiesOrCommunities: ["Ηράκλειο", "Χανιά", "Ρέθυμνο", "Άγιος Νικόλαος", "Σητεία"],
   },
   {
-    region: "Βόρειο Αιγαίο",
-    citiesOrVillages: ["Μυτιλήνη", "Χίος", "Λήμνος", "Σάμος", "Ικαρία"],
+    jurisdiction: "Βόρειο Αιγαίο",
+    citiesOrCommunities: ["Μυτιλήνη", "Χίος", "Λήμνος", "Σάμος", "Ικαρία"],
   },
   {
-    region: "Νότιο Αιγαίο",
-    citiesOrVillages: ["Ρόδος", "Σύρος", "Κως", "Κάλυμνος", "Πάρος"],
+    jurisdiction: "Νότιο Αιγαίο",
+    citiesOrCommunities: ["Ρόδος", "Σύρος", "Κως", "Κάλυμνος", "Πάρος"],
   },
 ];
 
-export const REGION_NAMES = REGIONAL_LOCATIONS.map((entry) => entry.region);
+export const GREEK_JURISDICTION_NAMES = GREEK_JURISDICTIONS.map((entry) => entry.jurisdiction);
 
-export const CITIES_BY_REGION = Object.fromEntries(
-  REGIONAL_LOCATIONS.map((entry) => [entry.region, entry.citiesOrVillages])
+export const CITIES_BY_JURISDICTION = Object.fromEntries(
+  GREEK_JURISDICTIONS.map((entry) => [entry.jurisdiction, entry.citiesOrCommunities])
 );
+
+// Legacy exports for backward compatibility
+export const REGIONAL_LOCATIONS = GREEK_JURISDICTIONS.map((j) => ({
+  region: j.jurisdiction,
+  citiesOrVillages: j.citiesOrCommunities,
+}));
+
+export const REGION_NAMES = GREEK_JURISDICTION_NAMES;
+
+export const CITIES_BY_REGION = CITIES_BY_JURISDICTION;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { API_BASE_URL, getAuthStatus, logoutUser, updateProfile } from "../lib/api.js";
-import { CITIES_BY_REGION, REGION_NAMES } from "../../../shared/locations.js";
+import { COUNTRIES, GREEK_JURISDICTION_NAMES, CITIES_BY_JURISDICTION } from "../../../shared/locations.js";
 
 export default function Profile() {
   const [status, setStatus] = useState({ loading: true, user: null, error: null });
@@ -11,7 +11,8 @@ export default function Profile() {
   const [avatarPayload, setAvatarPayload] = useState(undefined);
   const [avatarError, setAvatarError] = useState(null);
   const [isAvatarProcessing, setIsAvatarProcessing] = useState(false);
-  const getCityOptions = (region) => CITIES_BY_REGION[region] || [];
+  const getCityOptions = (country, jurisdiction) => 
+    country === "greece" && jurisdiction ? CITIES_BY_JURISDICTION[jurisdiction] || [] : [];
   const MAX_AVATAR_FILE_BYTES = 4 * 1024 * 1024;
   const MAX_AVATAR_BYTES = 320 * 1024;
   const MAX_AVATAR_DIMENSION = 360;
@@ -45,22 +46,32 @@ export default function Profile() {
     },
   ];
 
+  const COUNTRY_OPTION_LABELS = Object.fromEntries(COUNTRIES.map(c => [c.value, c.label]));
+
   const locationFields = [
-    { key: "country", label: "Χώρα", placeholder: "Προσθέστε τη χώρα διαμονής σας." },
     {
-      key: "region",
-      label: "Περιφέρεια",
-      placeholder: "Επιλέξτε την περιφέρεια κατοικίας σας.",
+      key: "locationCountry",
+      label: "Χώρα",
+      placeholder: "Επιλέξτε χώρα",
       type: "select",
-      options: REGION_NAMES,
+      options: COUNTRIES.map(c => c.value),
+      optionLabels: COUNTRY_OPTION_LABELS,
     },
     {
-      key: "cityOrVillage",
-      label: "Πόλη ή χωριό",
-      placeholder: "Επιλέξτε πόλη ή χωριό από την περιφέρειά σας.",
+      key: "locationJurisdiction",
+      label: "Περιφέρεια",
+      placeholder: "Επιλέξτε την περιφέρεια",
       type: "select",
-      getOptions: (state) => getCityOptions(state.region),
-      disabledWhen: (state) => !state.region,
+      options: GREEK_JURISDICTION_NAMES,
+      disabledWhen: (state) => state.locationCountry !== "greece",
+    },
+    {
+      key: "locationCity",
+      label: "Πόλη ή Κοινότητα",
+      placeholder: "Επιλέξτε πόλη ή κοινότητα",
+      type: "select",
+      getOptions: (state) => getCityOptions(state.locationCountry, state.locationJurisdiction),
+      disabledWhen: (state) => !state.locationJurisdiction,
     },
   ];
 
@@ -72,8 +83,12 @@ export default function Profile() {
       {}
     );
 
-    if (state.region && state.cityOrVillage && !getCityOptions(state.region).includes(state.cityOrVillage)) {
-      state.cityOrVillage = "";
+    // Validate city against current jurisdiction
+    if (state.locationCountry === "greece" && state.locationJurisdiction && state.locationCity) {
+      const validCities = getCityOptions(state.locationCountry, state.locationJurisdiction);
+      if (!validCities.includes(state.locationCity)) {
+        state.locationCity = "";
+      }
     }
 
     return state;
@@ -176,10 +191,18 @@ export default function Profile() {
     setFormState((prev) => {
       const nextState = { ...prev, [key]: value };
 
-      if (key === "region") {
-        const allowedCities = getCityOptions(value);
-        if (!allowedCities.includes(nextState.cityOrVillage)) {
-          nextState.cityOrVillage = "";
+      // Clear dependent fields when parent changes
+      if (key === "locationCountry") {
+        if (value !== "greece") {
+          nextState.locationJurisdiction = "";
+          nextState.locationCity = "";
+        }
+      }
+
+      if (key === "locationJurisdiction") {
+        const allowedCities = getCityOptions(nextState.locationCountry, value);
+        if (!allowedCities.includes(nextState.locationCity)) {
+          nextState.locationCity = "";
         }
       }
 

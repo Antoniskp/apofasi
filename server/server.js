@@ -18,7 +18,7 @@ import User from "./models/User.js";
 import ContactMessage from "./models/ContactMessage.js";
 import AnonymousVote from "./models/AnonymousVote.js";
 import Article from "./models/Article.js";
-import { CITIES_BY_REGION, REGION_NAMES } from "../shared/locations.js";
+import { CITIES_BY_REGION, REGION_NAMES, COUNTRIES, GREEK_JURISDICTION_NAMES, CITIES_BY_JURISDICTION } from "../shared/locations.js";
 import defaultPolls from "./data/defaultPolls.js";
 import { hashPassword, needsPasswordUpgrade, verifyPassword } from "./utils/crypto.js";
 
@@ -88,8 +88,13 @@ const sanitizeUser = (user) =>
       role: user.role,
       username: user.username,
       mobile: user.mobile,
-      country: user.country,
       occupation: user.occupation,
+      // New location hierarchy
+      locationCountry: user.locationCountry,
+      locationJurisdiction: user.locationJurisdiction,
+      locationCity: user.locationCity,
+      // Legacy location fields for backward compatibility
+      country: user.country,
       region: user.region,
       cityOrVillage: user.cityOrVillage,
       createdAt: user.createdAt,
@@ -130,6 +135,11 @@ const serializeArticle = (article) => ({
   content: article.content,
   author: serializeAuthor(article.author),
   tags: article.tags || [],
+  // New location hierarchy
+  locationCountry: article.locationCountry,
+  locationJurisdiction: article.locationJurisdiction,
+  locationCity: article.locationCity,
+  // Legacy location fields for backward compatibility
   region: article.region,
   cityOrVillage: article.cityOrVillage,
   isNews: Boolean(article.isNews),
@@ -204,6 +214,11 @@ const serializePoll = async (poll, currentUser, session, req) => {
       profileUrl: option.profileUrl,
     })),
     tags: poll.tags || [],
+    // New location hierarchy
+    locationCountry: poll.locationCountry,
+    locationJurisdiction: poll.locationJurisdiction,
+    locationCity: poll.locationCity,
+    // Legacy location fields for backward compatibility
     region: poll.region,
     cityOrVillage: poll.cityOrVillage,
     createdBy: poll.isAnonymousCreator ? null : serializeAuthor(poll.createdBy),
@@ -439,6 +454,91 @@ const validateArticleLocation = (region, cityOrVillage) => {
   return { valid: true, region: trimmedRegion, cityOrVillage: trimmedCity };
 };
 
+// New validation function for hierarchical location
+const validateLocationHierarchy = (locationCountry, locationJurisdiction, locationCity) => {
+  const trimmedCountry = locationCountry?.trim();
+  const trimmedJurisdiction = locationJurisdiction?.trim();
+  const trimmedCity = locationCity?.trim();
+
+  // Validate country
+  if (trimmedCountry && !COUNTRIES.find(c => c.value === trimmedCountry)) {
+    return { valid: false, error: "Η χώρα δεν είναι διαθέσιμη." };
+  }
+
+  // Validate jurisdiction (only for Greece)
+  if (trimmedJurisdiction) {
+    if (trimmedCountry !== "greece") {
+      return {
+        valid: false,
+        error: "Η περιφέρεια είναι διαθέσιμη μόνο για την Ελλάδα.",
+      };
+    }
+
+    if (!GREEK_JURISDICTION_NAMES.includes(trimmedJurisdiction)) {
+      return { valid: false, error: "Η περιφέρεια δεν είναι διαθέσιμη." };
+    }
+  }
+
+  // Validate city
+  if (trimmedCity) {
+    if (!trimmedJurisdiction) {
+      return {
+        valid: false,
+        error: "Επιλέξτε πρώτα περιφέρεια για να προσθέσετε πόλη ή κοινότητα.",
+      };
+    }
+
+    if (!CITIES_BY_JURISDICTION[trimmedJurisdiction]?.includes(trimmedCity)) {
+      return {
+        valid: false,
+        error: "Η πόλη ή η κοινότητα δεν ανήκει στην επιλεγμένη περιφέρεια.",
+      };
+    }
+  }
+
+  return { 
+    valid: true, 
+    locationCountry: trimmedCountry || "", 
+    locationJurisdiction: trimmedJurisdiction || "", 
+    locationCity: trimmedCity || "" 
+  };
+};
+
+// Helper function to process location fields from request
+const processLocationFields = (req) => {
+  const { region, cityOrVillage, locationCountry, locationJurisdiction, locationCity } = req.body || {};
+  
+  // Support both old and new location fields
+  if (locationCountry || locationJurisdiction || locationCity) {
+    // Use new hierarchy
+    const locationValidation = validateLocationHierarchy(locationCountry, locationJurisdiction, locationCity);
+    if (!locationValidation.valid) {
+      return { error: locationValidation.error };
+    }
+    return {
+      data: {
+        locationCountry: locationValidation.locationCountry || undefined,
+        locationJurisdiction: locationValidation.locationJurisdiction || undefined,
+        locationCity: locationValidation.locationCity || undefined,
+      }
+    };
+  } else if (region || cityOrVillage) {
+    // Use old fields for backward compatibility
+    const locationValidation = validateArticleLocation(region, cityOrVillage);
+    if (!locationValidation.valid) {
+      return { error: locationValidation.error };
+    }
+    return {
+      data: {
+        region: locationValidation.region || undefined,
+        cityOrVillage: locationValidation.cityOrVillage || undefined,
+      }
+    };
+  }
+  
+  return { data: {} };
+};
+
 // Articles routes
 articlesRouter.get("/", async (req, res) => {
   try {
@@ -495,7 +595,7 @@ articlesRouter.get("/:articleId", async (req, res) => {
 });
 
 articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
-  const { title, content, tags, region, cityOrVillage } = req.body || {};
+  const { title, content, tags } = req.body || {};
   const trimmedTitle = title?.trim();
   const trimmedContent = content?.trim();
 
@@ -504,10 +604,10 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
   }
 
   const normalizedTags = normalizeArticleTags(tags);
-  const locationValidation = validateArticleLocation(region, cityOrVillage);
-
-  if (!locationValidation.valid) {
-    return res.status(400).json({ message: locationValidation.error });
+  
+  const locationResult = processLocationFields(req);
+  if (locationResult.error) {
+    return res.status(400).json({ message: locationResult.error });
   }
 
   try {
@@ -516,8 +616,7 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
       content: trimmedContent,
       author: req.user._id,
       tags: normalizedTags,
-      region: locationValidation.region,
-      cityOrVillage: locationValidation.cityOrVillage,
+      ...locationResult.data,
     });
 
     await createdArticle.populate("author", "displayName username email");
@@ -533,7 +632,7 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
 
 articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
   const { articleId } = req.params;
-  const { title, content, tags, region, cityOrVillage } = req.body || {};
+  const { title, content, tags } = req.body || {};
   const userId = req.user?.id;
 
   if (!mongoose.Types.ObjectId.isValid(articleId)) {
@@ -548,10 +647,10 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
   }
 
   const normalizedTags = normalizeArticleTags(tags);
-  const locationValidation = validateArticleLocation(region, cityOrVillage);
-
-  if (!locationValidation.valid) {
-    return res.status(400).json({ message: locationValidation.error });
+  
+  const locationResult = processLocationFields(req);
+  if (locationResult.error) {
+    return res.status(400).json({ message: locationResult.error });
   }
 
   try {
@@ -569,8 +668,9 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
     article.title = trimmedTitle;
     article.content = trimmedContent;
     article.tags = normalizedTags;
-    article.region = locationValidation.region;
-    article.cityOrVillage = locationValidation.cityOrVillage;
+    
+    // Update location fields
+    Object.assign(article, locationResult.data);
 
     await article.save();
 
@@ -741,6 +841,9 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
     tags,
     region,
     cityOrVillage,
+    locationCountry,
+    locationJurisdiction,
+    locationCity,
     isAnonymousCreator,
     anonymousResponses,
     allowUserOptions,
@@ -825,34 +928,20 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
     )
   ).slice(0, 10);
 
-  const trimmedRegion = region?.trim();
-  const trimmedCity = cityOrVillage?.trim();
+  const locationResult = processLocationFields(req);
+  if (locationResult.error) {
+    return res.status(400).json({ message: locationResult.error });
+  }
+
   const shouldHideCreator = Boolean(isAnonymousCreator);
   const shouldHideResponders = Boolean(anonymousResponses);
-
-  if (trimmedRegion && !REGION_NAMES.includes(trimmedRegion)) {
-    return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
-  }
-
-  if (trimmedCity) {
-    if (!trimmedRegion) {
-      return res
-        .status(400)
-        .json({ message: "Επιλέξτε πρώτα περιφέρεια για να προσθέσετε πόλη ή χωριό." });
-    }
-
-    if (!CITIES_BY_REGION[trimmedRegion]?.includes(trimmedCity)) {
-      return res.status(400).json({ message: "Η πόλη ή το χωριό δεν ανήκει στην επιλεγμένη περιφέρεια." });
-    }
-  }
 
   try {
     const pollData = {
       question: trimmedQuestion,
       options: uniqueOptions,
       tags: normalizedTags,
-      region: trimmedRegion,
-      cityOrVillage: trimmedCity,
+      ...locationResult.data,
       isAnonymousCreator: shouldHideCreator,
       anonymousResponses: shouldHideResponders,
       createdBy: req.user._id,
@@ -1721,13 +1810,18 @@ authRouter.put("/profile", ensureAuthenticated, async (req, res) => {
     "lastName",
     "username",
     "mobile",
-    "country",
     "occupation",
-    "region",
-    "cityOrVillage",
     "gender",
     "avatar",
     "visibleToOtherUsers",
+    // New location hierarchy
+    "locationCountry",
+    "locationJurisdiction",
+    "locationCity",
+    // Legacy location fields for backward compatibility
+    "country",
+    "region",
+    "cityOrVillage",
   ];
   const updates = {};
 
@@ -1765,6 +1859,28 @@ authRouter.put("/profile", ensureAuthenticated, async (req, res) => {
     }
   }
 
+  // Validate new location hierarchy
+  if ("locationCountry" in updates || "locationJurisdiction" in updates || "locationCity" in updates) {
+    const currentCountry = updates.locationCountry ?? req.user.locationCountry;
+    const currentJurisdiction = updates.locationJurisdiction ?? req.user.locationJurisdiction;
+    const currentCity = updates.locationCity ?? req.user.locationCity;
+    
+    const locationValidation = validateLocationHierarchy(currentCountry, currentJurisdiction, currentCity);
+    if (!locationValidation.valid) {
+      return res.status(400).json({ message: locationValidation.error });
+    }
+    
+    // Clear child fields if parent is cleared
+    if ("locationCountry" in updates && !updates.locationCountry) {
+      updates.locationJurisdiction = undefined;
+      updates.locationCity = undefined;
+    }
+    if ("locationJurisdiction" in updates && !updates.locationJurisdiction) {
+      updates.locationCity = undefined;
+    }
+  }
+
+  // Validate legacy location fields for backward compatibility
   if ("region" in updates && updates.region && !REGION_NAMES.includes(updates.region)) {
     return res.status(400).json({ message: "Η περιφέρεια δεν είναι διαθέσιμη." });
   }
