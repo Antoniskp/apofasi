@@ -14,18 +14,23 @@ const anonymousVoteSchema = new mongoose.Schema(
     },
     sessionId: {
       type: String,
+      required: true,
       index: true,
     },
     ipAddress: {
       type: String,
+      required: true,
       index: true,
+    },
+    userAgent: {
+      type: String,
+      trim: true,
     },
   },
   { timestamps: true }
 );
 
-// Compound index for efficient lookups
-anonymousVoteSchema.index({ pollId: 1, sessionId: 1 });
-anonymousVoteSchema.index({ pollId: 1, ipAddress: 1 });
+// Compound index for efficient lookups - now requires BOTH sessionId AND ipAddress
+anonymousVoteSchema.index({ pollId: 1, sessionId: 1, ipAddress: 1 }, { unique: true });
 
 export default mongoose.model("AnonymousVote", anonymousVoteSchema);

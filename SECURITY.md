@@ -121,6 +121,48 @@ app.use('/api/', limiter);
 
 ## Known Security Considerations
 
+### Voting Security
+
+The voting system implements multiple security measures to prevent vote manipulation:
+
+#### Registered User Polls
+- **One vote per account**: Users can only vote once per poll, tracked by their user ID
+- **Device independent**: Users cannot vote multiple times by changing devices, browsers, or IP addresses
+- **Transparent tracking**: All votes are associated with the user's account
+- **Vote audit**: The system tracks which users voted for which options (visible to poll creator and admins)
+
+#### Anonymous Polls
+- **Dual-factor tracking**: Requires BOTH session ID AND IP address to match for vote identification
+- **Enhanced security**: Users cannot simply clear cookies or change IP to vote again - they must do both
+- **Session-based**: Each browser session is tracked with a unique session identifier
+- **IP-based**: The voter's IP address is recorded and must match for vote changes
+- **User agent tracking**: Browser/device information is stored for audit purposes
+- **No personal data**: No personally identifiable information is stored with anonymous votes
+
+#### Security Measures
+1. **Preventing multiple votes**:
+   - Registered users: Tied to user account (userId)
+   - Anonymous users: Requires matching session ID AND IP address
+2. **Vote integrity**:
+   - Vote counts are incremented/decremented atomically
+   - Database constraints prevent duplicate votes
+   - Timestamps track when votes were cast
+3. **Transparency**:
+   - Poll responses include security information
+   - Users are informed about how their vote is protected
+   - Creators can see security method used for their polls
+
+#### Limitations
+- Anonymous votes can potentially be circumvented by:
+  - Using a different device AND different network (VPN/proxy)
+  - Clearing browser data (session) AND changing IP address simultaneously
+- For critical polls requiring high security, use registered user voting instead of anonymous voting
+- Consider implementing additional measures like:
+  - Rate limiting (already recommended below)
+  - CAPTCHA for anonymous votes
+  - Email verification for registered users
+  - Phone number verification for high-security polls
+
 ### XSS Prevention
 - User-generated content should be sanitized
 - Consider using DOMPurify on the client side

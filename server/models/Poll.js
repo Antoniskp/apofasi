@@ -128,6 +128,16 @@ const pollSchema = new mongoose.Schema(
         default: []
       }
     },
+    voteSecurityInfo: {
+      type: String,
+      default: function() {
+        if (this.anonymousResponses) {
+          return "Ανώνυμες ψηφοφορίες απαιτούν τόσο session ID όσο και IP address για την αποτροπή πολλαπλών ψήφων.";
+        } else {
+          return "Εγγεγραμμένοι χρήστες μπορούν να ψηφίσουν μία φορά ανά λογαριασμό, ανεξάρτητα από τη συσκευή ή το IP.";
+        }
+      }
+    },
   },
   { timestamps: true }
 );
