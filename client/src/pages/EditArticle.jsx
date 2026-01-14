@@ -32,11 +32,11 @@ export default function EditArticle() {
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
   const navigate = useNavigate();
 
-  const availableCities = useMemo(() => 
+  const availableCities = useMemo(() =>
     formState.locationCountry === "greece" && formState.locationJurisdiction
       ? CITIES_BY_JURISDICTION[formState.locationJurisdiction] || []
-      : [], 
-    [formState.locationCountry, formState.locationJurisdiction]
+      : [],
+  [formState.locationCountry, formState.locationJurisdiction]
   );
 
   const loadAuthStatus = async () => {
