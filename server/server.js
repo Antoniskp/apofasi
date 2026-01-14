@@ -1641,10 +1641,8 @@ publicUsersRouter.get("/statistics", ensureAuthenticated, async (req, res) => {
     const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
     const activeSessions = await sessionStore.db.collection(sessionStore.collectionName)
       .countDocuments({
-        expires: { $gte: new Date() },
-        "session.passport.user": { $exists: true },
-        // Session was touched in the last 15 minutes
-        expires: { $gte: fifteenMinutesAgo }
+        expires: { $gte: fifteenMinutesAgo },
+        "session.passport.user": { $exists: true }
       });
     const onlineUsers = activeSessions;
 
