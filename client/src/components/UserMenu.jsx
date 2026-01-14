@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { logoutUser } from "../lib/api.js";
 import { useTheme } from "../lib/ThemeContext.jsx";
 
+// Mobile breakpoint - must match CSS media query in index.css
+const MOBILE_BREAKPOINT = 680;
+
 export default function UserMenu({ user, onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownStyle, setDropdownStyle] = useState({});
@@ -15,7 +18,7 @@ export default function UserMenu({ user, onLogout }) {
   useEffect(() => {
     const calculatePosition = () => {
       if (isOpen && buttonRef.current) {
-        const isMobile = window.innerWidth <= 680;
+        const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
         
         if (isMobile) {
           const buttonRect = buttonRef.current.getBoundingClientRect();
