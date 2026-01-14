@@ -58,7 +58,7 @@ export default function Articles() {
         </div>
 
         <div className="toolbar-container">
-          <div className="toolbar-right" style={{ marginLeft: "auto" }}>
+          <div className="toolbar-right ml-auto">
             {authState.user && (
               <>
                 <Link to="/articles/new" className="btn btn-primary">

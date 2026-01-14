@@ -192,7 +192,7 @@ export default function News() {
         </div>
 
         <div className="toolbar-container">
-          <div className="toolbar-right" style={{ marginLeft: "auto" }}>
+          <div className="toolbar-right ml-auto">
             {canSubmitNews && (
               <button 
                 type="button" 

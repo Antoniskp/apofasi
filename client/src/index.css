@@ -2655,6 +2655,11 @@ button:focus-visible {
   font-size: 0.85rem;
 }
 
+/* Utility class for margin-left auto */
+.ml-auto {
+  margin-left: auto;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .toolbar-container {
