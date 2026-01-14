@@ -128,6 +128,10 @@ const pollSchema = new mongoose.Schema(
         default: []
       }
     },
+    voteClosingDate: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

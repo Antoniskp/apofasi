@@ -235,6 +235,17 @@ export default function Polls() {
                   {poll.anonymousResponses && <span className="pill pill-ghost">Ανώνυμες ψήφοι</span>}
                 </div>
 
+                {(poll.allowUserOptions || poll.voteClosingDate) && (
+                  <div className="poll-meta-row">
+                    {poll.allowUserOptions && <span className="pill pill-ghost">Ανοικτό για νέες επιλογές</span>}
+                    {poll.voteClosingDate && (
+                      <span className="pill pill-ghost">
+                        Λήξη: {formatDateTime(poll.voteClosingDate)}
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {poll.tags?.length > 0 && (
                   <div className="chips">
                     {poll.tags.map((tag) => (
