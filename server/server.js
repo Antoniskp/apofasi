@@ -807,8 +807,11 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
   }
 
   // Validate options based on allowUserOptions setting
+  // When allowUserOptions is true, minOptionsRequired is 0 (no minimum)
+  // When allowUserOptions is false, minOptionsRequired is 2 (existing behavior)
   const minOptionsRequired = allowUserOptions ? 0 : 2;
   if (uniqueOptions.length < minOptionsRequired) {
+    // This only executes when allowUserOptions is false and we have < 2 options
     return res
       .status(400)
       .json({ message: "Χρειάζονται τουλάχιστον δύο μοναδικές επιλογές." });

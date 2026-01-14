@@ -219,8 +219,11 @@ export default function NewPoll() {
       return;
     }
     
+    // When allowUserOptions is true, minOptionsRequired is 0 (no minimum)
+    // When allowUserOptions is false, minOptionsRequired is 2 (existing behavior)
     const minOptionsRequired = formState.allowUserOptions ? 0 : 2;
     if (distinctOptions.length < minOptionsRequired) {
+      // This only executes when allowUserOptions is false and we have < 2 options
       setSubmission({ submitting: false, success: null, error: "Συμπληρώστε τουλάχιστον δύο μοναδικές επιλογές." });
       return;
     }

@@ -97,8 +97,12 @@ export const validateLinkPolicy = (linkPolicy) => {
  * @param {string} url - URL to validate
  * @param {object} linkPolicy - Poll's link policy {mode, allowedDomains}
  * @returns {{valid: boolean, error?: string}}
+ * 
+ * Note: This function should only be called when a URL is provided.
+ * The initial null/empty check is defensive programming.
  */
 export const validateProfileUrl = (url, linkPolicy = {}) => {
+  // Defensive check: this shouldn't be reached in normal flow
   if (!url || typeof url !== "string" || !url.trim()) {
     return { valid: false, error: "Το URL δεν είναι έγκυρο." };
   }
@@ -137,8 +141,12 @@ export const validateProfileUrl = (url, linkPolicy = {}) => {
  * Validates a photo data URL
  * @param {string} dataUrl - Base64 data URL
  * @returns {{valid: boolean, error?: string}}
+ * 
+ * Note: This function should only be called when a photo is provided.
+ * The initial null/empty check is defensive programming.
  */
 export const validatePhotoDataUrl = (dataUrl) => {
+  // Defensive check: this shouldn't be reached in normal flow
   if (!dataUrl || typeof dataUrl !== "string") {
     return { valid: false, error: "Η φωτογραφία δεν είναι έγκυρη." };
   }
