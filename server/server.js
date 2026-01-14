@@ -876,12 +876,12 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
       pollData.optionsArePeople = Boolean(optionsArePeople);
     }
     if (linkPolicy) {
-      pollData.linkPolicy = {
-        mode: linkPolicy.mode || "any",
-        allowedDomains: Array.isArray(linkPolicy.allowedDomains) 
-          ? linkPolicy.allowedDomains.filter(Boolean) 
-          : []
-      };
+      const { validateLinkPolicy } = await import("./utils/pollValidation.js");
+      const policyValidation = validateLinkPolicy(linkPolicy);
+      if (!policyValidation.valid) {
+        return res.status(400).json({ message: policyValidation.error });
+      }
+      pollData.linkPolicy = policyValidation.sanitized;
     }
 
     const createdPoll = await Poll.create(pollData);

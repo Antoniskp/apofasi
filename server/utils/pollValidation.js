@@ -24,6 +24,75 @@ export const isHttpsUrl = (url) => {
 };
 
 /**
+ * Validates and sanitizes a domain name
+ * @param {string} domain - Domain to validate
+ * @returns {{valid: boolean, sanitized?: string, error?: string}}
+ */
+export const validateDomain = (domain) => {
+  if (!domain || typeof domain !== "string") {
+    return { valid: false, error: "Μη έγκυρο domain." };
+  }
+
+  const trimmed = domain.trim().toLowerCase();
+  
+  // Basic domain format validation (no protocol, no path, alphanumeric + dots + hyphens)
+  const domainRegex = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+  
+  if (!domainRegex.test(trimmed)) {
+    return { valid: false, error: `Μη έγκυρο domain: ${domain}` };
+  }
+
+  // Prevent common malicious patterns
+  if (trimmed.includes("..") || trimmed.startsWith(".") || trimmed.endsWith(".")) {
+    return { valid: false, error: `Μη έγκυρο domain: ${domain}` };
+  }
+
+  return { valid: true, sanitized: trimmed };
+};
+
+/**
+ * Validates link policy configuration
+ * @param {object} linkPolicy - Link policy object {mode, allowedDomains}
+ * @returns {{valid: boolean, sanitized?: object, error?: string}}
+ */
+export const validateLinkPolicy = (linkPolicy) => {
+  if (!linkPolicy || typeof linkPolicy !== "object") {
+    return { valid: true, sanitized: { mode: "any", allowedDomains: [] } };
+  }
+
+  const { mode = "any", allowedDomains = [] } = linkPolicy;
+
+  if (!["any", "allowlist"].includes(mode)) {
+    return { valid: false, error: "Μη έγκυρη λειτουργία link policy." };
+  }
+
+  if (mode === "allowlist") {
+    if (!Array.isArray(allowedDomains)) {
+      return { valid: false, error: "Τα allowedDomains πρέπει να είναι πίνακας." };
+    }
+
+    const sanitizedDomains = [];
+    for (const domain of allowedDomains) {
+      const validation = validateDomain(domain);
+      if (!validation.valid) {
+        return validation;
+      }
+      sanitizedDomains.push(validation.sanitized);
+    }
+
+    return {
+      valid: true,
+      sanitized: {
+        mode: "allowlist",
+        allowedDomains: sanitizedDomains
+      }
+    };
+  }
+
+  return { valid: true, sanitized: { mode: "any", allowedDomains: [] } };
+};
+
+/**
  * Validates a profile URL against poll's link policy
  * @param {string} url - URL to validate
  * @param {object} linkPolicy - Poll's link policy {mode, allowedDomains}
