@@ -25,6 +25,11 @@ export default function NewPoll() {
     cityOrVillage: "",
     isAnonymousCreator: false,
     anonymousResponses: false,
+    allowUserOptions: false,
+    userOptionApproval: "auto",
+    optionsArePeople: false,
+    linkPolicyMode: "any",
+    linkPolicyDomains: "",
   });
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
   const navigate = useNavigate();
@@ -53,16 +58,28 @@ export default function NewPoll() {
     loadAuthStatus();
   }, []);
 
-  const handleOptionChange = (index, value) => {
+  const handleOptionChange = (index, field, value) => {
     setFormState((prev) => {
       const nextOptions = [...prev.options];
-      nextOptions[index] = value;
+      if (prev.optionsArePeople) {
+        // In people mode, options are objects
+        nextOptions[index] = {
+          ...(typeof nextOptions[index] === "object" ? nextOptions[index] : { text: nextOptions[index] || "" }),
+          [field]: value,
+        };
+      } else {
+        // In normal mode, options are strings
+        nextOptions[index] = value;
+      }
       return { ...prev, options: nextOptions };
     });
   };
 
   const addOptionField = () => {
-    setFormState((prev) => ({ ...prev, options: [...prev.options, ""] }));
+    setFormState((prev) => ({
+      ...prev,
+      options: [...prev.options, prev.optionsArePeople ? { text: "", photoUrl: "", photo: "", profileUrl: "" } : ""],
+    }));
   };
 
   const removeOptionField = (index) => {
@@ -71,6 +88,80 @@ export default function NewPoll() {
       const nextOptions = prev.options.filter((_, idx) => idx !== index);
       return { ...prev, options: nextOptions };
     });
+  };
+
+  const handlePhotoUpload = async (index, file) => {
+    if (!file) return;
+
+    const MAX_SIZE = 4 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setSubmission({ submitting: false, success: null, error: "Η φωτογραφία είναι πολύ μεγάλη (μέγιστο 4MB)." });
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setSubmission({ submitting: false, success: null, error: "Μη έγκυρος τύπος φωτογραφίας." });
+      return;
+    }
+
+    try {
+      const dataUrl = await resizeImage(file, 360, 320 * 1024);
+      handleOptionChange(index, "photo", dataUrl);
+    } catch (error) {
+      setSubmission({ submitting: false, success: null, error: error.message || "Σφάλμα επεξεργασίας φωτογραφίας." });
+    }
+  };
+
+  const resizeImage = (file, maxDimension, maxBytes) =>
+    new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const scale = Math.min(1, maxDimension / image.width, maxDimension / image.height);
+        const targetWidth = Math.round(image.width * scale);
+        const targetHeight = Math.round(image.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error("Δεν ήταν δυνατή η επεξεργασία της εικόνας."));
+          return;
+        }
+
+        ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+        let quality = 0.88;
+        let dataUrl = canvas.toDataURL("image/jpeg", quality);
+
+        while (getDataUrlSize(dataUrl) > maxBytes && quality > 0.55) {
+          quality -= 0.08;
+          dataUrl = canvas.toDataURL("image/jpeg", quality);
+        }
+
+        if (getDataUrlSize(dataUrl) > maxBytes) {
+          reject(new Error("Η φωτογραφία είναι πολύ μεγάλη μετά τη συμπίεση."));
+          return;
+        }
+
+        resolve(dataUrl);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Δεν ήταν δυνατή η φόρτωση της εικόνας."));
+      };
+
+      image.src = objectUrl;
+    });
+
+  const getDataUrlSize = (dataUrl) => {
+    if (!dataUrl) return 0;
+    const base64 = dataUrl.split(",")[1] || "";
+    return Math.ceil((base64.length * 3) / 4);
   };
 
   const handleRegionChange = (value) => {
@@ -86,15 +177,75 @@ export default function NewPoll() {
     }
 
     const trimmedQuestion = formState.question.trim();
-    const cleanedOptions = formState.options.map((opt) => opt.trim()).filter(Boolean);
-    const distinctOptions = Array.from(new Set(cleanedOptions));
+    
+    let processedOptions;
+    if (formState.optionsArePeople) {
+      // People mode: validate and process options as objects
+      processedOptions = formState.options
+        .map((opt) => {
+          if (typeof opt === "object") {
+            return {
+              text: opt.text?.trim() || "",
+              photoUrl: opt.photoUrl?.trim() || "",
+              photo: opt.photo || "",
+              profileUrl: opt.profileUrl?.trim() || "",
+            };
+          }
+          return null;
+        })
+        .filter((opt) => opt && opt.text);
+    } else {
+      // Normal mode: process as strings
+      const cleanedOptions = formState.options
+        .map((opt) => (typeof opt === "string" ? opt : opt?.text || ""))
+        .map((text) => text?.trim())
+        .filter(Boolean);
+      processedOptions = cleanedOptions;
+    }
+
+    const distinctOptions = Array.from(
+      new Map(
+        processedOptions.map((opt) => {
+          const key = typeof opt === "string" ? opt : opt.text;
+          return [key, opt];
+        })
+      ).values()
+    );
 
     if (!trimmedQuestion || distinctOptions.length < 2) {
       setSubmission({ submitting: false, success: null, error: "Συμπληρώστε ερώτηση και τουλάχιστον δύο μοναδικές επιλογές." });
       return;
     }
 
+    // Basic client-side validation for people mode
+    if (formState.optionsArePeople) {
+      for (const option of distinctOptions) {
+        if (!option.text?.trim()) {
+          setSubmission({ submitting: false, success: null, error: "Το όνομα είναι υποχρεωτικό για όλα τα πρόσωπα." });
+          return;
+        }
+        const hasPhotoUrl = option.photoUrl?.trim();
+        const hasPhoto = option.photo?.trim();
+        if (!hasPhotoUrl && !hasPhoto) {
+          setSubmission({ submitting: false, success: null, error: "Απαιτείται φωτογραφία (URL ή upload) για όλα τα πρόσωπα." });
+          return;
+        }
+        if (!option.profileUrl?.trim()) {
+          setSubmission({ submitting: false, success: null, error: "Το URL προφίλ είναι υποχρεωτικό για όλα τα πρόσωπα." });
+          return;
+        }
+      }
+    }
+
     const tags = uniqueTags(formState.tags);
+
+    // Build link policy
+    const linkPolicy = {
+      mode: formState.linkPolicyMode,
+      allowedDomains: formState.linkPolicyMode === "allowlist" 
+        ? formState.linkPolicyDomains.split(",").map((d) => d.trim()).filter(Boolean)
+        : []
+    };
 
     setSubmission({ submitting: true, success: null, error: null });
 
@@ -107,6 +258,10 @@ export default function NewPoll() {
         cityOrVillage: formState.cityOrVillage,
         isAnonymousCreator: formState.isAnonymousCreator,
         anonymousResponses: formState.anonymousResponses,
+        allowUserOptions: formState.allowUserOptions,
+        userOptionApproval: formState.userOptionApproval,
+        optionsArePeople: formState.optionsArePeople,
+        linkPolicy,
       });
 
       setSubmission({ submitting: false, success: "Η ψηφοφορία δημοσιεύτηκε.", error: null });
@@ -118,6 +273,11 @@ export default function NewPoll() {
         cityOrVillage: "",
         isAnonymousCreator: false,
         anonymousResponses: false,
+        allowUserOptions: false,
+        userOptionApproval: "auto",
+        optionsArePeople: false,
+        linkPolicyMode: "any",
+        linkPolicyDomains: "",
       });
       if (response?.poll?.id) {
         navigate(`/polls/${response.poll.id}`);
@@ -190,27 +350,84 @@ export default function NewPoll() {
             <div className="stack">
               <p className="label">Επιλογές απάντησης</p>
               <div className="option-stack">
-                {formState.options.map((option, index) => (
-                  <div key={index} className="option-row option-row-modern">
-                    <input
-                      className="input-modern"
-                      type="text"
-                      value={option}
-                      onChange={(event) => handleOptionChange(index, event.target.value)}
-                      placeholder={`Επιλογή ${index + 1}`}
-                    />
-                    {formState.options.length > 2 && (
-                      <button
-                        type="button"
-                        className="btn btn-subtle"
-                        onClick={() => removeOptionField(index)}
-                        aria-label="Αφαίρεση επιλογής"
-                      >
-                        Αφαίρεση
-                      </button>
-                    )}
-                  </div>
-                ))}
+                {formState.options.map((option, index) => {
+                  const optionText = typeof option === "string" ? option : option.text || "";
+                  const optionPhotoUrl = typeof option === "object" ? option.photoUrl || "" : "";
+                  const optionPhoto = typeof option === "object" ? option.photo || "" : "";
+                  const optionProfileUrl = typeof option === "object" ? option.profileUrl || "" : "";
+
+                  return (
+                    <div key={index} className={formState.optionsArePeople ? "option-row-people" : "option-row option-row-modern"}>
+                      {formState.optionsArePeople ? (
+                        <div className="people-option-fields">
+                          <input
+                            className="input-modern"
+                            type="text"
+                            value={optionText}
+                            onChange={(event) => handleOptionChange(index, "text", event.target.value)}
+                            placeholder="Όνομα προσώπου"
+                          />
+                          <input
+                            className="input-modern"
+                            type="url"
+                            value={optionPhotoUrl}
+                            onChange={(event) => handleOptionChange(index, "photoUrl", event.target.value)}
+                            placeholder="URL φωτογραφίας (https://...)"
+                          />
+                          <div className="photo-upload-row">
+                            <label className="btn btn-outline btn-sm">
+                              Ή ανέβασμα φωτογραφίας
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={(event) => handlePhotoUpload(index, event.target.files?.[0])}
+                                style={{ display: "none" }}
+                              />
+                            </label>
+                            {optionPhoto && <span className="muted small">✓ Ανέβηκε</span>}
+                          </div>
+                          <input
+                            className="input-modern"
+                            type="url"
+                            value={optionProfileUrl}
+                            onChange={(event) => handleOptionChange(index, "profileUrl", event.target.value)}
+                            placeholder="URL προφίλ/social (https://...)"
+                          />
+                          {formState.options.length > 2 && (
+                            <button
+                              type="button"
+                              className="btn btn-subtle btn-sm"
+                              onClick={() => removeOptionField(index)}
+                              aria-label="Αφαίρεση επιλογής"
+                            >
+                              Αφαίρεση
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <input
+                            className="input-modern"
+                            type="text"
+                            value={optionText}
+                            onChange={(event) => handleOptionChange(index, "text", event.target.value)}
+                            placeholder={`Επιλογή ${index + 1}`}
+                          />
+                          {formState.options.length > 2 && (
+                            <button
+                              type="button"
+                              className="btn btn-subtle"
+                              onClick={() => removeOptionField(index)}
+                              aria-label="Αφαίρεση επιλογής"
+                            >
+                              Αφαίρεση
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
               <button
                 type="button"
@@ -256,6 +473,93 @@ export default function NewPoll() {
                 {!formState.region && <p className="muted small">Επιλέξτε πρώτα περιφέρεια για να ενεργοποιηθεί.</p>}
               </div>
             </div>
+
+            <div className="privacy-grid">
+              <label className="privacy-tile">
+                <div className="privacy-toggle">
+                  <input
+                    type="checkbox"
+                    checked={formState.allowUserOptions}
+                    onChange={(event) =>
+                      setFormState((prev) => ({ ...prev, allowUserOptions: event.target.checked }))
+                    }
+                  />
+                  <span className="toggle-visual" aria-hidden />
+                </div>
+                <div>
+                  <p className="label">Επιτρέπονται επιλογές χρηστών</p>
+                  <p className="muted small">Οι χρήστες μπορούν να προσθέσουν τις δικές τους απαντήσεις.</p>
+                </div>
+              </label>
+
+              <label className="privacy-tile">
+                <div className="privacy-toggle">
+                  <input
+                    type="checkbox"
+                    checked={formState.optionsArePeople}
+                    onChange={(event) =>
+                      setFormState((prev) => ({ ...prev, optionsArePeople: event.target.checked }))
+                    }
+                  />
+                  <span className="toggle-visual" aria-hidden />
+                </div>
+                <div>
+                  <p className="label">Λειτουργία προσώπων</p>
+                  <p className="muted small">Οι επιλογές αντιπροσωπεύουν πρόσωπα με φωτογραφία και προφίλ.</p>
+                </div>
+              </label>
+            </div>
+
+            {formState.allowUserOptions && (
+              <div>
+                <p className="label">Έγκριση επιλογών χρηστών</p>
+                <select
+                  className="input-modern"
+                  value={formState.userOptionApproval}
+                  onChange={(event) =>
+                    setFormState((prev) => ({ ...prev, userOptionApproval: event.target.value }))
+                  }
+                >
+                  <option value="auto">Αυτόματη έγκριση</option>
+                  <option value="creator">Έγκριση από δημιουργό</option>
+                </select>
+                <p className="muted small">
+                  Επιλέξτε αν οι νέες επιλογές θα εγκρίνονται αυτόματα ή θα χρειάζεται η έγκρισή σας.
+                </p>
+              </div>
+            )}
+
+            {formState.optionsArePeople && (
+              <div>
+                <p className="label">Πολιτική συνδέσμων</p>
+                <select
+                  className="input-modern"
+                  value={formState.linkPolicyMode}
+                  onChange={(event) =>
+                    setFormState((prev) => ({ ...prev, linkPolicyMode: event.target.value }))
+                  }
+                >
+                  <option value="any">Οποιοδήποτε HTTPS URL</option>
+                  <option value="allowlist">Μόνο επιτρεπόμενα domains</option>
+                </select>
+                {formState.linkPolicyMode === "allowlist" && (
+                  <>
+                    <input
+                      className="input-modern"
+                      type="text"
+                      value={formState.linkPolicyDomains}
+                      onChange={(event) =>
+                        setFormState((prev) => ({ ...prev, linkPolicyDomains: event.target.value }))
+                      }
+                      placeholder="π.χ. facebook.com, instagram.com, linkedin.com"
+                    />
+                    <p className="muted small">
+                      Χωρίστε με κόμμα τα επιτρεπόμενα domains.
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="privacy-grid">
               <label className="privacy-tile">

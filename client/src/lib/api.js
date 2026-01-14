@@ -148,12 +148,16 @@ export const createPoll = async (payload) =>
       `${API_BASE_URL}/polls/`,
       buildJsonRequest({
         question: payload.question?.trim(),
-        options: payload.options?.map((opt) => opt?.trim()),
+        options: payload.options, // Keep as-is (can be string[] or object[])
         tags: payload.tags,
         region: payload.region?.trim(),
         cityOrVillage: payload.cityOrVillage?.trim(),
         isAnonymousCreator: Boolean(payload.isAnonymousCreator),
         anonymousResponses: Boolean(payload.anonymousResponses),
+        allowUserOptions: Boolean(payload.allowUserOptions),
+        userOptionApproval: payload.userOptionApproval,
+        optionsArePeople: Boolean(payload.optionsArePeople),
+        linkPolicy: payload.linkPolicy,
       })
     )
   );
@@ -210,6 +214,41 @@ export const deletePoll = async (pollId) =>
   handleResponse(
     await fetch(
       `${API_BASE_URL}/polls/${pollId}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    )
+  );
+
+export const addOptionToPoll = async (pollId, option) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/polls/${pollId}/options`,
+      buildJsonRequest({ option })
+    )
+  );
+
+export const listPendingOptions = async (pollId) =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/polls/${pollId}/options/pending`, {
+      credentials: "include",
+    })
+  );
+
+export const approveOption = async (pollId, optionId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/polls/${pollId}/options/${optionId}/approve`,
+      buildJsonRequest({})
+    )
+  );
+
+export const deleteOption = async (pollId, optionId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/polls/${pollId}/options/${optionId}`,
       {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
