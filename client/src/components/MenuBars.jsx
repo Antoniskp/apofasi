@@ -46,9 +46,17 @@ export default function MenuBars() {
   const [isOpen, setIsOpen] = useState(false);
   const { user: authUser } = useAuth();
   const [isMenuHidden, setIsMenuHidden] = useState(false);
+  const [openSubmenu, setOpenSubmenu] = useState(null);
   const location = useLocation();
 
-  const closeMenu = () => setIsOpen(false);
+  const closeMenu = () => {
+    setIsOpen(false);
+    setOpenSubmenu(null);
+  };
+
+  const toggleSubmenu = (label) => {
+    setOpenSubmenu(openSubmenu === label ? null : label);
+  };
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -114,15 +122,29 @@ export default function MenuBars() {
               .map((item) =>
                 item.subItems ? (
                   <div key={item.label} className="menu-link-group">
-                    <Link
-                      to={item.to}
-                      className={`menu-link${location.pathname === item.to ? " active" : ""}`}
-                      onClick={closeMenu}
+                    <div className="menu-link-with-toggle">
+                      <Link
+                        to={item.to}
+                        className={`menu-link${location.pathname === item.to ? " active" : ""}`}
+                        onClick={closeMenu}
+                      >
+                        <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
+                        {item.label}
+                      </Link>
+                      <button
+                        type="button"
+                        className="menu-submenu-toggle"
+                        aria-label={`Toggle ${item.label} submenu`}
+                        aria-expanded={openSubmenu === item.label}
+                        onClick={() => toggleSubmenu(item.label)}
+                      >
+                        <i className={`fa-solid fa-chevron-${openSubmenu === item.label ? 'up' : 'down'}`} aria-hidden />
+                      </button>
+                    </div>
+                    <div 
+                      className={`menu-submenu${openSubmenu === item.label ? ' open' : ''}`} 
+                      aria-label={`${item.label} submenu`}
                     >
-                      <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
-                      {item.label}
-                    </Link>
-                    <div className="menu-submenu" aria-label={`${item.label} submenu`}>
                       {item.subItems.map((subItem) =>
                         subItem.to ? (
                           <Link
