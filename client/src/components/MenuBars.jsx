@@ -136,12 +136,14 @@ export default function MenuBars() {
                         className="menu-submenu-toggle"
                         aria-label={`Toggle ${item.label} submenu`}
                         aria-expanded={openSubmenu === item.label}
+                        aria-controls={`submenu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                         onClick={() => toggleSubmenu(item.label)}
                       >
                         <i className={`fa-solid fa-chevron-${openSubmenu === item.label ? 'up' : 'down'}`} aria-hidden />
                       </button>
                     </div>
                     <div 
+                      id={`submenu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                       className={`menu-submenu${openSubmenu === item.label ? ' open' : ''}`} 
                       aria-label={`${item.label} submenu`}
                     >
