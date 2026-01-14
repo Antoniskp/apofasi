@@ -125,23 +125,9 @@ export const listUsers = async (searchTerm = "") => {
   );
 };
 
-export const listVisibleUsers = async (page = 1, perPage = 20) => {
-  const params = new URLSearchParams();
-  if (page) params.set("page", page.toString());
-  if (perPage) params.set("perPage", perPage.toString());
-  
-  const query = params.toString();
-  
-  return handleResponse(
-    await fetch(`${API_BASE_URL}/public-users/visible${query ? `?${query}` : ""}`, {
-      credentials: "include",
-    })
-  );
-};
-
-export const getUserStatistics = async () =>
+export const listVisibleUsers = async () =>
   handleResponse(
-    await fetch(`${API_BASE_URL}/public-users/statistics`, {
+    await fetch(`${API_BASE_URL}/public-users/visible`, {
       credentials: "include",
     })
   );
