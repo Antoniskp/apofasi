@@ -70,6 +70,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "reporter", "admin"],
       default: "user"
+    },
+    visibleToOtherUsers: {
+      type: Boolean,
+      default: false
     }
   },
   { timestamps: true }
