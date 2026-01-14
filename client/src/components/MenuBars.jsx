@@ -58,6 +58,10 @@ export default function MenuBars() {
     setOpenSubmenu(openSubmenu === label ? null : label);
   };
 
+  const generateSubmenuId = (label) => {
+    return `submenu-${label.toLowerCase().replace(/\s+/g, '-')}`;
+  };
+
   useEffect(() => {
     let lastScrollY = window.scrollY;
 
@@ -136,14 +140,14 @@ export default function MenuBars() {
                         className="menu-submenu-toggle"
                         aria-label={`Toggle ${item.label} submenu`}
                         aria-expanded={openSubmenu === item.label}
-                        aria-controls={`submenu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                        aria-controls={generateSubmenuId(item.label)}
                         onClick={() => toggleSubmenu(item.label)}
                       >
                         <i className={`fa-solid fa-chevron-${openSubmenu === item.label ? 'up' : 'down'}`} aria-hidden />
                       </button>
                     </div>
                     <div 
-                      id={`submenu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                      id={generateSubmenuId(item.label)}
                       className={`menu-submenu${openSubmenu === item.label ? ' open' : ''}`} 
                       aria-label={`${item.label} submenu`}
                     >
