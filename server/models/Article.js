@@ -11,10 +11,6 @@ const articleSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    thumbnail: {
-      type: String,
-      trim: true
-    },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

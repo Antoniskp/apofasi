@@ -290,58 +290,35 @@ export const getArticle = async (articleId) =>
     })
   );
 
-export const createArticle = async (payload) => {
-  const formData = new FormData();
-  
-  if (payload.title?.trim()) formData.append("title", payload.title.trim());
-  if (payload.content?.trim()) formData.append("content", payload.content.trim());
-  if (payload.tags) formData.append("tags", JSON.stringify(payload.tags));
-  if (payload.thumbnail) formData.append("thumbnail", payload.thumbnail);
-  if (payload.locationCountry?.trim()) formData.append("locationCountry", payload.locationCountry.trim());
-  if (payload.locationJurisdiction?.trim()) formData.append("locationJurisdiction", payload.locationJurisdiction.trim());
-  if (payload.locationCity?.trim()) formData.append("locationCity", payload.locationCity.trim());
-  
-  return handleResponse(
-    await fetch(`${API_BASE_URL}/articles/`, {
-      method: "POST",
-      credentials: "include",
-      body: formData
-    })
+export const createArticle = async (payload) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/articles/`,
+      buildJsonRequest({
+        title: payload.title?.trim(),
+        content: payload.content?.trim(),
+        tags: payload.tags,
+        locationCountry: payload.locationCountry?.trim(),
+        locationJurisdiction: payload.locationJurisdiction?.trim(),
+        locationCity: payload.locationCity?.trim(),
+      })
+    )
   );
-};
 
-export const updateArticle = async (articleId, payload) => {
-  const formData = new FormData();
-  
-  if (payload.title?.trim()) formData.append("title", payload.title.trim());
-  if (payload.content?.trim()) formData.append("content", payload.content.trim());
-  if (payload.tags) formData.append("tags", JSON.stringify(payload.tags));
-  if (payload.thumbnail) formData.append("thumbnail", payload.thumbnail);
-  if (payload.locationCountry?.trim()) formData.append("locationCountry", payload.locationCountry.trim());
-  if (payload.locationJurisdiction?.trim()) formData.append("locationJurisdiction", payload.locationJurisdiction.trim());
-  if (payload.locationCity?.trim()) formData.append("locationCity", payload.locationCity.trim());
-  
-  return handleResponse(
-    await fetch(`${API_BASE_URL}/articles/${articleId}`, {
-      method: "PUT",
-      credentials: "include",
-      body: formData
-    })
+export const updateArticle = async (articleId, payload) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/articles/${articleId}`,
+      buildJsonRequest({
+        title: payload.title?.trim(),
+        content: payload.content?.trim(),
+        tags: payload.tags,
+        locationCountry: payload.locationCountry?.trim(),
+        locationJurisdiction: payload.locationJurisdiction?.trim(),
+        locationCity: payload.locationCity?.trim(),
+      }, "PUT")
+    )
   );
-};
-
-export const uploadArticleImage = async (file) => {
-  const formData = new FormData();
-  formData.append("image", file);
-  
-  return handleResponse(
-    await fetch(`${API_BASE_URL}/articles/upload-image`, {
-      method: "POST",
-      credentials: "include",
-      body: formData
-    })
-  );
-};
 
 export const deleteArticle = async (articleId) =>
   handleResponse(

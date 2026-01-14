@@ -122,12 +122,6 @@ export default function ArticleDetail() {
   return (
     <div className="container">
       <div className="article-detail">
-        {article.thumbnail && (
-          <div className="article-detail-thumbnail">
-            <img src={article.thumbnail} alt={article.title} />
-          </div>
-        )}
-
         <div className="article-header">
           <h1>{article.title}</h1>
 
@@ -174,7 +168,7 @@ export default function ArticleDetail() {
         </div>
 
         <div className="article-content">
-          <div dangerouslySetInnerHTML={{ __html: article.content }} />
+          <p style={{ whiteSpace: 'pre-wrap' }}>{article.content}</p>
         </div>
 
         {(canEdit || canDelete || canTagAsNews) && (
