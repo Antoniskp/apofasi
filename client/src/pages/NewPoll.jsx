@@ -216,7 +216,10 @@ export default function NewPoll() {
     // Validate based on allowUserOptions setting
     const minOptionsRequired = formState.allowUserOptions ? 0 : 2;
     if (!trimmedQuestion || distinctOptions.length < minOptionsRequired) {
-      setSubmission({ submitting: false, success: null, error: "Συμπληρώστε ερώτηση και τουλάχιστον δύο μοναδικές επιλογές." });
+      const errorMessage = formState.allowUserOptions 
+        ? "Συμπληρώστε ερώτηση."
+        : "Συμπληρώστε ερώτηση και τουλάχιστον δύο μοναδικές επιλογές.";
+      setSubmission({ submitting: false, success: null, error: errorMessage });
       return;
     }
 
