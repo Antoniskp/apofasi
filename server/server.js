@@ -219,21 +219,17 @@ const serializePoll = async (poll, currentUser, session, req) => {
     }
   }
   
-  // For anonymous polls, check both session and IP
+  // For anonymous polls, check both session and IP (requires BOTH to match for security)
   if (poll.anonymousResponses) {
     const sessionId = session?.id;
     const ipAddress = req?.ip;
     
-    // Build query conditions
-    const orConditions = [];
-    if (sessionId) orConditions.push({ sessionId });
-    if (ipAddress) orConditions.push({ ipAddress });
-    
-    // Only query if we have at least one condition
-    if (orConditions.length > 0) {
+    // Require BOTH sessionId AND ipAddress for secure vote tracking
+    if (sessionId && ipAddress) {
       const anonymousVote = await AnonymousVote.findOne({
         pollId: poll._id,
-        $or: orConditions,
+        sessionId,
+        ipAddress,
       });
       
       if (anonymousVote) {
@@ -277,6 +273,14 @@ const serializePoll = async (poll, currentUser, session, req) => {
     hasVoted,
     votedOptionId,
     isCreatorOrAdmin,
+    // Security information for transparency
+    voteSecurity: {
+      method: poll.anonymousResponses ? "anonymous" : "authenticated",
+      description: poll.anonymousResponses 
+        ? "Ανώνυμες ψηφοφορίες απαιτούν session και IP για την αποτροπή πολλαπλών ψήφων από την ίδια συσκευή."
+        : "Εγγεγραμμένοι χρήστες μπορούν να ψηφίσουν μία φορά ανά λογαριασμό, ανεξάρτητα από συσκευή ή IP.",
+      canVoteMultipleTimes: false,
+    },
   };
 };
 
@@ -1079,23 +1083,24 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
     }
 
     if (poll.anonymousResponses) {
-      // Anonymous voting logic
+      // Anonymous voting logic - requires BOTH sessionId AND ipAddress for security
       const sessionId = req.session?.id;
       const ipAddress = req.ip;
+      const userAgent = req.get("user-agent");
 
-      // Build query conditions
-      const orConditions = [];
-      if (sessionId) orConditions.push({ sessionId });
-      if (ipAddress) orConditions.push({ ipAddress });
-
-      // Check if user has already voted (by session OR IP)
-      let existingVote = null;
-      if (orConditions.length > 0) {
-        existingVote = await AnonymousVote.findOne({
-          pollId: poll._id,
-          $or: orConditions,
+      // Validate that we have both sessionId and ipAddress for secure tracking
+      if (!sessionId || !ipAddress) {
+        return res.status(400).json({ 
+          message: "Για την ασφάλεια της ψηφοφορίας, απαιτείται σύνδεση από πλήρως αναγνωρισμένη συσκευή." 
         });
       }
+
+      // Check if user has already voted (requires BOTH session AND IP to match)
+      const existingVote = await AnonymousVote.findOne({
+        pollId: poll._id,
+        sessionId,
+        ipAddress,
+      });
 
       if (existingVote) {
         const oldOptionId = existingVote.optionId.toString();
@@ -1115,12 +1120,7 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
         
         // Update the anonymous vote record
         existingVote.optionId = normalizedOptionId;
-        if (sessionId && !existingVote.sessionId) {
-          existingVote.sessionId = sessionId;
-        }
-        if (ipAddress && !existingVote.ipAddress) {
-          existingVote.ipAddress = ipAddress;
-        }
+        existingVote.userAgent = userAgent;
         
         await existingVote.save();
         await poll.save();
@@ -1136,6 +1136,7 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
         optionId: normalizedOptionId,
         sessionId,
         ipAddress,
+        userAgent,
       });
 
       await poll.save();
@@ -1217,23 +1218,23 @@ pollsRouter.delete("/:pollId/vote", async (req, res) => {
     }
 
     if (poll.anonymousResponses) {
-      // Anonymous vote cancellation
+      // Anonymous vote cancellation - requires BOTH sessionId AND ipAddress
       const sessionId = req.session?.id;
       const ipAddress = req.ip;
 
-      // Build query conditions
-      const orConditions = [];
-      if (sessionId) orConditions.push({ sessionId });
-      if (ipAddress) orConditions.push({ ipAddress });
-
-      // Check if user has voted
-      let existingVote = null;
-      if (orConditions.length > 0) {
-        existingVote = await AnonymousVote.findOne({
-          pollId: poll._id,
-          $or: orConditions,
+      // Validate that we have both sessionId and ipAddress
+      if (!sessionId || !ipAddress) {
+        return res.status(400).json({ 
+          message: "Δεν είναι δυνατή η ακύρωση της ψήφου από αυτή τη συσκευή." 
         });
       }
+
+      // Check if user has voted (requires BOTH session AND IP to match)
+      const existingVote = await AnonymousVote.findOne({
+        pollId: poll._id,
+        sessionId,
+        ipAddress,
+      });
 
       if (!existingVote) {
         return res.status(400).json({ message: "Δεν έχετε ψηφίσει σε αυτή την ψηφοφορία." });

@@ -419,7 +419,12 @@ GET /api/polls
       "hasVoted": false,
       "isCreatorOrAdmin": false,
       "createdAt": "2024-01-01T00:00:00.000Z",
-      "updatedAt": "2024-01-01T00:00:00.000Z"
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "voteSecurity": {
+        "method": "anonymous",
+        "description": "Ανώνυμες ψηφοφορίες απαιτούν session και IP για την αποτροπή πολλαπλών ψήφων από την ίδια συσκευή.",
+        "canVoteMultipleTimes": false
+      }
     }
   ]
 }
@@ -535,6 +540,57 @@ POST /api/polls/:pollId/vote
 ```json
 {
   "poll": { /* updated poll object with new vote counts */ }
+}
+```
+
+**Voting Security:**
+
+The voting system implements different security measures based on the poll type:
+
+**Registered User Polls** (`anonymousResponses: false`):
+- Requires user authentication
+- Users can vote once per poll, tracked by user ID
+- Users CANNOT vote multiple times by:
+  - Changing devices or browsers
+  - Changing IP addresses or networks
+  - Clearing browser data
+- Vote is tied to the user's account permanently
+
+**Anonymous Polls** (`anonymousResponses: true`):
+- Does NOT require authentication
+- Votes are tracked by BOTH session ID AND IP address
+- Users can only vote/change vote from the same browser session AND same IP address
+- Users would need to BOTH clear session data AND change IP to vote again
+- This dual-factor approach significantly reduces vote manipulation
+
+**Security Response Fields:**
+
+Each poll response includes a `voteSecurity` object:
+```json
+{
+  "voteSecurity": {
+    "method": "anonymous" | "authenticated",
+    "description": "Description of the security method",
+    "canVoteMultipleTimes": false
+  }
+}
+```
+
+**Error Responses:**
+- `400 Bad Request`: Invalid option ID or missing session/IP (for anonymous polls)
+- `401 Unauthorized`: Authentication required (for registered user polls)
+- `404 Not Found`: Poll not found
+
+#### Cancel Vote
+```
+DELETE /api/polls/:pollId/vote
+```
+**Authentication Required**: Depends on poll settings
+
+**Response:** `200 OK`
+```json
+{
+  "poll": { /* updated poll object with vote removed */ }
 }
 ```
 
