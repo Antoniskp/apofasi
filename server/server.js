@@ -267,6 +267,7 @@ const serializePoll = async (poll, currentUser, session, req) => {
     userOptionApproval: poll.userOptionApproval || "auto",
     optionsArePeople: Boolean(poll.optionsArePeople),
     linkPolicy: poll.linkPolicy || { mode: "any", allowedDomains: [] },
+    voteClosingDate: poll.voteClosingDate || null,
     createdAt: poll.createdAt,
     updatedAt: poll.updatedAt,
     totalVotes,
@@ -926,6 +927,7 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
     userOptionApproval,
     optionsArePeople,
     linkPolicy,
+    voteClosingDate,
   } = req.body || {};
   const trimmedQuestion = question?.trim();
 
@@ -1040,6 +1042,16 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
         return res.status(400).json({ message: policyValidation.error });
       }
       pollData.linkPolicy = policyValidation.sanitized;
+    }
+    if (voteClosingDate) {
+      const closingDate = new Date(voteClosingDate);
+      if (isNaN(closingDate.getTime())) {
+        return res.status(400).json({ message: "Μη έγκυρη ημερομηνία λήξης ψηφοφορίας." });
+      }
+      if (closingDate < new Date()) {
+        return res.status(400).json({ message: "Η ημερομηνία λήξης πρέπει να είναι στο μέλλον." });
+      }
+      pollData.voteClosingDate = closingDate;
     }
 
     const createdPoll = await Poll.create(pollData);

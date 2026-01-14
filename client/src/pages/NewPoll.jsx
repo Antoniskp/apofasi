@@ -31,6 +31,7 @@ export default function NewPoll() {
     optionsArePeople: false,
     linkPolicyMode: "any",
     linkPolicyDomains: "",
+    voteClosingDate: "",
   });
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ export default function NewPoll() {
     formState.locationCountry === "greece" && formState.locationJurisdiction
       ? CITIES_BY_JURISDICTION[formState.locationJurisdiction] || []
       : [], 
-    [formState.locationCountry, formState.locationJurisdiction]
+  [formState.locationCountry, formState.locationJurisdiction]
   );
 
   const loadAuthStatus = async () => {
@@ -284,6 +285,7 @@ export default function NewPoll() {
         userOptionApproval: formState.userOptionApproval,
         optionsArePeople: formState.optionsArePeople,
         linkPolicy,
+        voteClosingDate: formState.voteClosingDate || null,
       });
 
       setSubmission({ submitting: false, success: "Η ψηφοφορία δημοσιεύτηκε.", error: null });
@@ -301,6 +303,7 @@ export default function NewPoll() {
         optionsArePeople: false,
         linkPolicyMode: "any",
         linkPolicyDomains: "",
+        voteClosingDate: "",
       });
       if (response?.poll?.id) {
         navigate(`/polls/${response.poll.id}`);
@@ -635,6 +638,21 @@ export default function NewPoll() {
                   <p className="muted small">Επιτρέπει μία ψήφο ανά συσκευή χωρίς εμφάνιση στοιχείων χρήστη.</p>
                 </div>
               </label>
+            </div>
+
+            <div>
+              <p className="label">Ημερομηνία και ώρα λήξης ψηφοφορίας (προαιρετικό)</p>
+              <input
+                className="input-modern"
+                type="datetime-local"
+                value={formState.voteClosingDate}
+                onChange={(event) =>
+                  setFormState((prev) => ({ ...prev, voteClosingDate: event.target.value }))
+                }
+              />
+              <p className="muted small">
+                Ορίστε πότε θα κλείσει η ψηφοφορία. Αφήστε κενό για απεριόριστη διάρκεια.
+              </p>
             </div>
 
             {submission.error && <p className="error-text">{submission.error}</p>}
