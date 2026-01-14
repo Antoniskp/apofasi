@@ -385,8 +385,6 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: 42px;
-  height: 42px;
   min-height: 44px;
   min-width: 44px;
   padding: 0;
@@ -433,8 +431,6 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
   min-height: 44px;
   min-width: 44px;
   border-radius: 9px;
@@ -1448,8 +1444,6 @@ button:focus-visible {
 }
 
 .auth-btn {
-  width: 56px;
-  height: 56px;
   min-height: 56px;
   min-width: 56px;
   border: none;
