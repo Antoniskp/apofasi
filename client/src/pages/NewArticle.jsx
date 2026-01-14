@@ -200,6 +200,7 @@ export default function NewArticle() {
             value={formState.content}
             onChange={(value) => setFormState((prev) => ({ ...prev, content: value }))}
             placeholder="Γράψτε το περιεχόμενο του άρθρου σας..."
+            onError={(error) => setSubmission({ submitting: false, success: null, error })}
           />
           <small>Μπορείτε να εισάγετε εικόνες, βίντεο και να μορφοποιήσετε το κείμενο</small>
         </div>

@@ -3,7 +3,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { uploadArticleImage } from "../lib/api.js";
 
-export default function RichTextEditor({ value, onChange, placeholder }) {
+export default function RichTextEditor({ value, onChange, placeholder, onError }) {
   const quillRef = useRef(null);
 
   // Custom image handler
@@ -19,7 +19,9 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
 
       // Check file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
-        alert("Το μέγεθος της εικόνας δεν πρέπει να υπερβαίνει τα 5MB.");
+        if (onError) {
+          onError("Το μέγεθος της εικόνας δεν πρέπει να υπερβαίνει τα 5MB.");
+        }
         return;
       }
 
@@ -34,10 +36,12 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
         quill.setSelection(range.index + 1);
       } catch (error) {
         console.error("Image upload failed:", error);
-        alert("Αποτυχία μεταφόρτωσης εικόνας: " + error.message);
+        if (onError) {
+          onError("Αποτυχία μεταφόρτωσης εικόνας: " + error.message);
+        }
       }
     };
-  }, []);
+  }, [onError]);
 
   // Quill modules configuration
   const modules = useMemo(

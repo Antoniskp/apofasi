@@ -94,7 +94,7 @@ const imageFileFilter = (req, file, cb) => {
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Μόνο αρχεία εικόνας (JPEG, PNG, GIF, WebP) επιτρέπονται."), false);
+    cb(new Error("Μη έγκυρος τύπος αρχείου."), false);
   }
 };
 
@@ -2055,9 +2055,6 @@ authRouter.get("/debug-sentry", function mainHandler(req, res) {
 
 const PORT = process.env.PORT || 5000;
 const HOST = "127.0.0.1";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const clientBuildPath = path.join(__dirname, "../client/dist");
 const clientIndexPath = path.join(clientBuildPath, "index.html");
