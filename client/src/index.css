@@ -2257,6 +2257,19 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  /* Smooth animation for opening */
+  animation: slideDown 200ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .user-menu-item {
@@ -2312,14 +2325,26 @@ button:focus-visible {
   }
   
   .user-menu-trigger {
-    padding: 6px 10px;
+    padding: 8px 12px;
+    min-height: 44px; /* Better touch target size */
   }
   
   .user-menu-dropdown {
-    right: 0;
+    /* Use fixed positioning on mobile for better control */
+    position: fixed;
+    top: auto;
+    right: 16px;
     left: auto;
-    min-width: 180px;
-    max-width: min(280px, calc(100vw - 32px));
+    bottom: auto;
+    min-width: 220px;
+    max-width: calc(100vw - 32px);
+    /* Enhanced shadow for better visibility */
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18), 0 0 1px rgba(15, 23, 42, 0.2);
+  }
+  
+  .user-menu-item {
+    padding: 12px 14px; /* Larger touch targets */
+    min-height: 44px;
   }
 }
 

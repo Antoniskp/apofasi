@@ -3,12 +3,47 @@ import { Link, useNavigate } from "react-router-dom";
 import { logoutUser } from "../lib/api.js";
 import { useTheme } from "../lib/ThemeContext.jsx";
 
+// Mobile breakpoint - must match CSS media query in index.css
+const MOBILE_BREAKPOINT = 680;
+
 export default function UserMenu({ user, onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState({});
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+
+  // Calculate dropdown position on mobile
+  useEffect(() => {
+    const calculatePosition = () => {
+      if (isOpen && buttonRef.current) {
+        const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+        
+        if (isMobile) {
+          const buttonRect = buttonRef.current.getBoundingClientRect();
+          // Position dropdown below the button with proper spacing
+          setDropdownStyle({
+            top: `${buttonRect.bottom + 8}px`,
+          });
+        } else {
+          setDropdownStyle({});
+        }
+      }
+    };
+
+    calculatePosition();
+
+    // Recalculate on resize (e.g., screen rotation)
+    if (isOpen) {
+      window.addEventListener("resize", calculatePosition);
+      window.addEventListener("scroll", calculatePosition, true);
+      return () => {
+        window.removeEventListener("resize", calculatePosition);
+        window.removeEventListener("scroll", calculatePosition, true);
+      };
+    }
+  }, [isOpen]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -137,6 +172,7 @@ export default function UserMenu({ user, onLogout }) {
         <div
           className="user-menu-dropdown"
           role="menu"
+          style={dropdownStyle}
           onKeyDown={handleKeyDown}
         >
           {isAuthenticated ? (
