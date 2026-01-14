@@ -29,11 +29,11 @@ export default function NewArticle() {
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
   const navigate = useNavigate();
 
-  const availableCities = useMemo(() => 
+  const availableCities = useMemo(() =>
     formState.locationCountry === "greece" && formState.locationJurisdiction
       ? CITIES_BY_JURISDICTION[formState.locationJurisdiction] || []
-      : [], 
-    [formState.locationCountry, formState.locationJurisdiction]
+      : [],
+  [formState.locationCountry, formState.locationJurisdiction]
   );
 
   const loadAuthStatus = async () => {
@@ -309,6 +309,7 @@ export default function NewArticle() {
       <style>{`
         .article-form {
           max-width: 800px;
+          width: 100%;
         }
 
         .form-group {
@@ -330,6 +331,7 @@ export default function NewArticle() {
           border-radius: 4px;
           font-size: 1rem;
           font-family: inherit;
+          box-sizing: border-box;
         }
 
         .form-group textarea {
@@ -347,6 +349,7 @@ export default function NewArticle() {
           display: flex;
           gap: 1rem;
           margin-top: 2rem;
+          flex-wrap: wrap;
         }
 
         .button {
@@ -357,6 +360,7 @@ export default function NewArticle() {
           cursor: pointer;
           text-decoration: none;
           display: inline-block;
+          text-align: center;
         }
 
         .button.primary {
@@ -404,11 +408,14 @@ export default function NewArticle() {
           margin-top: 1rem;
           position: relative;
           display: inline-block;
+          max-width: 100%;
         }
 
         .thumbnail-preview img {
           max-width: 300px;
           max-height: 200px;
+          width: 100%;
+          height: auto;
           border-radius: 4px;
           border: 1px solid #ddd;
           display: block;
@@ -427,6 +434,82 @@ export default function NewArticle() {
 
         .remove-thumbnail:hover {
           background: #b71c1c;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+          .article-form {
+            max-width: 100%;
+            padding: 0;
+          }
+
+          .form-group {
+            margin-bottom: 1.25rem;
+          }
+
+          .form-group input,
+          .form-group textarea,
+          .form-group select {
+            padding: 0.65rem;
+            font-size: 16px; /* Prevents zoom on iOS */
+          }
+
+          .form-group small {
+            font-size: 0.8rem;
+          }
+
+          .form-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+          }
+
+          .button {
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            font-size: 16px; /* Prevents zoom on iOS */
+          }
+
+          .thumbnail-preview {
+            width: 100%;
+          }
+
+          .thumbnail-preview img {
+            max-width: 100%;
+          }
+
+          .message {
+            padding: 0.875rem;
+            font-size: 0.95rem;
+          }
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+          .form-group {
+            margin-bottom: 1rem;
+          }
+
+          .form-group input,
+          .form-group textarea,
+          .form-group select {
+            padding: 0.6rem;
+          }
+
+          .button {
+            padding: 0.75rem 1rem;
+          }
+
+          .remove-thumbnail {
+            width: 100%;
+            padding: 0.625rem 1rem;
+          }
+        }
+
+        /* Tablet and small desktop */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .article-form {
+            max-width: 700px;
+          }
         }
       `}</style>
     </div>

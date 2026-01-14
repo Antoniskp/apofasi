@@ -42,6 +42,26 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Container for content pages */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem 0.75rem;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
