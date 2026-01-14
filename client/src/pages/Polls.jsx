@@ -222,7 +222,9 @@ export default function Polls() {
                   <div className="muted small">{formatDateTime(poll.createdAt)}</div>
                 </div>
 
-                <h3 className="poll-question">{poll.question}</h3>
+                <h3 className="poll-question">
+                  <Link to={`/polls/${poll.id}`}>{poll.question}</Link>
+                </h3>
 
                 <div className="poll-meta-row">
                   <span className="muted small">
@@ -368,6 +370,10 @@ export default function Polls() {
                 )}
                 {voteStatus.error && <p className="error-text">{voteStatus.error}</p>}
                 {cancelStatus.error && <p className="error-text">{cancelStatus.error}</p>}
+                
+                <Link to={`/polls/${poll.id}`} className="link-primary">
+                  Προβολή λεπτομερειών και στατιστικών →
+                </Link>
               </div>
             );
           })}
