@@ -14,12 +14,14 @@ const anonymousVoteSchema = new mongoose.Schema(
     },
     sessionId: {
       type: String,
-      required: true,
+      // Not marked as required to maintain backward compatibility
+      // but application logic requires it for new votes
       index: true,
     },
     ipAddress: {
       type: String,
-      required: true,
+      // Not marked as required to maintain backward compatibility
+      // but application logic requires it for new votes
       index: true,
     },
     userAgent: {
@@ -31,6 +33,16 @@ const anonymousVoteSchema = new mongoose.Schema(
 );
 
 // Compound index for efficient lookups - now requires BOTH sessionId AND ipAddress
-anonymousVoteSchema.index({ pollId: 1, sessionId: 1, ipAddress: 1 }, { unique: true });
+// Partial index to only apply to documents that have both fields
+anonymousVoteSchema.index(
+  { pollId: 1, sessionId: 1, ipAddress: 1 }, 
+  { 
+    unique: true,
+    partialFilterExpression: {
+      sessionId: { $exists: true, $ne: null },
+      ipAddress: { $exists: true, $ne: null }
+    }
+  }
+);
 
 export default mongoose.model("AnonymousVote", anonymousVoteSchema);
