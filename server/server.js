@@ -1631,13 +1631,68 @@ pollsRouter.delete("/:pollId/options/:optionId", ensureAuthenticated, async (req
 
 const publicUsersRouter = express.Router();
 
-// Get list of visible users (authenticated users only)
+// Get user statistics (authenticated users only)
+publicUsersRouter.get("/statistics", ensureAuthenticated, async (req, res) => {
+  try {
+    // Total users count
+    const totalUsers = await User.countDocuments();
+
+    // Online users (users with active sessions in last 15 minutes)
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+    const activeSessions = await sessionStore.db.collection(sessionStore.collectionName)
+      .countDocuments({
+        expires: { $gte: new Date() },
+        "session.passport.user": { $exists: true },
+        // Session was touched in the last 15 minutes
+        expires: { $gte: fifteenMinutesAgo }
+      });
+    const onlineUsers = activeSessions;
+
+    // Polls created by registered users
+    const pollsCreated = await Poll.countDocuments({ createdBy: { $exists: true, $ne: null } });
+
+    // Votes from registered users
+    const votesFromRegistered = await Poll.aggregate([
+      { $unwind: "$userVotes" },
+      { $count: "total" }
+    ]);
+    const registeredVotes = votesFromRegistered.length > 0 ? votesFromRegistered[0].total : 0;
+
+    // Votes from anonymous users
+    const anonymousVotes = await AnonymousVote.countDocuments();
+
+    return res.json({
+      statistics: {
+        totalUsers,
+        onlineUsers,
+        pollsCreated,
+        registeredVotes,
+        anonymousVotes,
+      }
+    });
+  } catch (error) {
+    console.error("[user-statistics-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση στατιστικών." });
+  }
+});
+
+// Get list of visible users (authenticated users only) with pagination
 publicUsersRouter.get("/visible", ensureAuthenticated, async (req, res) => {
   try {
-    const users = await User.find({ visibleToOtherUsers: true })
-      .sort({ createdAt: -1 })
-      .limit(200)
-      .select("displayName firstName lastName username avatar occupation region cityOrVillage createdAt");
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const perPage = Math.min(100, Math.max(1, parseInt(req.query.perPage) || 20));
+    const skip = (page - 1) * perPage;
+
+    const filter = { visibleToOtherUsers: true };
+    
+    const [users, totalCount] = await Promise.all([
+      User.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(perPage)
+        .select("displayName firstName lastName username avatar occupation region cityOrVillage createdAt"),
+      User.countDocuments(filter)
+    ]);
 
     // Serialize users without exposing sensitive info
     const visibleUsers = users.map((user) => ({
@@ -1653,7 +1708,19 @@ publicUsersRouter.get("/visible", ensureAuthenticated, async (req, res) => {
       createdAt: user.createdAt,
     }));
 
-    return res.json({ users: visibleUsers });
+    const totalPages = Math.ceil(totalCount / perPage);
+
+    return res.json({
+      users: visibleUsers,
+      pagination: {
+        page,
+        perPage,
+        totalCount,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      }
+    });
   } catch (error) {
     console.error("[visible-users-list-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση χρηστών." });
