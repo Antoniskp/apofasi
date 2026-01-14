@@ -1653,7 +1653,7 @@ publicUsersRouter.get("/statistics", ensureAuthenticated, async (req, res) => {
 
     // Votes from registered users
     const votesFromRegistered = await Poll.aggregate([
-      { $match: { userVotes: { $exists: true, $ne: null, $not: { $size: 0 } } } },
+      { $match: { userVotes: { $exists: true, $ne: null, $ne: [] } } },
       { $unwind: "$userVotes" },
       { $count: "total" }
     ]);

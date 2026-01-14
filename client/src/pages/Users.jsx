@@ -41,7 +41,9 @@ export default function Users() {
 
   const handlePageChange = (newPage) => {
     loadUsers(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined' && window.scrollTo) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const { loading, users, error, pagination } = status;
