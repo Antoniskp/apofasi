@@ -217,7 +217,7 @@ client/
 1. Test all affected functionality
 2. Check error cases
 3. Verify on different screen sizes (for UI changes)
-4. Test with different user roles (user, reporter, admin)
+4. Test with different user roles (user, reporter, editor, admin)
 
 ### Future: Automated Testing
 

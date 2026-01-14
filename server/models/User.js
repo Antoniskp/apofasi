@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "reporter", "admin"],
+      enum: ["user", "reporter", "editor", "admin"],
       default: "user"
     },
     visibleToOtherUsers: {

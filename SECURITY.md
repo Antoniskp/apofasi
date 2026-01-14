@@ -49,7 +49,7 @@ If you discover a security vulnerability in this project, please report it by:
 ### Authentication & Authorization
 
 - Protected routes require authentication
-- Role-based access control (user, reporter, admin)
+- Role-based access control (user, reporter, editor, admin)
 - OAuth providers (Google, Facebook) properly configured
 - User data sanitized before sending to client
 
