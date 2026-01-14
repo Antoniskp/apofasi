@@ -70,7 +70,7 @@ export default function MyArticles() {
   };
 
   return (
-    <div className="section narrow">
+    <div className="section">
       <p className="pill">Άρθρα</p>
       <div className="section-header">
         <h1 className="section-title">Τα Άρθρα μου</h1>

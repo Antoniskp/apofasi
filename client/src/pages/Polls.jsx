@@ -136,7 +136,7 @@ export default function Polls() {
   const showAuthCard = authLoading || authError || !user;
 
   return (
-    <div className="section narrow">
+    <div className="section">
       <p className="pill">Ψηφοφορίες</p>
       <h1 className="section-title">Δημόσιες ψηφοφορίες</h1>
       <p className="muted">Δημιουργήστε και ψηφίστε σε θέματα επικαιρότητας με ετικέτες, προαιρετική τοποθεσία και έμφαση στην ιδιωτικότητα.</p>

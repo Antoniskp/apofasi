@@ -115,7 +115,7 @@ export default function News() {
   const canSubmitNews = hasReporterAccess(user);
 
   return (
-    <div className="section narrow">
+    <div className="section">
       <p className="pill">Ειδήσεις</p>
       <h1 className="section-title">Διαχείριση περιεχομένου</h1>
       <p className="muted">Οι συντάκτες και οι διαχειριστές μπορούν να καταχωρήσουν νέες ειδήσεις.</p>
