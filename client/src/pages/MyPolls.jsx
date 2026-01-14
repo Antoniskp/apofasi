@@ -93,7 +93,7 @@ export default function MyPolls() {
   const { loading: pollsLoading, polls, error: pollsError } = pollsState;
 
   return (
-    <div className="section narrow">
+    <div className="section">
       <p className="pill">Ψηφοφορίες</p>
       <div className="section-header">
         <h1 className="section-title">Οι ψηφοφορίες μου</h1>

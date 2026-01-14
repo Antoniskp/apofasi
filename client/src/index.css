@@ -571,6 +571,19 @@ button:focus-visible {
   box-shadow: var(--shadow);
 }
 
+@media (min-width: 1400px) {
+  .section {
+    max-width: 1320px;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    margin: 16px auto;
+    padding: 24px 16px;
+  }
+}
+
 .section-title {
   margin: 0 0 12px;
   font-size: 1.6rem;
@@ -2145,7 +2158,9 @@ button:focus-visible {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
+  left: auto;
   min-width: 200px;
+  max-width: calc(100vw - 32px);
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -2216,6 +2231,8 @@ button:focus-visible {
   .user-menu-dropdown {
     right: 0;
     left: auto;
+    min-width: 180px;
+    max-width: min(280px, calc(100vw - 32px));
   }
 }
 
@@ -2694,6 +2711,21 @@ button:focus-visible {
   
   .home-polls-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Responsive adjustments for large desktop screens (1600px+) */
+@media (min-width: 1601px) {
+  .responsive-card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .home-polls-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
   
   .grid-3 {

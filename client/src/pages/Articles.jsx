@@ -47,7 +47,7 @@ export default function Articles() {
   };
 
   return (
-    <div className="section narrow">
+    <div className="section">
       <p className="pill">Άρθρα</p>
       <h1 className="section-title">Άρθρα</h1>
       <p className="muted">Διαβάστε και δημιουργήστε άρθρα σχετικά με θέματα επικαιρότητας.</p>
