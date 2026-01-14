@@ -122,6 +122,12 @@ export default function ArticleDetail() {
   return (
     <div className="container">
       <div className="article-detail">
+        {article.thumbnail && (
+          <div className="article-detail-thumbnail">
+            <img src={article.thumbnail} alt={article.title} />
+          </div>
+        )}
+
         <div className="article-header">
           <h1>{article.title}</h1>
 
@@ -168,9 +174,7 @@ export default function ArticleDetail() {
         </div>
 
         <div className="article-content">
-          {article.content.split("\n").map((paragraph, idx) => (
-            <p key={idx}>{paragraph}</p>
-          ))}
+          <div dangerouslySetInnerHTML={{ __html: article.content }} />
         </div>
 
         {(canEdit || canDelete || canTagAsNews) && (

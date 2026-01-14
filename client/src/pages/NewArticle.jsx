@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { COUNTRIES, GREEK_JURISDICTION_NAMES, CITIES_BY_JURISDICTION } from "../../../shared/locations.js";
 import { API_BASE_URL, createArticle, getAuthStatus } from "../lib/api.js";
+import RichTextEditor from "../components/RichTextEditor.jsx";
 
 const uniqueTags = (rawTags = "") =>
   Array.from(
@@ -19,6 +20,8 @@ export default function NewArticle() {
     title: "",
     content: "",
     tags: "",
+    thumbnail: null,
+    thumbnailPreview: null,
     locationCountry: "",
     locationJurisdiction: "",
     locationCity: "",
@@ -72,6 +75,42 @@ export default function NewArticle() {
     }));
   };
 
+  const handleThumbnailChange = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setSubmission({ submitting: false, success: null, error: "Το μέγεθος της εικόνας δεν πρέπει να υπερβαίνει τα 5MB." });
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith("image/")) {
+      setSubmission({ submitting: false, success: null, error: "Μόνο αρχεία εικόνας επιτρέπονται." });
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormState((prev) => ({
+        ...prev,
+        thumbnail: file,
+        thumbnailPreview: reader.result
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveThumbnail = () => {
+    setFormState((prev) => ({
+      ...prev,
+      thumbnail: null,
+      thumbnailPreview: null
+    }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -97,6 +136,7 @@ export default function NewArticle() {
         title: trimmedTitle,
         content: trimmedContent,
         tags,
+        thumbnail: formState.thumbnail,
         locationCountry: formState.locationCountry,
         locationJurisdiction: formState.locationJurisdiction,
         locationCity: formState.locationCity,
@@ -156,14 +196,32 @@ export default function NewArticle() {
 
         <div className="form-group">
           <label htmlFor="content">Περιεχόμενο *</label>
-          <textarea
-            id="content"
+          <RichTextEditor
             value={formState.content}
-            onChange={(e) => setFormState((prev) => ({ ...prev, content: e.target.value }))}
+            onChange={(value) => setFormState((prev) => ({ ...prev, content: value }))}
             placeholder="Γράψτε το περιεχόμενο του άρθρου σας..."
-            rows={15}
-            required
+            onError={(error) => setSubmission({ submitting: false, success: null, error })}
           />
+          <small>Μπορείτε να εισάγετε εικόνες, βίντεο και να μορφοποιήσετε το κείμενο</small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="thumbnail">Εικόνα Εξωφύλλου (προαιρετικό)</label>
+          <input
+            type="file"
+            id="thumbnail"
+            accept="image/*"
+            onChange={handleThumbnailChange}
+          />
+          <small>Μέγιστο μέγεθος: 5MB. Θα εμφανίζεται στη λίστα άρθρων και στην κορυφή του άρθρου.</small>
+          {formState.thumbnailPreview && (
+            <div className="thumbnail-preview">
+              <img src={formState.thumbnailPreview} alt="Preview" />
+              <button type="button" onClick={handleRemoveThumbnail} className="remove-thumbnail">
+                Αφαίρεση
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="form-group">
@@ -340,6 +398,35 @@ export default function NewArticle() {
           background: #e8f5e9;
           color: #2e7d32;
           border: 1px solid #66bb6a;
+        }
+
+        .thumbnail-preview {
+          margin-top: 1rem;
+          position: relative;
+          display: inline-block;
+        }
+
+        .thumbnail-preview img {
+          max-width: 300px;
+          max-height: 200px;
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          display: block;
+        }
+
+        .remove-thumbnail {
+          margin-top: 0.5rem;
+          padding: 0.5rem 1rem;
+          background: #d32f2f;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.9rem;
+        }
+
+        .remove-thumbnail:hover {
+          background: #b71c1c;
         }
       `}</style>
     </div>
