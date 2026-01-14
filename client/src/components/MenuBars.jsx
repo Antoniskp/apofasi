@@ -33,6 +33,7 @@ const topMenu = [
     to: "/education",
     icon: "fa-graduation-cap",
     subItems: [
+      { label: "Οικονομία", to: "/education/economics" },
       { label: "Κρατικές εφαρμογές", to: "/education/government-apps" },
       { label: "Στατιστικά Δημοσίου", to: "/education/government-statistics" },
       { label: "Ελληνικό νομικό σύστημα", to: "/education/greek-law-system" }

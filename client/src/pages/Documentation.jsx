@@ -184,6 +184,7 @@ export default function Documentation() {
             <li>/how-we-do-it</li>
             <li>/bounties</li>
             <li>/education</li>
+            <li>/education/economics</li>
             <li>/education/government-apps</li>
             <li>/education/government-statistics</li>
             <li>/education/greek-law-system</li>

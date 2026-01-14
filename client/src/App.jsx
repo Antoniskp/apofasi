@@ -30,6 +30,7 @@ import TopChoices from "./pages/TopChoices.jsx";
 import HowWeDoIt from "./pages/HowWeDoIt.jsx";
 import Bounties from "./pages/Bounties.jsx";
 import Education from "./pages/Education.jsx";
+import Economics from "./pages/Economics.jsx";
 import GovernmentApps from "./pages/GovernmentApps.jsx";
 import GovernmentStatistics from "./pages/GovernmentStatistics.jsx";
 import GreekLawSystem from "./pages/GreekLawSystem.jsx";
@@ -69,6 +70,7 @@ function App() {
         <Route path="/how-we-do-it" element={withLayout(<HowWeDoIt />)} />
         <Route path="/bounties" element={withLayout(<Bounties />)} />
         <Route path="/education" element={withLayout(<Education />)} />
+        <Route path="/education/economics" element={withLayout(<Economics />)} />
         <Route
           path="/education/government-apps"
           element={withLayout(<GovernmentApps />)}
