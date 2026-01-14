@@ -40,7 +40,7 @@ export default function NewPoll() {
     formState.locationCountry === "greece" && formState.locationJurisdiction
       ? CITIES_BY_JURISDICTION[formState.locationJurisdiction] || []
       : [], 
-    [formState.locationCountry, formState.locationJurisdiction]
+  [formState.locationCountry, formState.locationJurisdiction]
   );
 
   const loadAuthStatus = async () => {
