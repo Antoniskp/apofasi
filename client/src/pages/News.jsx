@@ -60,7 +60,7 @@ export default function News() {
     loadNews();
   }, []);
 
-  const { loading, user } = status;
+  const { user } = status;
   const canManageNews = hasEditorAccess(user);
 
   return (
@@ -79,7 +79,7 @@ export default function News() {
             <p>Για να προσθέσετε νέα είδηση:</p>
             <ol style={{ marginLeft: "1.5rem", lineHeight: "1.8" }}>
               <li>Δημιουργήστε ένα νέο άρθρο στη σελίδα <Link to="/articles">Άρθρα</Link></li>
-              <li>Ανοίξτε το άρθρο και επιλέξτε "Επισήμανση ως Είδηση"</li>
+              <li>Ανοίξτε το άρθρο και επιλέξτε &quot;Επισήμανση ως Είδηση&quot;</li>
             </ol>
             <div className="cta-row">
               <Link className="btn" to="/articles/new">
