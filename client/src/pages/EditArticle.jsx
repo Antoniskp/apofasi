@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { CITIES_BY_REGION, REGION_NAMES } from "../../../shared/locations.js";
+import { COUNTRIES, GREEK_JURISDICTION_NAMES, CITIES_BY_JURISDICTION } from "../../../shared/locations.js";
 import { API_BASE_URL, getArticle, updateArticle, getAuthStatus } from "../lib/api.js";
 
 const uniqueTags = (rawTags = "") =>
@@ -21,13 +21,19 @@ export default function EditArticle() {
     title: "",
     content: "",
     tags: "",
-    region: "",
-    cityOrVillage: "",
+    locationCountry: "",
+    locationJurisdiction: "",
+    locationCity: "",
   });
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
   const navigate = useNavigate();
 
-  const availableCities = useMemo(() => CITIES_BY_REGION[formState.region] || [], [formState.region]);
+  const availableCities = useMemo(() => 
+    formState.locationCountry === "greece" && formState.locationJurisdiction
+      ? CITIES_BY_JURISDICTION[formState.locationJurisdiction] || []
+      : [], 
+    [formState.locationCountry, formState.locationJurisdiction]
+  );
 
   const loadAuthStatus = async () => {
     setAuthState((prev) => ({ ...prev, loading: true }));
@@ -59,8 +65,9 @@ export default function EditArticle() {
         title: article.title || "",
         content: article.content || "",
         tags: article.tags ? article.tags.join(", ") : "",
-        region: article.region || "",
-        cityOrVillage: article.cityOrVillage || "",
+        locationCountry: article.locationCountry || "",
+        locationJurisdiction: article.locationJurisdiction || "",
+        locationCity: article.locationCity || "",
       });
     } catch (error) {
       setArticleState({
@@ -78,8 +85,21 @@ export default function EditArticle() {
     loadArticle();
   }, [articleId]);
 
-  const handleRegionChange = (value) => {
-    setFormState((prev) => ({ ...prev, region: value, cityOrVillage: "" }));
+  const handleCountryChange = (value) => {
+    setFormState((prev) => ({ 
+      ...prev, 
+      locationCountry: value, 
+      locationJurisdiction: "", 
+      locationCity: "" 
+    }));
+  };
+
+  const handleJurisdictionChange = (value) => {
+    setFormState((prev) => ({ 
+      ...prev, 
+      locationJurisdiction: value, 
+      locationCity: "" 
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -107,8 +127,9 @@ export default function EditArticle() {
         title: trimmedTitle,
         content: trimmedContent,
         tags,
-        region: formState.region,
-        cityOrVillage: formState.cityOrVillage,
+        locationCountry: formState.locationCountry,
+        locationJurisdiction: formState.locationJurisdiction,
+        locationCity: formState.locationCity,
       });
 
       setSubmission({ submitting: false, success: "Το άρθρο ενημερώθηκε επιτυχώς!", error: null });
@@ -217,30 +238,48 @@ export default function EditArticle() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="region">Περιφέρεια (προαιρετικό)</label>
+          <label htmlFor="locationCountry">Χώρα (προαιρετικό)</label>
           <select
-            id="region"
-            value={formState.region}
-            onChange={(e) => handleRegionChange(e.target.value)}
+            id="locationCountry"
+            value={formState.locationCountry}
+            onChange={(e) => handleCountryChange(e.target.value)}
           >
-            <option value="">-- Επιλέξτε περιφέρεια --</option>
-            {REGION_NAMES.map((region) => (
-              <option key={region} value={region}>
-                {region}
+            <option value="">-- Επιλέξτε χώρα --</option>
+            {COUNTRIES.map((country) => (
+              <option key={country.value} value={country.value}>
+                {country.label}
               </option>
             ))}
           </select>
         </div>
 
-        {formState.region && (
+        {formState.locationCountry === "greece" && (
           <div className="form-group">
-            <label htmlFor="cityOrVillage">Πόλη ή Χωριό (προαιρετικό)</label>
+            <label htmlFor="locationJurisdiction">Περιφέρεια (προαιρετικό)</label>
             <select
-              id="cityOrVillage"
-              value={formState.cityOrVillage}
-              onChange={(e) => setFormState((prev) => ({ ...prev, cityOrVillage: e.target.value }))}
+              id="locationJurisdiction"
+              value={formState.locationJurisdiction}
+              onChange={(e) => handleJurisdictionChange(e.target.value)}
             >
-              <option value="">-- Επιλέξτε πόλη ή χωριό --</option>
+              <option value="">-- Επιλέξτε περιφέρεια --</option>
+              {GREEK_JURISDICTION_NAMES.map((jurisdiction) => (
+                <option key={jurisdiction} value={jurisdiction}>
+                  {jurisdiction}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {formState.locationJurisdiction && (
+          <div className="form-group">
+            <label htmlFor="locationCity">Πόλη ή Κοινότητα (προαιρετικό)</label>
+            <select
+              id="locationCity"
+              value={formState.locationCity}
+              onChange={(e) => setFormState((prev) => ({ ...prev, locationCity: e.target.value }))}
+            >
+              <option value="">-- Επιλέξτε πόλη ή κοινότητα --</option>
               {availableCities.map((city) => (
                 <option key={city} value={city}>
                   {city}
