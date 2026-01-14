@@ -7,6 +7,7 @@ import session from "express-session";
 import fs from "fs";
 import mongoose from "mongoose";
 import MongoStore from "connect-mongo";
+import multer from "multer";
 import passport from "passport";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -64,6 +65,47 @@ const corsOptions = {
 
 const app = express();
 app.set("trust proxy", 1);
+
+// Configure file upload with multer
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsDir = path.join(__dirname, "uploads");
+
+// Ensure uploads directory exists
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configure multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+  }
+});
+
+// File filter to accept only images
+const imageFileFilter = (req, file, cb) => {
+  const allowedMimes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Μόνο αρχεία εικόνας (JPEG, PNG, GIF, WebP) επιτρέπονται."), false);
+  }
+};
+
+// Configure multer with size limits (5MB for images)
+const upload = multer({
+  storage: storage,
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  }
+});
 
 // CORS must be the first middleware on the app
 app.use(cors(corsOptions));
@@ -133,6 +175,7 @@ const serializeArticle = (article) => ({
   id: article.id,
   title: article.title,
   content: article.content,
+  thumbnail: article.thumbnail,
   author: serializeAuthor(article.author),
   tags: article.tags || [],
   // New location hierarchy
@@ -594,7 +637,7 @@ articlesRouter.get("/:articleId", async (req, res) => {
   }
 });
 
-articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
+articlesRouter.post("/", ensureAuthenticated, upload.single('thumbnail'), async (req, res) => {
   const { title, content, tags } = req.body || {};
   const trimmedTitle = title?.trim();
   const trimmedContent = content?.trim();
@@ -611,13 +654,20 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
   }
 
   try {
-    const createdArticle = await Article.create({
+    const articleData = {
       title: trimmedTitle,
       content: trimmedContent,
       author: req.user._id,
       tags: normalizedTags,
       ...locationResult.data,
-    });
+    };
+
+    // Add thumbnail if uploaded
+    if (req.file) {
+      articleData.thumbnail = `/uploads/${req.file.filename}`;
+    }
+
+    const createdArticle = await Article.create(articleData);
 
     await createdArticle.populate("author", "displayName username email");
 
@@ -630,7 +680,7 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
   }
 });
 
-articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
+articlesRouter.put("/:articleId", ensureAuthenticated, upload.single('thumbnail'), async (req, res) => {
   const { articleId } = req.params;
   const { title, content, tags } = req.body || {};
   const userId = req.user?.id;
@@ -669,6 +719,11 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
     article.content = trimmedContent;
     article.tags = normalizedTags;
     
+    // Update thumbnail if uploaded
+    if (req.file) {
+      article.thumbnail = `/uploads/${req.file.filename}`;
+    }
+    
     // Update location fields
     Object.assign(article, locationResult.data);
 
@@ -681,6 +736,23 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
   } catch (error) {
     console.error("[article-update-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η ενημέρωση του άρθρου." });
+  }
+});
+
+// Endpoint to upload images for article content
+articlesRouter.post("/upload-image", ensureAuthenticated, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "Δεν βρέθηκε αρχείο εικόνας." });
+    }
+    
+    return res.json({ 
+      url: `/uploads/${req.file.filename}`,
+      message: "Η εικόνα μεταφορτώθηκε επιτυχώς."
+    });
+  } catch (error) {
+    console.error("[image-upload-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η μεταφόρτωση της εικόνας." });
   }
 });
 
@@ -1973,6 +2045,9 @@ app.use("/users", usersRouter);
 app.use("/api/users", usersRouter);
 app.use("/contact", contactRouter);
 app.use("/api/contact", contactRouter);
+
+// Serve uploaded files
+app.use("/uploads", express.static(uploadsDir));
 
 authRouter.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("Sentry Test Error!");

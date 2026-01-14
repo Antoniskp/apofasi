@@ -36,3 +36,6 @@ yarn-error.log*
 .tmp
 tmp
 *.tmp
+
+# Uploaded files
+server/uploads

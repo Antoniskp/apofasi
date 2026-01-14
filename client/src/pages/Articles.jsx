@@ -46,6 +46,12 @@ export default function Articles() {
     });
   };
 
+  const stripHtml = (html) => {
+    const tmp = document.createElement("DIV");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
+  };
+
   return (
     <div className="section">
       <p className="pill">Άρθρα</p>
@@ -88,6 +94,12 @@ export default function Articles() {
           <div className="responsive-card-grid">
             {articlesState.articles.map((article) => (
               <div key={article.id} className="card compact-card">
+                {article.thumbnail && (
+                  <div className="article-thumbnail">
+                    <img src={article.thumbnail} alt={article.title} />
+                  </div>
+                )}
+                
                 <div className="article-header-row">
                   <div className="pill pill-soft">Άρθρο</div>
                   <div className="muted small">{formatDate(article.createdAt)}</div>
@@ -123,8 +135,8 @@ export default function Articles() {
                 )}
 
                 <p className="article-preview">
-                  {article.content.substring(0, 200)}
-                  {article.content.length > 200 && "..."}
+                  {stripHtml(article.content).substring(0, 200)}
+                  {stripHtml(article.content).length > 200 && "..."}
                 </p>
 
                 <Link to={`/articles/${article.id}`} className="link-primary">
