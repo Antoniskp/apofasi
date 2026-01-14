@@ -65,6 +65,10 @@ const corsOptions = {
 const app = express();
 app.set("trust proxy", 1);
 
+// Get directory name for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // CORS must be the first middleware on the app
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
@@ -1996,8 +2000,6 @@ authRouter.get("/debug-sentry", function mainHandler(req, res) {
 const PORT = process.env.PORT || 5000;
 const HOST = "127.0.0.1";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const clientBuildPath = path.join(__dirname, "../client/dist");
 const clientIndexPath = path.join(clientBuildPath, "index.html");
 const hasClientBuild = fs.existsSync(clientIndexPath);
