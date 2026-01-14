@@ -58,7 +58,7 @@ export default function Articles() {
         </div>
 
         <div className="toolbar-container">
-          <div className="toolbar-right" style={{ marginLeft: 'auto' }}>
+          <div className="toolbar-right" style={{ marginLeft: "auto" }}>
             {authState.user && (
               <>
                 <Link to="/articles/new" className="btn btn-primary">
@@ -72,68 +72,68 @@ export default function Articles() {
           </div>
         </div>
 
-      {articlesState.loading && <p className="muted">Φόρτωση άρθρων...</p>}
+        {articlesState.loading && <p className="muted">Φόρτωση άρθρων...</p>}
       
-      {articlesState.error && (
-        <div className="card compact-card error-text">{articlesState.error}</div>
-      )}
+        {articlesState.error && (
+          <div className="card compact-card error-text">{articlesState.error}</div>
+        )}
 
-      {!articlesState.loading && !articlesState.error && articlesState.articles.length === 0 && (
-        <div className="card compact-card">
-          <p className="muted">Δεν υπάρχουν άρθρα ακόμα.</p>
-        </div>
-      )}
+        {!articlesState.loading && !articlesState.error && articlesState.articles.length === 0 && (
+          <div className="card compact-card">
+            <p className="muted">Δεν υπάρχουν άρθρα ακόμα.</p>
+          </div>
+        )}
 
-      {!articlesState.loading && articlesState.articles.length > 0 && (
-        <div className="compact-list">
-          {articlesState.articles.map((article) => (
-            <div key={article.id} className="card compact-card">
-              <div className="article-header-row">
-                <div className="pill pill-soft">Άρθρο</div>
-                <div className="muted small">{formatDate(article.createdAt)}</div>
-              </div>
-              
-              <h3 className="article-title">
-                <Link to={`/articles/${article.id}`}>{article.title}</Link>
-              </h3>
-              
-              <div className="article-meta-row">
-                <span className="muted small">
-                  Συγγραφέας: {article.author?.displayName || "Άγνωστος"}
-                </span>
-                {article.isNews && (
-                  <span className="pill pill-ghost">📰 Είδηση</span>
-                )}
-              </div>
-
-              {article.tags && article.tags.length > 0 && (
-                <div className="chips">
-                  {article.tags.map((tag, idx) => (
-                    <span key={idx} className="chip">
-                      #{tag}
-                    </span>
-                  ))}
+        {!articlesState.loading && articlesState.articles.length > 0 && (
+          <div className="compact-list">
+            {articlesState.articles.map((article) => (
+              <div key={article.id} className="card compact-card">
+                <div className="article-header-row">
+                  <div className="pill pill-soft">Άρθρο</div>
+                  <div className="muted small">{formatDate(article.createdAt)}</div>
                 </div>
-              )}
+              
+                <h3 className="article-title">
+                  <Link to={`/articles/${article.id}`}>{article.title}</Link>
+                </h3>
+              
+                <div className="article-meta-row">
+                  <span className="muted small">
+                  Συγγραφέας: {article.author?.displayName || "Άγνωστος"}
+                  </span>
+                  {article.isNews && (
+                    <span className="pill pill-ghost">📰 Είδηση</span>
+                  )}
+                </div>
 
-              {(article.region || article.cityOrVillage) && (
-                <p className="muted small">
+                {article.tags && article.tags.length > 0 && (
+                  <div className="chips">
+                    {article.tags.map((tag, idx) => (
+                      <span key={idx} className="chip">
+                      #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {(article.region || article.cityOrVillage) && (
+                  <p className="muted small">
                   Τοποθεσία: {[article.region, article.cityOrVillage].filter(Boolean).join(" • ")}
+                  </p>
+                )}
+
+                <p className="article-preview">
+                  {article.content.substring(0, 200)}
+                  {article.content.length > 200 && "..."}
                 </p>
-              )}
 
-              <p className="article-preview">
-                {article.content.substring(0, 200)}
-                {article.content.length > 200 && "..."}
-              </p>
-
-              <Link to={`/articles/${article.id}`} className="link-primary">
+                <Link to={`/articles/${article.id}`} className="link-primary">
                 Διαβάστε περισσότερα →
-              </Link>
-            </div>
-          ))}
-        </div>
-      )}
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

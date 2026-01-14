@@ -192,7 +192,7 @@ export default function News() {
         </div>
 
         <div className="toolbar-container">
-          <div className="toolbar-right" style={{ marginLeft: 'auto' }}>
+          <div className="toolbar-right" style={{ marginLeft: "auto" }}>
             {canSubmitNews && (
               <button 
                 type="button" 
@@ -200,7 +200,7 @@ export default function News() {
                 onClick={() => {
                   setForm({ title: "", content: "" });
                   setSubmission({ submitting: false, success: null, error: null });
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               >
                 ✚ Νέα είδηση

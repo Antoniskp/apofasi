@@ -162,7 +162,7 @@ export default function AdminUsers() {
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
+                    if (event.key === "Enter") {
                       handleSearchSubmit(event);
                     }
                   }}
