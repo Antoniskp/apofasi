@@ -1,6 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css');
 
+/* Mobile-First CSS Reset and Best Practices */
+
+/* Use border-box for predictable sizing across all elements */
+html {
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Prevent images and videos from causing horizontal overflow */
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent inputs from zooming on iOS Safari (font-size must be >= 16px) */
+input, select, textarea, button {
+  font-size: 16px;
+}
+
 /* Light mode (default) */
 :root {
   --page-bg: #f5f7fb;
@@ -27,10 +49,6 @@
   --accent-soft: #1f2937;
   --border: #30363d;
   --shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-}
-
-* {
-  box-sizing: border-box;
 }
 
 body {
@@ -76,6 +94,7 @@ body {
 
 .page-shell {
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
   background: var(--page-bg);
   color: var(--ink-strong);
 }
@@ -398,6 +417,7 @@ button:focus-visible {
 
 .home {
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
   background: radial-gradient(circle at 20% 20%, rgba(34, 55, 90, 0.08), transparent 36%),
     radial-gradient(circle at 80% 15%, rgba(34, 55, 90, 0.06), transparent 34%),
     var(--page-bg);
@@ -2606,7 +2626,7 @@ button:focus-visible {
 /* Compact input styles */
 .input-modern.compact {
   padding: 6px 12px;
-  font-size: 0.9rem;
+  font-size: 1rem; /* Must be >= 16px to prevent iOS Safari zoom */
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--card-bg);
@@ -2783,7 +2803,7 @@ button:focus-visible {
 
 .compact-select {
   padding: 4px 8px;
-  font-size: 0.85rem;
+  font-size: 1rem; /* Must be >= 16px to prevent iOS Safari zoom */
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--card-bg);
