@@ -214,12 +214,14 @@ export default function NewPoll() {
     );
 
     // Validate based on allowUserOptions setting
+    if (!trimmedQuestion) {
+      setSubmission({ submitting: false, success: null, error: "Συμπληρώστε ερώτηση." });
+      return;
+    }
+    
     const minOptionsRequired = formState.allowUserOptions ? 0 : 2;
-    if (!trimmedQuestion || distinctOptions.length < minOptionsRequired) {
-      const errorMessage = formState.allowUserOptions 
-        ? "Συμπληρώστε ερώτηση."
-        : "Συμπληρώστε ερώτηση και τουλάχιστον δύο μοναδικές επιλογές.";
-      setSubmission({ submitting: false, success: null, error: errorMessage });
+    if (distinctOptions.length < minOptionsRequired) {
+      setSubmission({ submitting: false, success: null, error: "Συμπληρώστε τουλάχιστον δύο μοναδικές επιλογές." });
       return;
     }
 

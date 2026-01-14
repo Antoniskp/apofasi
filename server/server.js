@@ -809,10 +809,9 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
   // Validate options based on allowUserOptions setting
   const minOptionsRequired = allowUserOptions ? 0 : 2;
   if (uniqueOptions.length < minOptionsRequired) {
-    const errorMessage = allowUserOptions
-      ? "Χρειάζεται ερώτηση."
-      : "Χρειάζονται ερώτηση και τουλάχιστον δύο μοναδικές επιλογές.";
-    return res.status(400).json({ message: errorMessage });
+    return res
+      .status(400)
+      .json({ message: "Χρειάζονται τουλάχιστον δύο μοναδικές επιλογές." });
   }
 
   // Check for duplicates only if we have options

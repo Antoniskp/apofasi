@@ -14,7 +14,7 @@ const stringToColor = (str) => {
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const hue = hash % 360;
+  const hue = Math.abs(hash) % 360;
   return `hsl(${hue}, 65%, 55%)`;
 };
 
