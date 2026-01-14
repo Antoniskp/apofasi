@@ -167,45 +167,36 @@ export default function Polls() {
 
       <div className="section">
         <div className="section-header">
-          <div>
-            <h2 className="section-title">Πρόσφατες ψηφοφορίες</h2>
-            <p className="muted">
-              Δείτε τις ψηφοφορίες των χρηστών και ψηφίστε με μία συμμετοχή ανά λογαριασμό ή ανά συσκευή όταν η συμμετοχή είναι ανώνυμη.
-            </p>
-          </div>
-          <div className="actions-row">
-            <Link className="btn" to="/polls/new">
-              Νέα ψηφοφορία
-            </Link>
-            {user && (
-              <Link className="btn btn-outline" to="/polls/my-polls">
-                Οι ψηφοφορίες μου
-              </Link>
-            )}
-          </div>
+          <h2 className="section-title">Πρόσφατες ψηφοφορίες</h2>
         </div>
 
-        <div className="info-grid">
-          <div>
-            <p className="label">Αναζήτηση</p>
+        <div className="toolbar-container">
+          <div className="toolbar-left">
             <input
-              className="input-modern"
+              className="input-modern compact"
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Αναζήτηση σε ερώτηση, ετικέτες, δημιουργό"
+              placeholder="🔍 Αναζήτηση σε ερώτηση, ετικέτες, δημιουργό..."
             />
-          </div>
-          <div>
-            <p className="label">Ταξινόμηση</p>
             <select
-              className="input-modern"
+              className="input-modern compact"
               value={sortOption}
               onChange={(event) => setSortOption(event.target.value)}
             >
               <option value="newest">Πιο πρόσφατες</option>
               <option value="popular">Πιο δημοφιλείς</option>
             </select>
+          </div>
+          <div className="toolbar-right">
+            <Link className="btn btn-primary" to="/polls/new">
+              ✚ Νέα ψηφοφορία
+            </Link>
+            {user && (
+              <Link className="btn btn-outline" to="/polls/my-polls">
+                Οι ψηφοφορίες μου
+              </Link>
+            )}
           </div>
         </div>
 
@@ -218,14 +209,14 @@ export default function Polls() {
           </div>
         )}
 
-        <div className="stack">
+        <div className="compact-list">
           {filteredPolls.map((poll) => {
             const totalVotes = getTotalVotes(poll);
             const voteStatus = voteState[poll.id] || {};
             const cancelStatus = cancelState[poll.id] || {};
 
             return (
-              <div key={poll.id} className="card poll-card modern-card">
+              <div key={poll.id} className="card poll-card compact-card">
                 <div className="poll-header-row">
                   <div className="pill pill-soft">Ψηφοφορία</div>
                   <div className="muted small">{formatDateTime(poll.createdAt)}</div>
