@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL, getAuthStatus, logoutUser } from "../lib/api.js";
+import { useAuth } from "../lib/AuthContext.jsx";
 
 const providers = [
   {
@@ -17,9 +18,9 @@ const providers = [
 ];
 
 export default function AuthButtons() {
+  const { user: authUser, refreshAuth } = useAuth();
   const [status, setStatus] = useState({
     loading: true,
-    user: null,
     error: null,
     providers: {}
   });
@@ -32,14 +33,12 @@ export default function AuthButtons() {
       const data = await getAuthStatus();
       setStatus({
         loading: false,
-        user: data.user,
         error: null,
         providers: data.providers || {}
       });
     } catch (error) {
       setStatus({
         loading: false,
-        user: null,
         error:
           API_BASE_URL
             ? error.message || "Αποτυχία ελέγχου κατάστασης. Ελέγξτε ότι ο server τρέχει."
@@ -57,7 +56,7 @@ export default function AuthButtons() {
     setIsLoggingOut(true);
     try {
       await logoutUser();
-      await loadStatus();
+      await refreshAuth();
     } finally {
       setIsLoggingOut(false);
     }
@@ -78,7 +77,7 @@ export default function AuthButtons() {
             <p className="muted small">Θα ενεργοποιηθεί μόλις προστεθούν τα κλειδιά OAuth.</p>
           )}
         </div>
-        {status.user && (
+        {authUser && (
           <div className="auth-badge">
             Συνδεδεμένος/η
           </div>
@@ -112,7 +111,7 @@ export default function AuthButtons() {
         })}
       </div>
 
-      {status.user && (
+      {authUser && (
         <div className="auth-footer">
           <button
             type="button"

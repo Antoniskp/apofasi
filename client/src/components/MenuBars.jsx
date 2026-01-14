@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { getAuthStatus } from "../lib/api.js";
+import { useState, useEffect } from "react";
+import { useAuth } from "../lib/AuthContext.jsx";
 import UserMenu from "./UserMenu.jsx";
 
 const pollRegions = [
@@ -44,24 +44,11 @@ const topMenu = [
 
 export default function MenuBars() {
   const [isOpen, setIsOpen] = useState(false);
-  const [authStatus, setAuthStatus] = useState({ loading: true, user: null });
+  const { user: authUser } = useAuth();
   const [isMenuHidden, setIsMenuHidden] = useState(false);
   const location = useLocation();
 
   const closeMenu = () => setIsOpen(false);
-
-  const loadAuthStatus = async () => {
-    try {
-      const data = await getAuthStatus();
-      setAuthStatus({ loading: false, user: data.user });
-    } catch (error) {
-      setAuthStatus({ loading: false, user: null });
-    }
-  };
-
-  useEffect(() => {
-    loadAuthStatus();
-  }, []);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -123,7 +110,7 @@ export default function MenuBars() {
 
           <nav className={`menu-links ${isOpen ? "open" : ""}`} aria-label="Top navigation">
             {topMenu
-              .filter((item) => !item.requireAuth || authStatus.user)
+              .filter((item) => !item.requireAuth || authUser)
               .map((item) =>
                 item.subItems ? (
                   <div key={item.label} className="menu-link-group">
@@ -168,12 +155,12 @@ export default function MenuBars() {
               )}
 
             <div className="menu-actions menu-actions-mobile">
-              <UserMenu user={authStatus.user} onLogout={loadAuthStatus} />
+              <UserMenu user={authUser} />
             </div>
           </nav>
 
           <div className="menu-actions menu-actions-desktop">
-            <UserMenu user={authStatus.user} onLogout={loadAuthStatus} />
+            <UserMenu user={authUser} />
           </div>
         </div>
       </div>
