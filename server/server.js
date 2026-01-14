@@ -801,13 +801,24 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
     new Map(processedOptions.map((opt) => [opt.text, opt])).values()
   );
 
-  if (!trimmedQuestion || uniqueOptions.length < 2) {
-    return res
-      .status(400)
-      .json({ message: "Χρειάζονται ερώτηση και τουλάχιστον δύο μοναδικές επιλογές." });
+  // Validate question is provided
+  if (!trimmedQuestion) {
+    return res.status(400).json({ message: "Χρειάζεται ερώτηση." });
   }
 
-  if (uniqueOptions.length !== processedOptions.length) {
+  // Validate options based on allowUserOptions setting
+  // When allowUserOptions is true, minOptionsRequired is 0 (no minimum)
+  // When allowUserOptions is false, minOptionsRequired is 2 (existing behavior)
+  const minOptionsRequired = allowUserOptions ? 0 : 2;
+  if (uniqueOptions.length < minOptionsRequired) {
+    // This only executes when allowUserOptions is false and we have < 2 options
+    return res
+      .status(400)
+      .json({ message: "Χρειάζονται τουλάχιστον δύο μοναδικές επιλογές." });
+  }
+
+  // Check for duplicates only if we have options
+  if (processedOptions.length > 0 && uniqueOptions.length !== processedOptions.length) {
     return res.status(400).json({ message: "Οι επιλογές πρέπει να είναι διαφορετικές μεταξύ τους." });
   }
 

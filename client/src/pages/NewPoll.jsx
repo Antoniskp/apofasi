@@ -84,7 +84,8 @@ export default function NewPoll() {
 
   const removeOptionField = (index) => {
     setFormState((prev) => {
-      if (prev.options.length <= 2) return prev;
+      const minOptions = prev.allowUserOptions ? 0 : 2;
+      if (prev.options.length <= minOptions) return prev;
       const nextOptions = prev.options.filter((_, idx) => idx !== index);
       return { ...prev, options: nextOptions };
     });
@@ -212,28 +213,29 @@ export default function NewPoll() {
       ).values()
     );
 
-    if (!trimmedQuestion || distinctOptions.length < 2) {
-      setSubmission({ submitting: false, success: null, error: "Συμπληρώστε ερώτηση και τουλάχιστον δύο μοναδικές επιλογές." });
+    // Validate based on allowUserOptions setting
+    if (!trimmedQuestion) {
+      setSubmission({ submitting: false, success: null, error: "Συμπληρώστε ερώτηση." });
+      return;
+    }
+    
+    // When allowUserOptions is true, minOptionsRequired is 0 (no minimum)
+    // When allowUserOptions is false, minOptionsRequired is 2 (existing behavior)
+    const minOptionsRequired = formState.allowUserOptions ? 0 : 2;
+    if (distinctOptions.length < minOptionsRequired) {
+      // This only executes when allowUserOptions is false and we have < 2 options
+      setSubmission({ submitting: false, success: null, error: "Συμπληρώστε τουλάχιστον δύο μοναδικές επιλογές." });
       return;
     }
 
-    // Basic client-side validation for people mode
+    // Basic client-side validation for people mode - photo and profileUrl are now optional
     if (formState.optionsArePeople) {
       for (const option of distinctOptions) {
         if (!option.text?.trim()) {
           setSubmission({ submitting: false, success: null, error: "Το όνομα είναι υποχρεωτικό για όλα τα πρόσωπα." });
           return;
         }
-        const hasPhotoUrl = option.photoUrl?.trim();
-        const hasPhoto = option.photo?.trim();
-        if (!hasPhotoUrl && !hasPhoto) {
-          setSubmission({ submitting: false, success: null, error: "Απαιτείται φωτογραφία (URL ή upload) για όλα τα πρόσωπα." });
-          return;
-        }
-        if (!option.profileUrl?.trim()) {
-          setSubmission({ submitting: false, success: null, error: "Το URL προφίλ είναι υποχρεωτικό για όλα τα πρόσωπα." });
-          return;
-        }
+        // Photo and profileUrl validations removed - they are now optional
       }
     }
 
@@ -393,7 +395,7 @@ export default function NewPoll() {
                             onChange={(event) => handleOptionChange(index, "profileUrl", event.target.value)}
                             placeholder="URL προφίλ/social (https://...)"
                           />
-                          {formState.options.length > 2 && (
+                          {formState.options.length > (formState.allowUserOptions ? 0 : 2) && (
                             <button
                               type="button"
                               className="btn btn-subtle btn-sm"
@@ -413,7 +415,7 @@ export default function NewPoll() {
                             onChange={(event) => handleOptionChange(index, "text", event.target.value)}
                             placeholder={`Επιλογή ${index + 1}`}
                           />
-                          {formState.options.length > 2 && (
+                          {formState.options.length > (formState.allowUserOptions ? 0 : 2) && (
                             <button
                               type="button"
                               className="btn btn-subtle"

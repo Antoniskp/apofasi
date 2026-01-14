@@ -320,7 +320,12 @@ POST /api/polls
 
 **Note**: 
 - `options` can be an array of strings (legacy) or an array of objects for people mode
-- People mode options require: `{text, photoUrl or photo, profileUrl}`
+- When `allowUserOptions` is `true`, polls can be created with 0 options
+- When `allowUserOptions` is `false`, at least 2 unique options are required
+- People mode options require: `{text}` (name/text is required)
+  - `photoUrl` (optional): HTTPS URL to a photo
+  - `photo` (optional): Base64-encoded image data URL
+  - `profileUrl` (optional): HTTPS URL to a profile (validated against `linkPolicy` if provided)
 - `userOptionApproval`: "auto" | "creator" (default: "auto")
 - `linkPolicy.mode`: "any" | "allowlist" (default: "any")
 
@@ -338,6 +343,9 @@ POST /api/polls
       "text": "Jane Smith",
       "photo": "data:image/jpeg;base64,...",
       "profileUrl": "https://twitter.com/janesmith"
+    },
+    {
+      "text": "Alex Johnson"
     }
   ],
   "optionsArePeople": true,
@@ -345,6 +353,16 @@ POST /api/polls
     "mode": "allowlist",
     "allowedDomains": ["linkedin.com", "twitter.com", "facebook.com"]
   }
+}
+```
+
+**Empty Options Example (with allowUserOptions):**
+```json
+{
+  "question": "What topics should we cover next?",
+  "options": [],
+  "allowUserOptions": true,
+  "userOptionApproval": "creator"
 }
 ```
 
@@ -390,13 +408,22 @@ POST /api/polls/:pollId/options
 }
 ```
 
-**People Mode Example:**
+**People Mode Example (all fields optional except text):**
 ```json
 {
   "option": {
     "text": "Alex Johnson",
     "photoUrl": "https://example.com/alex.jpg",
     "profileUrl": "https://linkedin.com/in/alexj"
+  }
+}
+```
+
+**People Mode Example (minimal - text only):**
+```json
+{
+  "option": {
+    "text": "Sam Lee"
   }
 }
 ```

@@ -7,6 +7,27 @@ const formatDateTime = (value) => {
   return new Date(value).toLocaleString("el-GR", { dateStyle: "medium", timeStyle: "short" });
 };
 
+// Generate a consistent color from a string
+const stringToColor = (str) => {
+  if (!str) return "hsl(200, 50%, 50%)";
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 65%, 55%)`;
+};
+
+// Get initials from name
+const getInitials = (name) => {
+  if (!name) return "?";
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) {
+    return words[0].substring(0, 2).toUpperCase();
+  }
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+};
+
 export default function PollDetail() {
   const { pollId } = useParams();
   const navigate = useNavigate();
@@ -340,9 +361,18 @@ export default function PollDetail() {
               if (poll.optionsArePeople) {
                 // Render person card
                 const photoSrc = option.photo || option.photoUrl;
+                const backgroundColor = stringToColor(option.text);
+                const initials = getInitials(option.text);
+                
                 return (
                   <div key={option.id} className={`poll-option person-option ${isPending ? "pending" : ""}`}>
-                    {photoSrc && <img src={photoSrc} alt={option.text} className="person-photo" />}
+                    {photoSrc ? (
+                      <img src={photoSrc} alt={option.text} className="person-photo" />
+                    ) : (
+                      <div className="person-photo-placeholder" style={{ backgroundColor }}>
+                        {initials}
+                      </div>
+                    )}
                     <div className="poll-option-content">
                       <div className="poll-option-header">
                         <div className="poll-option-title">
