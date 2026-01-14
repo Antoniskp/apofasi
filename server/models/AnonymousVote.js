@@ -6,7 +6,7 @@ const anonymousVoteSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Poll",
       required: true,
-      index: true,
+      index: true, // Individual index for poll queries
     },
     optionId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -16,13 +16,13 @@ const anonymousVoteSchema = new mongoose.Schema(
       type: String,
       // Not marked as required to maintain backward compatibility
       // but application logic requires it for new votes
-      index: true,
+      index: true, // Individual index for session-based lookups
     },
     ipAddress: {
       type: String,
       // Not marked as required to maintain backward compatibility
       // but application logic requires it for new votes
-      index: true,
+      index: true, // Individual index for IP-based lookups
     },
     userAgent: {
       type: String,
@@ -34,6 +34,7 @@ const anonymousVoteSchema = new mongoose.Schema(
 
 // Compound index for efficient lookups - now requires BOTH sessionId AND ipAddress
 // Partial index to only apply to documents that have both fields
+// This prevents duplicate votes while maintaining backward compatibility
 anonymousVoteSchema.index(
   { pollId: 1, sessionId: 1, ipAddress: 1 }, 
   { 

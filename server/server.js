@@ -1091,7 +1091,7 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
       // Validate that we have both sessionId and ipAddress for secure tracking
       if (!sessionId || !ipAddress) {
         return res.status(400).json({ 
-          message: "Για την ασφάλεια της ψηφοφορίας, απαιτείται και session και IP address." 
+          message: "Για την ασφάλεια της ψηφοφορίας, απαιτείται σύνδεση από πλήρως αναγνωρισμένη συσκευή." 
         });
       }
 
@@ -1225,7 +1225,7 @@ pollsRouter.delete("/:pollId/vote", async (req, res) => {
       // Validate that we have both sessionId and ipAddress
       if (!sessionId || !ipAddress) {
         return res.status(400).json({ 
-          message: "Για την ακύρωση της ψήφου, απαιτείται και session και IP address." 
+          message: "Δεν είναι δυνατή η ακύρωση της ψήφου από αυτή τη συσκευή." 
         });
       }
 
