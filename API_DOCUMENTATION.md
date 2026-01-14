@@ -191,8 +191,12 @@ GET /api/news
 ```
 POST /api/news
 ```
+**Status**: DEPRECATED (returns 410 Gone)
+
+**Note**: Standalone news items are no longer supported. Use articles with the `isNews` flag instead. See "Tag Article as News" endpoint.
+
 **Authentication Required**: Yes  
-**Required Role**: `reporter` or `admin`
+**Required Role**: `reporter`, `editor`, or `admin`
 
 **Request Body:**
 ```json
@@ -215,6 +219,147 @@ POST /api/news
   }
 }
 ```
+
+---
+
+## Article Endpoints
+
+Articles are the primary content type for news in the application. Articles can be tagged as news by users with the `reporter`, `editor`, or `admin` role.
+
+#### List Articles
+```
+GET /api/articles
+```
+**Authentication Required**: No
+
+**Response:** `200 OK`
+```json
+{
+  "articles": [
+    {
+      "id": "article_id",
+      "title": "Article Title",
+      "content": "Article content...",
+      "author": {
+        "id": "user_id",
+        "displayName": "Author Name"
+      },
+      "tags": ["tag1", "tag2"],
+      "region": "Αττική",
+      "cityOrVillage": "Αθήνα",
+      "isNews": true,
+      "taggedAsNewsBy": {
+        "id": "editor_id",
+        "displayName": "Editor Name"
+      },
+      "taggedAsNewsAt": "2024-01-15T10:30:00.000Z",
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z"
+    }
+  ]
+}
+```
+
+#### Get Article Details
+```
+GET /api/articles/:articleId
+```
+**Authentication Required**: No
+
+**Response:** `200 OK` - Returns single article object
+
+#### Create Article
+```
+POST /api/articles
+```
+**Authentication Required**: Yes
+
+**Request Body:**
+```json
+{
+  "title": "Article Title",
+  "content": "Article content...",
+  "tags": ["tag1", "tag2"],
+  "region": "Αττική",
+  "cityOrVillage": "Αθήνα"
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "article": { /* article object */ }
+}
+```
+
+#### Update Article
+```
+PUT /api/articles/:articleId
+```
+**Authentication Required**: Yes (must be author)
+
+**Request Body:** Same as Create Article
+
+**Response:** `200 OK`
+
+#### Delete Article
+```
+DELETE /api/articles/:articleId
+```
+**Authentication Required**: Yes (must be author or admin)
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Το άρθρο διαγράφηκε επιτυχώς."
+}
+```
+
+#### Tag Article as News
+```
+PUT /api/articles/:articleId/tag-as-news
+```
+**Authentication Required**: Yes  
+**Required Role**: `reporter`, `editor`, or `admin`
+
+Marks an article as news. The article will appear in the news feed.
+
+**Response:** `200 OK`
+```json
+{
+  "article": {
+    "id": "article_id",
+    "isNews": true,
+    "taggedAsNewsBy": {
+      "id": "editor_id",
+      "displayName": "Editor Name"
+    },
+    "taggedAsNewsAt": "2024-01-15T10:30:00.000Z",
+    ...
+  }
+}
+```
+
+#### Untag Article as News
+```
+PUT /api/articles/:articleId/untag-as-news
+```
+**Authentication Required**: Yes  
+**Required Role**: `reporter`, `editor`, or `admin`
+
+Removes the news flag from an article. The article will no longer appear in the news feed.
+
+**Response:** `200 OK`
+
+#### Get My Articles
+```
+GET /api/articles/my-articles
+```
+**Authentication Required**: Yes
+
+Returns all articles created by the authenticated user.
+
+**Response:** `200 OK` - Returns array of article objects
 
 ---
 
@@ -534,7 +679,7 @@ PUT /api/users/:userId/role
 }
 ```
 
-**Allowed Roles:** `user`, `reporter`, `admin`
+**Allowed Roles:** `user`, `reporter`, `editor`, `admin`
 
 **Response:** `200 OK`
 ```json

@@ -117,7 +117,7 @@ export default function ArticleDetail() {
   const isAdmin = authState.user?.role === "admin";
   const canEdit = isAuthor;
   const canDelete = isAuthor || isAdmin;
-  const canTagAsNews = authState.user && (authState.user.role === "reporter" || authState.user.role === "admin");
+  const canTagAsNews = authState.user && (authState.user.role === "reporter" || authState.user.role === "editor" || authState.user.role === "admin");
 
   return (
     <div className="container">

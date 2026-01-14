@@ -392,31 +392,12 @@ newsRouter.get("/", async (req, res) => {
   }
 });
 
-newsRouter.post("/", ensureAuthenticated, ensureRole("reporter", "admin"), async (req, res) => {
-  const { title, content } = req.body || {};
-  const trimmedTitle = title?.trim();
-  const trimmedContent = content?.trim();
-
-  if (!trimmedTitle || !trimmedContent) {
-    return res.status(400).json({ message: "Απαιτούνται τίτλος και περιεχόμενο." });
-  }
-
-  try {
-    const createdNews = await News.create({
-      title: trimmedTitle,
-      content: trimmedContent,
-      author: req.user._id,
-    });
-
-    const populatedNews = await createdNews.populate("author", "displayName username email");
-
-    return res.status(201).json({
-      news: serializeNews(populatedNews),
-    });
-  } catch (error) {
-    console.error("[news-create-error]", error);
-    return res.status(500).json({ message: "Δεν ήταν δυνατή η προσθήκη της είδησης." });
-  }
+newsRouter.post("/", ensureAuthenticated, ensureRole("reporter", "editor", "admin"), async (req, res) => {
+  // Deprecated: Standalone news items are no longer supported
+  // Use articles with the isNews flag instead
+  return res.status(410).json({ 
+    message: "Δημιουργία ξεχωριστών ειδήσεων δεν υποστηρίζεται πλέον. Χρησιμοποιήστε άρθρα και επισημάνετέ τα ως ειδήσεις." 
+  });
 });
 
 // Helper functions for article validation
@@ -634,7 +615,7 @@ articlesRouter.delete("/:articleId", ensureAuthenticated, async (req, res) => {
   }
 });
 
-articlesRouter.put("/:articleId/tag-as-news", ensureAuthenticated, ensureRole("reporter", "admin"), async (req, res) => {
+articlesRouter.put("/:articleId/tag-as-news", ensureAuthenticated, ensureRole("reporter", "editor", "admin"), async (req, res) => {
   const { articleId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(articleId)) {
@@ -664,7 +645,7 @@ articlesRouter.put("/:articleId/tag-as-news", ensureAuthenticated, ensureRole("r
   }
 });
 
-articlesRouter.put("/:articleId/untag-as-news", ensureAuthenticated, ensureRole("reporter", "admin"), async (req, res) => {
+articlesRouter.put("/:articleId/untag-as-news", ensureAuthenticated, ensureRole("reporter", "editor", "admin"), async (req, res) => {
   const { articleId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(articleId)) {
@@ -1516,7 +1497,7 @@ usersRouter.get("/", async (req, res) => {
 usersRouter.put("/:userId/role", async (req, res) => {
   const { userId } = req.params;
   const { role } = req.body || {};
-  const allowedRoles = ["user", "reporter", "admin"];
+  const allowedRoles = ["user", "reporter", "editor", "admin"];
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return res.status(400).json({ message: "Μη έγκυρο αναγνωριστικό χρήστη." });

@@ -18,7 +18,7 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
 - **email** (`String`, unique, sparse, lowercased, optional)
 - **password** (`String`, optional; only present for local accounts)
 - **avatar** (`String`, optional)
-- **role** (`String`, enum `user|reporter|admin`, default `user`)
+- **role** (`String`, enum `user|reporter|editor|admin`, default `user`)
 - **timestamps**: `createdAt`, `updatedAt` (auto-managed)
 
 **Indexes**
@@ -54,10 +54,29 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
 - **timestamps**: `createdAt`, `updatedAt` (auto-managed)
 
 ## News (`news` collection)
+**Deprecated:** Standalone news items are no longer created. Articles with `isNews: true` are used instead.
+
 - **title** (`String`, required)
 - **content** (`String`, required)
 - **author** (`ObjectId` referencing `users`)
 - **timestamps**: `createdAt`, `updatedAt` (auto-managed)
+
+## Articles (`articles` collection)
+- **title** (`String`, required, trimmed)
+- **content** (`String`, required)
+- **author** (`ObjectId` referencing `users`, required)
+- **tags** (`Array<String>`, trimmed, unique per article, max 10)
+- **region** (`String`, optional)
+- **cityOrVillage** (`String`, optional; must match selected region when present)
+- **isNews** (`Boolean`, default `false`; marks article as news)
+- **taggedAsNewsBy** (`ObjectId` referencing `users`, optional; user who tagged as news)
+- **taggedAsNewsAt** (`Date`, optional; timestamp when tagged as news)
+- **timestamps**: `createdAt`, `updatedAt` (auto-managed)
+
+**Indexes**
+- Compound index on `{ author, createdAt }` for author's articles
+- Compound index on `{ isNews, createdAt }` for news feed
+- Index on `tags` for tag-based queries
 
 ## Contact Messages (`contactmessages` collection)
 - **name** (`String`, optional; sender provided or derived from user profile)
