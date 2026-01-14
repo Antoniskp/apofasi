@@ -801,13 +801,21 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
     new Map(processedOptions.map((opt) => [opt.text, opt])).values()
   );
 
-  if (!trimmedQuestion || uniqueOptions.length < 2) {
+  // Validate question is provided
+  if (!trimmedQuestion) {
+    return res.status(400).json({ message: "Χρειάζεται ερώτηση." });
+  }
+
+  // Validate options based on allowUserOptions setting
+  const minOptionsRequired = allowUserOptions ? 0 : 2;
+  if (uniqueOptions.length < minOptionsRequired) {
     return res
       .status(400)
       .json({ message: "Χρειάζονται ερώτηση και τουλάχιστον δύο μοναδικές επιλογές." });
   }
 
-  if (uniqueOptions.length !== processedOptions.length) {
+  // Check for duplicates only if we have options
+  if (processedOptions.length > 0 && uniqueOptions.length !== processedOptions.length) {
     return res.status(400).json({ message: "Οι επιλογές πρέπει να είναι διαφορετικές μεταξύ τους." });
   }
 

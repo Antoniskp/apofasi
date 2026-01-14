@@ -99,8 +99,8 @@ export const validateLinkPolicy = (linkPolicy) => {
  * @returns {{valid: boolean, error?: string}}
  */
 export const validateProfileUrl = (url, linkPolicy = {}) => {
-  if (!url || typeof url !== "string") {
-    return { valid: false, error: "Το URL είναι υποχρεωτικό." };
+  if (!url || typeof url !== "string" || !url.trim()) {
+    return { valid: false, error: "Το URL δεν είναι έγκυρο." };
   }
 
   if (!isHttpsUrl(url)) {
@@ -140,7 +140,7 @@ export const validateProfileUrl = (url, linkPolicy = {}) => {
  */
 export const validatePhotoDataUrl = (dataUrl) => {
   if (!dataUrl || typeof dataUrl !== "string") {
-    return { valid: false, error: "Η φωτογραφία είναι υποχρεωτική." };
+    return { valid: false, error: "Η φωτογραφία δεν είναι έγκυρη." };
   }
 
   // Check if it's a data URL
@@ -194,15 +194,10 @@ export const validatePeopleOption = (option, linkPolicy) => {
     return { valid: false, error: "Το όνομα είναι υποχρεωτικό." };
   }
 
-  // Photo: either photoUrl OR photo must be provided
+  // Photo is now optional: validate photoUrl if provided
   const hasPhotoUrl = photoUrl && typeof photoUrl === "string" && photoUrl.trim();
   const hasPhoto = photo && typeof photo === "string" && photo.trim();
 
-  if (!hasPhotoUrl && !hasPhoto) {
-    return { valid: false, error: "Απαιτείται φωτογραφία (URL ή upload)." };
-  }
-
-  // Validate photoUrl if provided
   if (hasPhotoUrl && !isHttpsUrl(photoUrl)) {
     return { valid: false, error: "Το URL φωτογραφίας πρέπει να είναι HTTPS." };
   }
@@ -215,15 +210,12 @@ export const validatePeopleOption = (option, linkPolicy) => {
     }
   }
 
-  // ProfileUrl is required
-  if (!profileUrl || typeof profileUrl !== "string" || !profileUrl.trim()) {
-    return { valid: false, error: "Το URL προφίλ είναι υποχρεωτικό." };
-  }
-
-  // Validate profileUrl
-  const urlValidation = validateProfileUrl(profileUrl, linkPolicy);
-  if (!urlValidation.valid) {
-    return urlValidation;
+  // ProfileUrl is now optional: validate if provided
+  if (profileUrl && typeof profileUrl === "string" && profileUrl.trim()) {
+    const urlValidation = validateProfileUrl(profileUrl, linkPolicy);
+    if (!urlValidation.valid) {
+      return urlValidation;
+    }
   }
 
   return { valid: true };
