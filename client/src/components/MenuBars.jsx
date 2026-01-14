@@ -37,7 +37,8 @@ const topMenu = [
       { label: "Στατιστικά Δημοσίου", to: "/education/government-statistics" },
       { label: "Ελληνικό νομικό σύστημα", to: "/education/greek-law-system" }
     ]
-  }
+  },
+  { label: "Χρήστες", to: "/users", icon: "fa-users", requireAuth: true }
 ];
 
 export default function MenuBars() {
@@ -120,10 +121,41 @@ export default function MenuBars() {
           </div>
 
           <nav className={`menu-links ${isOpen ? "open" : ""}`} aria-label="Top navigation">
-            {topMenu.map((item) =>
-              item.subItems ? (
-                <div key={item.label} className="menu-link-group">
+            {topMenu
+              .filter((item) => !item.requireAuth || authStatus.user)
+              .map((item) =>
+                item.subItems ? (
+                  <div key={item.label} className="menu-link-group">
+                    <Link
+                      to={item.to}
+                      className={`menu-link${location.pathname === item.to ? " active" : ""}`}
+                      onClick={closeMenu}
+                    >
+                      <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
+                      {item.label}
+                    </Link>
+                    <div className="menu-submenu" aria-label={`${item.label} submenu`}>
+                      {item.subItems.map((subItem) =>
+                        subItem.to ? (
+                          <Link
+                            key={subItem.label}
+                            to={subItem.to}
+                            className={`menu-subitem${location.pathname === subItem.to ? " active" : ""}`}
+                            onClick={closeMenu}
+                          >
+                            {subItem.label}
+                          </Link>
+                        ) : (
+                          <span key={subItem.label} className="menu-subitem">
+                            {subItem.label}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+                ) : (
                   <Link
+                    key={item.label}
                     to={item.to}
                     className={`menu-link${location.pathname === item.to ? " active" : ""}`}
                     onClick={closeMenu}
@@ -131,37 +163,8 @@ export default function MenuBars() {
                     <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
                     {item.label}
                   </Link>
-                  <div className="menu-submenu" aria-label={`${item.label} submenu`}>
-                    {item.subItems.map((subItem) =>
-                      subItem.to ? (
-                        <Link
-                          key={subItem.label}
-                          to={subItem.to}
-                          className={`menu-subitem${location.pathname === subItem.to ? " active" : ""}`}
-                          onClick={closeMenu}
-                        >
-                          {subItem.label}
-                        </Link>
-                      ) : (
-                        <span key={subItem.label} className="menu-subitem">
-                          {subItem.label}
-                        </span>
-                      )
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  className={`menu-link${location.pathname === item.to ? " active" : ""}`}
-                  onClick={closeMenu}
-                >
-                  <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
-                  {item.label}
-                </Link>
-              )
-            )}
+                )
+              )}
 
             <div className="menu-actions menu-actions-mobile">
               <UserMenu user={authStatus.user} onLogout={loadAuthStatus} />
