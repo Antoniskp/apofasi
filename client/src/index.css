@@ -2660,6 +2660,13 @@ button:focus-visible {
   margin-left: auto;
 }
 
+/* Responsive card grid - main utility for listing cards in a responsive grid */
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .toolbar-container {
@@ -2680,5 +2687,9 @@ button:focus-visible {
   
   .input-modern.compact {
     min-width: 100%;
+  }
+  
+  .responsive-card-grid {
+    grid-template-columns: 1fr;
   }
 }

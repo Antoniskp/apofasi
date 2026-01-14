@@ -85,7 +85,7 @@ export default function Articles() {
         )}
 
         {!articlesState.loading && articlesState.articles.length > 0 && (
-          <div className="compact-list">
+          <div className="responsive-card-grid">
             {articlesState.articles.map((article) => (
               <div key={article.id} className="card compact-card">
                 <div className="article-header-row">

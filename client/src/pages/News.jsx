@@ -218,7 +218,7 @@ export default function News() {
           </div>
         )}
 
-        <div className="compact-list">
+        <div className="responsive-card-grid">
           {newsFeed.news.map((item) => (
             <div key={item.id} className="card compact-card">
               <div className="story-header">
