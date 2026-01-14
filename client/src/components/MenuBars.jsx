@@ -59,7 +59,8 @@ export default function MenuBars() {
   };
 
   const generateSubmenuId = (label) => {
-    return `submenu-${label.toLowerCase().replace(/\s+/g, '-')}`;
+    // Sanitize label by removing special characters and normalizing spaces
+    return `submenu-${label.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}`;
   };
 
   useEffect(() => {
