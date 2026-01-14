@@ -21,6 +21,7 @@ import Contribute from "./pages/Contribute.jsx";
 import Register from "./pages/Register.jsx";
 import Profile from "./pages/Profile.jsx";
 import AdminUsers from "./pages/AdminUsers.jsx";
+import Users from "./pages/Users.jsx";
 import Contact from "./pages/Contact.jsx";
 import About from "./pages/About.jsx";
 import Social from "./pages/Social.jsx";
@@ -88,6 +89,7 @@ function App() {
         <Route path="/auth" element={withLayout(<Auth />)} />
         <Route path="/register" element={withLayout(<Register />)} />
         <Route path="/profile" element={withLayout(<Profile />)} />
+        <Route path="/users" element={withLayout(<Users />)} />
         <Route path="/admin/users" element={withLayout(<AdminUsers />)} />
         <Route path="/auth/success" element={withLayout(<AuthStatus type="success" />)} />
         <Route path="/auth/error" element={withLayout(<AuthStatus type="error" />)} />

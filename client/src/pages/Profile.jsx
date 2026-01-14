@@ -491,6 +491,50 @@ export default function Profile() {
               </div>
             </div>
 
+            <div className="profile-section">
+              <div>
+                <h3>Ορατότητα προφίλ</h3>
+                <p className="muted small">
+                  Επιλέξτε αν το προφίλ σας θα είναι ορατό σε άλλους χρήστες της πλατφόρμας.
+                </p>
+              </div>
+              <div className="profile-field">
+                <label className="profile-checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={user.visibleToOtherUsers || false}
+                    onChange={async (event) => {
+                      const newValue = event.target.checked;
+                      setSaveError(null);
+                      setSaveMessage(null);
+                      setIsSaving(true);
+                      try {
+                        const response = await updateProfile({ visibleToOtherUsers: newValue });
+                        setStatus((prev) => ({ ...prev, user: response.user }));
+                        setSaveMessage(
+                          newValue
+                            ? "Το προφίλ σας είναι τώρα ορατό σε άλλους χρήστες."
+                            : "Το προφίλ σας δεν είναι πλέον ορατό σε άλλους χρήστες."
+                        );
+                      } catch (error) {
+                        setSaveError(error.message || "Δεν ήταν δυνατή η ενημέρωση της ορατότητας.");
+                      } finally {
+                        setIsSaving(false);
+                      }
+                    }}
+                    disabled={isSaving}
+                  />
+                  <span>Το προφίλ μου είναι ορατό σε άλλους χρήστες</span>
+                </label>
+                <p className="muted small">
+                  Όταν ενεργοποιηθεί, το προφίλ σας θα εμφανίζεται στη λίστα χρηστών που μπορούν να δουν άλλοι 
+                  συνδεδεμένοι χρήστες. Θα εμφανίζονται μόνο το όνομα, η φωτογραφία και βασικές πληροφορίες σας.
+                </p>
+                {saveMessage && <p className="success-text">{saveMessage}</p>}
+                {saveError && <p className="error-text">{saveError}</p>}
+              </div>
+            </div>
+
             <div className="actions-row profile-actions">
               <button type="button" className="btn" onClick={loadProfile} disabled={loading}>
                 Ανανέωση

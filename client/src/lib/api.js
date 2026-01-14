@@ -49,6 +49,10 @@ export const updateProfile = async (payload) => {
     profilePayload.avatar = payload.avatar;
   }
 
+  if ("visibleToOtherUsers" in payload) {
+    profilePayload.visibleToOtherUsers = payload.visibleToOtherUsers;
+  }
+
   return handleResponse(
     await fetch(
       `${API_BASE_URL}/auth/profile`,
@@ -120,6 +124,13 @@ export const listUsers = async (searchTerm = "") => {
     })
   );
 };
+
+export const listVisibleUsers = async () =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/public-users/visible`, {
+      credentials: "include",
+    })
+  );
 
 export const updateUserRole = async (userId, role) =>
   handleResponse(

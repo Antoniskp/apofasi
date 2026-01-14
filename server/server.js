@@ -93,6 +93,7 @@ const sanitizeUser = (user) =>
       region: user.region,
       cityOrVillage: user.cityOrVillage,
       createdAt: user.createdAt,
+      visibleToOtherUsers: user.visibleToOtherUsers,
     }
     : null;
 
@@ -1485,6 +1486,37 @@ pollsRouter.delete("/:pollId/options/:optionId", ensureAuthenticated, async (req
   }
 });
 
+const publicUsersRouter = express.Router();
+
+// Get list of visible users (authenticated users only)
+publicUsersRouter.get("/visible", ensureAuthenticated, async (req, res) => {
+  try {
+    const users = await User.find({ visibleToOtherUsers: true })
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .select("displayName firstName lastName username avatar occupation region cityOrVillage createdAt");
+
+    // Serialize users without exposing sensitive info
+    const visibleUsers = users.map((user) => ({
+      id: user.id,
+      displayName: user.displayName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      avatar: user.avatar,
+      occupation: user.occupation,
+      region: user.region,
+      cityOrVillage: user.cityOrVillage,
+      createdAt: user.createdAt,
+    }));
+
+    return res.json({ users: visibleUsers });
+  } catch (error) {
+    console.error("[visible-users-list-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση χρηστών." });
+  }
+});
+
 const usersRouter = express.Router();
 
 usersRouter.use(ensureAuthenticated);
@@ -1714,6 +1746,7 @@ authRouter.put("/profile", ensureAuthenticated, async (req, res) => {
     "cityOrVillage",
     "gender",
     "avatar",
+    "visibleToOtherUsers",
   ];
   const updates = {};
 
@@ -1838,6 +1871,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/news", newsRouter);
 app.use("/api/articles", articlesRouter);
 app.use("/api/polls", pollsRouter);
+app.use("/api/public-users", publicUsersRouter);
 app.use("/users", usersRouter);
 app.use("/api/users", usersRouter);
 app.use("/contact", contactRouter);
