@@ -69,242 +69,118 @@ export default function MyArticles() {
     });
   };
 
-  if (authState.loading) {
-    return (
-      <div className="container">
-        <p>Φόρτωση...</p>
-      </div>
-    );
-  }
-
-  if (!authState.user) {
-    return (
-      <div className="container">
-        <h1>Τα Άρθρα μου</h1>
-        <div className="message error">
-          Πρέπει να συνδεθείτε για να δείτε τα άρθρα σας.{" "}
-          <Link to="/auth">Σύνδεση</Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container">
-      <h1>Τα Άρθρα μου</h1>
-
-      <div style={{ marginBottom: "1.5rem" }}>
-        <Link to="/articles/new" className="button">
-          Νέο Άρθρο
-        </Link>
-        {" "}
-        <Link to="/articles" className="button secondary">
-          Όλα τα Άρθρα
-        </Link>
+    <div className="section narrow">
+      <p className="pill">Άρθρα</p>
+      <div className="section-header">
+        <h1 className="section-title">Τα Άρθρα μου</h1>
+        {authState.user && (
+          <div className="cta-row">
+            <Link to="/articles/new" className="btn btn-primary">
+              ✚ Νέο Άρθρο
+            </Link>
+            <Link to="/articles" className="btn btn-outline">
+              Όλα τα Άρθρα
+            </Link>
+          </div>
+        )}
       </div>
 
-      {articlesState.loading && <p>Φόρτωση άρθρων...</p>}
+      {authState.loading && <p className="muted">Φόρτωση συνεδρίας...</p>}
 
-      {articlesState.error && (
-        <div className="message error">{articlesState.error}</div>
-      )}
-
-      {deleteState.error && (
-        <div className="message error">{deleteState.error}</div>
-      )}
-
-      {!articlesState.loading && !articlesState.error && articlesState.articles.length === 0 && (
-        <p>Δεν έχετε δημιουργήσει άρθρα ακόμα.</p>
-      )}
-
-      {!articlesState.loading && articlesState.articles.length > 0 && (
-        <div className="articles-list">
-          {articlesState.articles.map((article) => (
-            <div key={article.id} className="article-card">
-              <h2>
-                <Link to={`/articles/${article.id}`}>{article.title}</Link>
-              </h2>
-
-              <div className="article-meta">
-                <span>{formatDate(article.createdAt)}</span>
-                {article.isNews && (
-                  <>
-                    {" • "}
-                    <span className="news-badge">📰 Είδηση</span>
-                  </>
-                )}
-              </div>
-
-              {article.tags && article.tags.length > 0 && (
-                <div className="article-tags">
-                  {article.tags.map((tag, idx) => (
-                    <span key={idx} className="tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {(article.region || article.cityOrVillage) && (
-                <div className="article-location">
-                  📍 {article.cityOrVillage || article.region}
-                </div>
-              )}
-
-              <p className="article-preview">
-                {article.content.substring(0, 200)}
-                {article.content.length > 200 && "..."}
-              </p>
-
-              <div className="article-actions">
-                <Link to={`/articles/${article.id}`} className="button small">
-                  Προβολή
-                </Link>
-                <Link to={`/articles/${article.id}/edit`} className="button small secondary">
-                  Επεξεργασία
-                </Link>
-                <button
-                  onClick={() => handleDelete(article.id, article.title)}
-                  disabled={deleteState.deleting === article.id}
-                  className="button small danger"
-                >
-                  {deleteState.deleting === article.id ? "Διαγραφή..." : "Διαγραφή"}
-                </button>
-              </div>
-            </div>
-          ))}
+      {!authState.loading && !authState.user && (
+        <div className="card auth-card stack">
+          <p className="muted">Χρειάζεται σύνδεση για να δείτε τα άρθρα σας.</p>
+          <div className="cta-row">
+            <Link className="btn" to="/auth">
+              Σύνδεση
+            </Link>
+            <Link className="btn btn-outline" to="/register">
+              Δημιουργία λογαριασμού
+            </Link>
+          </div>
         </div>
       )}
 
-      <style>{`
-        .articles-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
+      {!authState.loading && authState.user && (
+        <>
+          {articlesState.loading && <p className="muted">Φόρτωση άρθρων...</p>}
 
-        .article-card {
-          background: #fff;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          padding: 1.5rem;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+          {articlesState.error && (
+            <div className="card compact-card error-text">{articlesState.error}</div>
+          )}
 
-        .article-card h2 {
-          margin: 0 0 0.5rem 0;
-          font-size: 1.5rem;
-        }
+          {deleteState.error && (
+            <div className="card compact-card error-text">{deleteState.error}</div>
+          )}
 
-        .article-card h2 a {
-          color: #333;
-          text-decoration: none;
-        }
+          {!articlesState.loading && !articlesState.error && articlesState.articles.length === 0 && (
+            <div className="card compact-card">
+              <p className="muted">Δεν έχετε δημιουργήσει άρθρα ακόμα.</p>
+            </div>
+          )}
 
-        .article-card h2 a:hover {
-          color: #0066cc;
-        }
+          {!articlesState.loading && articlesState.articles.length > 0 && (
+            <div className="responsive-card-grid">
+              {articlesState.articles.map((article) => (
+                <div key={article.id} className="card compact-card">
+                  <div className="article-header-row">
+                    <div className="pill pill-soft">Άρθρο</div>
+                    <div className="muted small">{formatDate(article.createdAt)}</div>
+                  </div>
 
-        .article-meta {
-          color: #666;
-          font-size: 0.9rem;
-          margin-bottom: 0.5rem;
-        }
+                  <h3 className="article-title">
+                    <Link to={`/articles/${article.id}`}>{article.title}</Link>
+                  </h3>
 
-        .news-badge {
-          color: #d32f2f;
-          font-weight: bold;
-        }
+                  <div className="article-meta-row">
+                    {article.isNews && (
+                      <span className="pill pill-ghost">📰 Είδηση</span>
+                    )}
+                  </div>
 
-        .article-tags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          margin: 0.5rem 0;
-        }
+                  {article.tags && article.tags.length > 0 && (
+                    <div className="chips">
+                      {article.tags.map((tag, idx) => (
+                        <span key={idx} className="chip">
+                      #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
-        .tag {
-          background: #e3f2fd;
-          color: #1976d2;
-          padding: 0.25rem 0.75rem;
-          border-radius: 12px;
-          font-size: 0.85rem;
-        }
+                  {(article.region || article.cityOrVillage) && (
+                    <p className="muted small">
+                  📍 {[article.region, article.cityOrVillage].filter(Boolean).join(" • ")}
+                    </p>
+                  )}
 
-        .article-location {
-          color: #666;
-          font-size: 0.9rem;
-          margin: 0.5rem 0;
-        }
+                  <p className="article-preview">
+                    {article.content.substring(0, 200)}
+                    {article.content.length > 200 && "..."}
+                  </p>
 
-        .article-preview {
-          color: #555;
-          line-height: 1.6;
-          margin: 1rem 0;
-        }
-
-        .article-actions {
-          display: flex;
-          gap: 0.5rem;
-          margin-top: 1rem;
-        }
-
-        .button {
-          padding: 0.5rem 1rem;
-          border: none;
-          border-radius: 4px;
-          font-size: 1rem;
-          cursor: pointer;
-          text-decoration: none;
-          display: inline-block;
-          background: #0066cc;
-          color: white;
-        }
-
-        .button:hover:not(:disabled) {
-          background: #0052a3;
-        }
-
-        .button.secondary {
-          background: #f5f5f5;
-          color: #333;
-        }
-
-        .button.secondary:hover {
-          background: #e0e0e0;
-        }
-
-        .button.small {
-          padding: 0.4rem 0.8rem;
-          font-size: 0.9rem;
-        }
-
-        .button.danger {
-          background: #d32f2f;
-          color: white;
-        }
-
-        .button.danger:hover:not(:disabled) {
-          background: #b71c1c;
-        }
-
-        .button:disabled {
-          background: #ccc;
-          cursor: not-allowed;
-        }
-
-        .message {
-          padding: 1rem;
-          border-radius: 4px;
-          margin-bottom: 1rem;
-        }
-
-        .message.error {
-          background: #ffebee;
-          color: #c62828;
-          border: 1px solid #ef5350;
-        }
-      `}</style>
+                  <div className="cta-row">
+                    <Link to={`/articles/${article.id}`} className="btn btn-outline">
+                  Προβολή
+                    </Link>
+                    <Link to={`/articles/${article.id}/edit`} className="btn btn-outline">
+                  Επεξεργασία
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(article.id, article.title)}
+                      disabled={deleteState.deleting === article.id}
+                      className="btn btn-subtle"
+                    >
+                      {deleteState.deleting === article.id ? "Διαγραφή..." : "Διαγραφή"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

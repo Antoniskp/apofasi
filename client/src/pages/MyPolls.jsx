@@ -121,7 +121,7 @@ export default function MyPolls() {
             </div>
           )}
 
-          <div className="stack">
+          <div className="responsive-card-grid">
             {polls.map((poll) => {
               const totalVotes = getTotalVotes(poll);
               const delStatus = deleteState[poll.id] || {};

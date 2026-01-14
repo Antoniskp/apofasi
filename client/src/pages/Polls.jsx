@@ -209,7 +209,7 @@ export default function Polls() {
           </div>
         )}
 
-        <div className="compact-list">
+        <div className="responsive-card-grid">
           {filteredPolls.map((poll) => {
             const totalVotes = getTotalVotes(poll);
             const voteStatus = voteState[poll.id] || {};
