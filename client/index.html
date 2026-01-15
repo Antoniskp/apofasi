@@ -16,8 +16,11 @@
     <script>
       // Prevent Chrome extension errors from breaking the page
       window.addEventListener('error', function(e) {
-        // Ignore errors from chrome-extension:// sources
+        // Ignore specific syntax errors from chrome-extension:// sources
+        // This prevents buggy extensions from cluttering the console
         if (e.filename && e.filename.startsWith('chrome-extension://')) {
+          // Log to console for debugging but prevent error propagation
+          console.debug('Suppressed extension error:', e.message, 'from', e.filename);
           e.preventDefault();
           return true;
         }
