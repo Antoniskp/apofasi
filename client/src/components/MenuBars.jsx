@@ -239,7 +239,6 @@ export default function MenuBars() {
                       onClick={(e) => item.subItems && handleMenuClick(e, item.label)}
                       startIcon={iconMap[item.icon]}
                       sx={{
-                        color: location.pathname === item.to ? '#facc15' : '#e2e8f0',
                         fontWeight: 700,
                         fontSize: '0.8rem',
                         textTransform: 'uppercase',
