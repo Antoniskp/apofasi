@@ -31,22 +31,6 @@ import BalanceIcon from '@mui/icons-material/Balance';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 
-const pollRegions = [
-  { label: "Ανατολική Μακεδονία και Θράκη" },
-  { label: "Κεντρική Μακεδονία" },
-  { label: "Δυτική Μακεδονία" },
-  { label: "Ήπειρος" },
-  { label: "Θεσσαλία" },
-  { label: "Ιόνια Νησιά" },
-  { label: "Δυτική Ελλάδα" },
-  { label: "Στερεά Ελλάδα" },
-  { label: "Αττική" },
-  { label: "Πελοπόννησος" },
-  { label: "Βόρειο Αιγαίο" },
-  { label: "Νότιο Αιγαίο" },
-  { label: "Κρήτη" }
-];
-
 const iconMap = {
   'fa-newspaper': <NewspaperIcon />,
   'fa-file-lines': <ArticleIcon />,
@@ -58,12 +42,7 @@ const iconMap = {
 const topMenu = [
   { label: "Ειδήσεις", to: "/news", icon: "fa-newspaper" },
   { label: "Άρθρα", to: "/articles", icon: "fa-file-lines" },
-  {
-    label: "Ψηφοφορίες",
-    to: "/polls",
-    icon: "fa-square-poll-vertical",
-    subItems: pollRegions
-  },
+  { label: "Ψηφοφορίες", to: "/polls", icon: "fa-square-poll-vertical" },
   {
     label: "Εκπαίδευση",
     to: "/education",
