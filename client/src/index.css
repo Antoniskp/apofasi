@@ -2067,9 +2067,8 @@ button:focus-visible {
     z-index: 10;
   }
 
-  /* Show backdrop when menu is open */
-  .menu-links.open ~ .menu-actions-desktop,
-  .menu-top:has(.menu-links.open)::after {
+  /* Show backdrop when menu is open - using class instead of :has for better compatibility */
+  .menu-shell.menu-backdrop-active .menu-top::after {
     opacity: 1;
     pointer-events: auto;
   }
@@ -2577,7 +2576,7 @@ button:focus-visible {
   /* Add safe area padding for notched devices */
   @supports (padding-bottom: env(safe-area-inset-bottom)) {
     .user-menu-dropdown {
-      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
     }
   }
 }

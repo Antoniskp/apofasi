@@ -84,7 +84,7 @@ export default function MenuBars() {
   }, [isOpen]);
 
   return (
-    <div className={`menu-shell${isMenuHidden ? " menu-hidden" : ""}`}>
+    <div className={`menu-shell${isMenuHidden ? " menu-hidden" : ""}${isOpen ? " menu-backdrop-active" : ""}`}>
       <div className="menu-top">
         <div className="menu-top-inner">
           <div className="menu-left">
