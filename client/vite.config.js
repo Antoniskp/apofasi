@@ -30,8 +30,10 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             // Split MUI into its own chunk for better caching
+            // Vite automatically adds content hash to chunk names for cache invalidation
+            // e.g., mui-CLgyUEuG.js - hash changes when MUI version updates
             'mui': ['@mui/material', '@emotion/react', '@emotion/styled'],
-            // Split React libraries
+            // Split React libraries - stable and rarely change
             'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           },
         },

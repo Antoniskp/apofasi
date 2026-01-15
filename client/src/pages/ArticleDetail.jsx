@@ -168,7 +168,7 @@ export default function ArticleDetail() {
         </div>
 
         <div className="article-content">
-          <p style={{ whiteSpace: "pre-wrap" }}>{article.content}</p>
+          <p style={{ whiteSpace: 'pre-wrap' }}>{article.content}</p>
         </div>
 
         {(canEdit || canDelete || canTagAsNews) && (

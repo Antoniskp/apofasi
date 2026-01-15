@@ -30,6 +30,13 @@ const buttonGroupStyles = {
   mt: 2,
 };
 
+const formStyles = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 2,
+  mt: 2,
+};
+
 export default function MuiExamples() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -84,7 +91,7 @@ export default function MuiExamples() {
           <Typography variant="body2" color="text.secondary" paragraph>
             Using static sx objects defined outside component to reduce runtime overhead.
           </Typography>
-          <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
+          <Box component="form" sx={formStyles}>
             <TextField
               label="Name"
               value={formData.name}
