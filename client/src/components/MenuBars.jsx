@@ -117,7 +117,7 @@ export default function MenuBars() {
                     component={Link}
                     to={item.to}
                     selected={location.pathname === item.to}
-                    onClick={closeMobileMenu}
+                    onClick={() => toggleSubmenuMobile(item.label)}
                   >
                     <ListItemText primary={item.label} />
                   </ListItemButton>
