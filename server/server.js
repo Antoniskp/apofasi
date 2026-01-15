@@ -1988,7 +1988,6 @@ app.use("/api/news", newsRouter);
 app.use("/api/articles", articlesRouter);
 app.use("/api/polls", pollsRouter);
 app.use("/api/public-users", publicUsersRouter);
-app.use("/users", usersRouter);
 app.use("/api/users", usersRouter);
 app.use("/contact", contactRouter);
 app.use("/api/contact", contactRouter);
