@@ -1,16 +1,16 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense } from "react";
 // Best Practice #2: Tree-shaking friendly path imports
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
 
 // Best Practice #6: Lazy load heavy components (Dialog, Drawer)
-const ExampleDialog = lazy(() => import('../components/ExampleDialog.jsx'));
+const ExampleDialog = lazy(() => import("../components/ExampleDialog.jsx"));
 
 // Best Practice #3B: Static sx objects defined outside component
 const containerStyles = {
@@ -24,17 +24,17 @@ const cardStyles = {
 };
 
 const buttonGroupStyles = {
-  display: 'flex',
+  display: "flex",
   gap: 2,
-  flexWrap: 'wrap',
+  flexWrap: "wrap",
   mt: 2,
 };
 
 export default function MuiExamples() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    name: "",
+    email: "",
   });
 
   const handleChange = (field) => (event) => {
@@ -84,18 +84,18 @@ export default function MuiExamples() {
           <Typography variant="body2" color="text.secondary" paragraph>
             Using static sx objects defined outside component to reduce runtime overhead.
           </Typography>
-          <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+          <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
             <TextField
               label="Name"
               value={formData.name}
-              onChange={handleChange('name')}
+              onChange={handleChange("name")}
               fullWidth
             />
             <TextField
               label="Email"
               type="email"
               value={formData.email}
-              onChange={handleChange('email')}
+              onChange={handleChange("email")}
               fullWidth
             />
             <Button variant="contained" color="primary" type="button">
@@ -131,7 +131,7 @@ export default function MuiExamples() {
             4. Performance Best Practices Applied
           </Typography>
           <Box component="ul" sx={{ pl: 2 }}>
-            <li>✅ Tree-shaking friendly path imports (import Button from '@mui/material/Button')</li>
+            <li>✅ Tree-shaking friendly path imports (import Button from &apos;@mui/material/Button&apos;)</li>
             <li>✅ Single theme created at module scope (theme.js)</li>
             <li>✅ System fonts for zero network overhead</li>
             <li>✅ CssBaseline for consistent global styles</li>

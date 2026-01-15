@@ -1,10 +1,10 @@
 // Best Practice #6: Heavy component that's lazy loaded
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 
 export default function ExampleDialog({ open, onClose }) {
   return (
@@ -13,7 +13,7 @@ export default function ExampleDialog({ open, onClose }) {
       <DialogContent>
         <Typography variant="body1" paragraph>
           This dialog component is lazy loaded using React.lazy() and Suspense.
-          It's only downloaded when the user clicks the "Open Dialog" button,
+          It&apos;s only downloaded when the user clicks the &quot;Open Dialog&quot; button,
           keeping the initial bundle size smaller.
         </Typography>
         <Typography variant="body2" color="text.secondary">

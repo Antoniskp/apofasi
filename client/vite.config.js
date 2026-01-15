@@ -23,6 +23,29 @@ export default defineConfig(({ mode }) => {
           secure: false
         }
       }
-    }
+    },
+    build: {
+      // Optimize bundle splitting for better caching and loading
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Split MUI into its own chunk for better caching
+            'mui': ['@mui/material', '@emotion/react', '@emotion/styled'],
+            // Split React libraries
+            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          },
+        },
+      },
+      // Set chunk size warning limit (500KB default)
+      chunkSizeWarningLimit: 600,
+      // Enable CSS code splitting
+      cssCodeSplit: true,
+      // Use esbuild for faster minification (default in Vite 5+)
+      minify: 'esbuild',
+      // Remove console.log and debugger in production
+      esbuild: {
+        drop: mode === 'production' ? ['console', 'debugger'] : [],
+      },
+    },
   };
 });
