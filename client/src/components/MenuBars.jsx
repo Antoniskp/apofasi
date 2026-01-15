@@ -39,7 +39,7 @@ export default function MenuBars() {
 
   const generateSubmenuId = (label) => {
     // Sanitize label by removing special characters and normalizing spaces
-    return `submenu-${label.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}`;
+    return `submenu-${label.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")}`;
   };
 
   useEffect(() => {
@@ -123,12 +123,12 @@ export default function MenuBars() {
                         aria-controls={generateSubmenuId(item.label)}
                         onClick={() => toggleSubmenu(item.label)}
                       >
-                        <i className={`fa-solid fa-chevron-${openSubmenu === item.label ? 'up' : 'down'}`} aria-hidden />
+                        <i className={`fa-solid fa-chevron-${openSubmenu === item.label ? "up" : "down"}`} aria-hidden />
                       </button>
                     </div>
                     <div 
                       id={generateSubmenuId(item.label)}
-                      className={`menu-submenu${openSubmenu === item.label ? ' open' : ''}`}
+                      className={`menu-submenu${openSubmenu === item.label ? " open" : ""}`}
                     >
                       {item.subItems.map((subItem) =>
                         subItem.to ? (
