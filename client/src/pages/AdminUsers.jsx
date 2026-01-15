@@ -80,8 +80,7 @@ export default function AdminUsers() {
 
   useEffect(() => {
     loadSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // loadSession is stable
 
   const handleRoleChange = (userId, role) => {
     setRoleDrafts((prev) => ({ ...prev, [userId]: role }));

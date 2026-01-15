@@ -1,119 +1,48 @@
-import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../lib/api.js";
-import { useTheme } from "../lib/ThemeContext.jsx";
+import { useTheme as useCustomTheme } from "../lib/ThemeContext.jsx";
 import { useAuth } from "../lib/AuthContext.jsx";
-
-// Mobile breakpoint - must match CSS media query in index.css
-const MOBILE_BREAKPOINT = 680;
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Typography,
+} from "@mui/material";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import PersonIcon from "@mui/icons-material/Person";
+import PollIcon from "@mui/icons-material/Poll";
+import LogoutIcon from "@mui/icons-material/Logout";
+import LoginIcon from "@mui/icons-material/Login";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function UserMenu({ user }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [dropdownStyle, setDropdownStyle] = useState({});
-  const menuRef = useRef(null);
-  const buttonRef = useRef(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useCustomTheme();
   const { refreshAuth } = useAuth();
+  const open = Boolean(anchorEl);
 
-  // Calculate dropdown position on mobile
-  useEffect(() => {
-    const calculatePosition = () => {
-      if (isOpen && buttonRef.current) {
-        const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
-        
-        if (isMobile) {
-          const buttonRect = buttonRef.current.getBoundingClientRect();
-          // Position dropdown below the button with proper spacing
-          setDropdownStyle({
-            top: `${buttonRect.bottom + 8}px`,
-          });
-        } else {
-          setDropdownStyle({});
-        }
-      }
-    };
-
-    calculatePosition();
-
-    // Recalculate on resize (e.g., screen rotation)
-    if (isOpen) {
-      window.addEventListener("resize", calculatePosition);
-      window.addEventListener("scroll", calculatePosition, true);
-      return () => {
-        window.removeEventListener("resize", calculatePosition);
-        window.removeEventListener("scroll", calculatePosition, true);
-      };
-    }
-  }, [isOpen]);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [isOpen]);
-
-  // Handle keyboard navigation
-  const handleKeyDown = (event) => {
-    if (event.key === "Escape") {
-      setIsOpen(false);
-      buttonRef.current?.focus();
-    }
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleButtonKeyDown = (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setIsOpen((prev) => !prev);
-    } else if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setIsOpen(true);
-      // Focus first menu item after opening
-      requestAnimationFrame(() => {
-        menuRef.current?.querySelector('[role="menuitem"]')?.focus();
-      });
-    }
-  };
-
-  const handleMenuItemKeyDown = (event, action) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      action();
-    } else if (event.key === "ArrowDown") {
-      event.preventDefault();
-      // Find next menuitem, skipping separators
-      let nextElement = event.target.nextElementSibling;
-      while (nextElement && nextElement.getAttribute("role") !== "menuitem") {
-        nextElement = nextElement.nextElementSibling;
-      }
-      if (nextElement) {
-        nextElement.focus();
-      }
-    } else if (event.key === "ArrowUp") {
-      event.preventDefault();
-      // Find previous menuitem, skipping separators
-      let prevElement = event.target.previousElementSibling;
-      while (prevElement && prevElement.getAttribute("role") !== "menuitem") {
-        prevElement = prevElement.previousElementSibling;
-      }
-      if (prevElement) {
-        prevElement.focus();
-      }
-    }
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
   const handleLogout = async () => {
     try {
       await logoutUser();
-      setIsOpen(false);
+      handleClose();
       await refreshAuth();
       navigate("/");
     } catch (error) {
@@ -121,13 +50,13 @@ export default function UserMenu({ user }) {
     }
   };
 
-  const handleLinkClick = () => {
-    setIsOpen(false);
-  };
-
   const handleThemeToggle = () => {
     toggleTheme();
-    // Don't close menu immediately to provide feedback
+  };
+
+  const handleNavigation = (path) => {
+    handleClose();
+    navigate(path);
   };
 
   const isAuthenticated = Boolean(user);
@@ -135,135 +64,95 @@ export default function UserMenu({ user }) {
   const userAvatar = user?.avatar;
 
   return (
-    <div className="user-menu-container" ref={menuRef}>
-      <button
-        ref={buttonRef}
-        type="button"
-        className="user-menu-trigger"
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((prev) => !prev)}
-        onKeyDown={handleButtonKeyDown}
+    <Box>
+      <IconButton
+        onClick={handleClick}
+        size="small"
+        sx={{ 
+          display: "flex", 
+          gap: 0.5, 
+          color: "#e2e8f0",
+          "&:hover": { bgcolor: "rgba(255, 255, 255, 0.08)" },
+        }}
+        aria-controls={open ? "user-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+      >
+        {isAuthenticated && userAvatar ? (
+          <Avatar src={userAvatar} alt={userName} sx={{ width: 32, height: 32 }} />
+        ) : (
+          <AccountCircleIcon sx={{ fontSize: 32 }} />
+        )}
+        <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 0.5 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {isAuthenticated ? userName : "Menu"}
+          </Typography>
+          <ExpandMoreIcon fontSize="small" />
+        </Box>
+      </IconButton>
+      <Menu
+        id="user-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        MenuListProps={{
+          "aria-labelledby": "user-menu-button",
+        }}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            minWidth: 200,
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         {isAuthenticated ? (
           <>
-            {userAvatar ? (
-              <img src={userAvatar} alt="" className="user-menu-avatar" />
-            ) : (
-              <span className="user-menu-icon" aria-hidden="true">
-                <i className="fa-solid fa-circle-user" />
-              </span>
-            )}
-            <span className="user-menu-name">{userName}</span>
-            <i className={`fa-solid fa-chevron-down user-menu-chevron ${isOpen ? "open" : ""}`} aria-hidden="true" />
+            <MenuItem onClick={() => handleNavigation("/polls/my-polls")}>
+              <ListItemIcon>
+                <PollIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>My Polls</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={() => handleNavigation("/profile")}>
+              <ListItemIcon>
+                <PersonIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Profile</ListItemText>
+            </MenuItem>
+            <Divider />
+            <MenuItem onClick={handleLogout}>
+              <ListItemIcon>
+                <LogoutIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Log out</ListItemText>
+            </MenuItem>
           </>
         ) : (
           <>
-            <span className="user-menu-icon" aria-hidden="true">
-              <i className="fa-solid fa-circle-user" />
-            </span>
-            <span className="user-menu-name">Menu</span>
-            <i className={`fa-solid fa-chevron-down user-menu-chevron ${isOpen ? "open" : ""}`} aria-hidden="true" />
+            <MenuItem onClick={() => handleNavigation("/auth")}>
+              <ListItemIcon>
+                <LoginIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Sign in</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={() => handleNavigation("/register")}>
+              <ListItemIcon>
+                <PersonAddIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Sign up</ListItemText>
+            </MenuItem>
           </>
         )}
-      </button>
-
-      {isOpen && (
-        <div
-          className="user-menu-dropdown"
-          role="menu"
-          style={dropdownStyle}
-          onKeyDown={handleKeyDown}
-        >
-          {isAuthenticated ? (
-            <>
-              <Link
-                to="/polls/my-polls"
-                role="menuitem"
-                className="user-menu-item"
-                onClick={handleLinkClick}
-                onKeyDown={(e) => handleMenuItemKeyDown(e, () => {
-                  handleLinkClick();
-                  navigate("/polls/my-polls");
-                })}
-                tabIndex={0}
-              >
-                <i className="fa-solid fa-square-poll-vertical" aria-hidden="true" />
-                <span>My Polls</span>
-              </Link>
-              <Link
-                to="/profile"
-                role="menuitem"
-                className="user-menu-item"
-                onClick={handleLinkClick}
-                onKeyDown={(e) => handleMenuItemKeyDown(e, () => {
-                  handleLinkClick();
-                  navigate("/profile");
-                })}
-                tabIndex={0}
-              >
-                <i className="fa-solid fa-user" aria-hidden="true" />
-                <span>Profile</span>
-              </Link>
-              <div className="user-menu-separator" role="separator" />
-              <button
-                type="button"
-                role="menuitem"
-                className="user-menu-item"
-                onClick={handleLogout}
-                onKeyDown={(e) => handleMenuItemKeyDown(e, handleLogout)}
-                tabIndex={0}
-              >
-                <i className="fa-solid fa-right-from-bracket" aria-hidden="true" />
-                <span>Log out</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/auth"
-                role="menuitem"
-                className="user-menu-item"
-                onClick={handleLinkClick}
-                onKeyDown={(e) => handleMenuItemKeyDown(e, () => {
-                  handleLinkClick();
-                  navigate("/auth");
-                })}
-                tabIndex={0}
-              >
-                <i className="fa-solid fa-right-to-bracket" aria-hidden="true" />
-                <span>Sign in</span>
-              </Link>
-              <Link
-                to="/register"
-                role="menuitem"
-                className="user-menu-item"
-                onClick={handleLinkClick}
-                onKeyDown={(e) => handleMenuItemKeyDown(e, () => {
-                  handleLinkClick();
-                  navigate("/register");
-                })}
-                tabIndex={0}
-              >
-                <i className="fa-solid fa-user-plus" aria-hidden="true" />
-                <span>Sign up</span>
-              </Link>
-            </>
-          )}
-          <div className="user-menu-separator" role="separator" />
-          <button
-            type="button"
-            role="menuitem"
-            className="user-menu-item"
-            onClick={handleThemeToggle}
-            onKeyDown={(e) => handleMenuItemKeyDown(e, handleThemeToggle)}
-            tabIndex={0}
-          >
-            <i className={`fa-solid fa-${theme === "dark" ? "sun" : "moon"}`} aria-hidden="true" />
-            <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
-          </button>
-        </div>
-      )}
-    </div>
+        <Divider />
+        <MenuItem onClick={handleThemeToggle}>
+          <ListItemIcon>
+            {theme === "dark" ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+          </ListItemIcon>
+          <ListItemText>{theme === "dark" ? "Light mode" : "Dark mode"}</ListItemText>
+        </MenuItem>
+      </Menu>
+    </Box>
   );
 }

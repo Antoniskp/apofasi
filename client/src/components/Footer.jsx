@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAuthStatus, logoutUser } from "../lib/api.js";
+import {
+  Box,
+  Container,
+  Stack,
+  Typography,
+  Button,
+  Paper,
+  Chip,
+  Divider,
+} from "@mui/material";
+import BalanceIcon from "@mui/icons-material/Balance";
 
 const footerSections = [
   {
@@ -75,81 +86,211 @@ export default function Footer() {
   };
 
   return (
-    <footer className="footer" aria-label="Footer menu">
-      <div className="footer-inner">
-        <div className="footer-brand">
-          <div className="footer-mark" aria-hidden>
-            ap
-          </div>
-          <div>
-            <p className="eyebrow">Apofasi</p>
-            <h2>Καλύτερες αποφάσεις, μαζί.</h2>
-            <p className="muted">
-              Ειδήσεις, ψηφοφορίες και εργαλεία για να χτίσουμε μια ενημερωμένη κοινότητα.
-            </p>
-          </div>
-        </div>
+    <Box
+      component="footer"
+      sx={{
+        mt: 4,
+        background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+        borderTop: 1,
+        borderColor: "divider",
+      }}
+    >
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* Brand section */}
+        <Stack spacing={2} sx={{ mb: 3 }}>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 2,
+                    bgcolor: "#0f172a",
+                    color: "#facc15",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 800,
+                    fontSize: "0.875rem",
+                    boxShadow: "0 8px 20px rgba(15, 23, 42, 0.14)",
+                  }}
+                >
+                  <BalanceIcon />
+                </Box>
+                <Box>
+                  <Typography variant="overline" sx={{ fontWeight: 700, lineHeight: 1 }}>
+                    Apofasi
+                  </Typography>
+                  <Typography variant="h6" component="h2" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                    Καλύτερες αποφάσεις, μαζί.
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    Ειδήσεις, ψηφοφορίες και εργαλεία για να χτίσουμε μια ενημερωμένη κοινότητα.
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
 
-        <div className="footer-highlight" aria-label="Platform status">
-          <div className="footer-badge">Beta</div>
-          <div>
-            <p className="eyebrow">24/7 ενημέρωση</p>
-            <p className="muted">
-              Η πλατφόρμα βρίσκεται σε beta λειτουργία με συνεχή ανανεώσεις περιεχομένου.
-            </p>
-          </div>
-        </div>
+            {/* Beta status */}
+            <Box sx={{ flex: 1 }}>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 2,
+                  bgcolor: "#0f172a",
+                  color: "#e2e8f0",
+                  borderRadius: 2,
+                  border: "1px solid #1f2937",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Chip
+                    label="Beta"
+                    sx={{
+                      bgcolor: "#1f2937",
+                      color: "#facc15",
+                      fontWeight: 800,
+                      fontSize: "0.75rem",
+                    }}
+                  />
+                  <Box>
+                    <Typography variant="overline" sx={{ fontWeight: 700, lineHeight: 1 }}>
+                      24/7 ενημέρωση
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                      Η πλατφόρμα βρίσκεται σε beta λειτουργία με συνεχή ανανεώσεις περιεχομένου.
+                    </Typography>
+                  </Box>
+                </Box>
+              </Paper>
+            </Box>
+          </Box>
+        </Stack>
 
-        <div className="footer-grid">
+        {/* Footer links grid */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(4, 1fr)" },
+            gap: 2,
+            mb: 2,
+          }}
+        >
           {footerSections.map((section) => (
-            <div key={section.title} className="footer-card">
+            <Paper
+              key={section.title}
+              elevation={1}
+              sx={{
+                p: 2,
+                bgcolor: "#fff",
+                borderRadius: 2,
+                border: 1,
+                borderColor: "divider",
+              }}
+            >
               {section.titleLink ? (
-                <Link to={section.titleLink} className="footer-link heading-link">
-                  <h3>{section.title}</h3>
-                </Link>
+                <Typography
+                  component={Link}
+                  to={section.titleLink}
+                  variant="h6"
+                  sx={{
+                    fontSize: "1rem",
+                    fontWeight: 700,
+                    mb: 1,
+                    textDecoration: "none",
+                    color: "inherit",
+                    display: "block",
+                    "&:hover": {
+                      color: "primary.main",
+                    },
+                  }}
+                >
+                  {section.title}
+                </Typography>
               ) : (
-                <h3>{section.title}</h3>
+                <Typography variant="h6" sx={{ fontSize: "1rem", fontWeight: 700, mb: 1 }}>
+                  {section.title}
+                </Typography>
               )}
-              <div className="footer-links">
+              <Stack spacing={0.5}>
                 {section.links.map((link) =>
                   link.href ? (
-                    <a
+                    <Typography
                       key={link.label}
-                      className="footer-link"
+                      component="a"
                       href={link.href}
                       target="_blank"
                       rel="noreferrer"
+                      variant="body2"
+                      sx={{
+                        color: "primary.main",
+                        fontWeight: 700,
+                        textDecoration: "none",
+                        fontSize: "0.875rem",
+                        "&:hover": {
+                          textDecoration: "underline",
+                        },
+                      }}
                     >
                       {link.label}
-                    </a>
+                    </Typography>
                   ) : (
-                    <Link key={link.label} to={link.to} className="footer-link">
+                    <Typography
+                      key={link.label}
+                      component={Link}
+                      to={link.to}
+                      variant="body2"
+                      sx={{
+                        color: "primary.main",
+                        fontWeight: 700,
+                        textDecoration: "none",
+                        fontSize: "0.875rem",
+                        "&:hover": {
+                          textDecoration: "underline",
+                        },
+                      }}
+                    >
                       {link.label}
-                    </Link>
+                    </Typography>
                   )
                 )}
-              </div>
-            </div>
+              </Stack>
+            </Paper>
           ))}
-        </div>
-      </div>
+        </Box>
 
-      <div className="footer-bottom">
-        <span>© {new Date().getFullYear()} Apofasi</span>
-        <div className="footer-bottom-right">
-          <span>Χτισμένο με ανοιχτό κώδικα και φροντίδα.</span>
-          {authStatus.user && (
-            <button
-              type="button"
-              className="btn btn-outline footer-logout"
-              onClick={handleLogout}
-              disabled={authStatus.loading || isLoggingOut}
-            >
-              {isLoggingOut ? "Αποσύνδεση..." : "Αποσύνδεση"}
-            </button>
-          )}
-        </div>
-      </div>
-    </footer>
+        {/* Footer bottom */}
+        <Divider sx={{ my: 2 }} />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 1,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            © {new Date().getFullYear()} Apofasi
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Χτισμένο με ανοιχτό κώδικα και φροντίδα.
+            </Typography>
+            {authStatus.user && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleLogout}
+                disabled={authStatus.loading || isLoggingOut}
+              >
+                {isLoggingOut ? "Αποσύνδεση..." : "Αποσύνδεση"}
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 }
