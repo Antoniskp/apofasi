@@ -94,12 +94,6 @@ export default function Articles() {
           <div className="responsive-card-grid">
             {articlesState.articles.map((article) => (
               <div key={article.id} className="card compact-card">
-                {article.thumbnail && (
-                  <div className="article-thumbnail">
-                    <img src={article.thumbnail} alt={article.title} />
-                  </div>
-                )}
-                
                 <div className="article-header-row">
                   <div className="pill pill-soft">Άρθρο</div>
                   <div className="muted small">{formatDate(article.createdAt)}</div>
