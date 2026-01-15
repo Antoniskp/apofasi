@@ -114,8 +114,6 @@ export default function MenuBars() {
               <Box key={item.label}>
                 <ListItem disablePadding>
                   <ListItemButton
-                    component={Link}
-                    to={item.to}
                     selected={location.pathname === item.to}
                     onClick={() => toggleSubmenuMobile(item.label)}
                   >
