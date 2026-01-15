@@ -2,6 +2,34 @@ import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import UserMenu from "./UserMenu.jsx";
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Button,
+  Menu,
+  MenuItem,
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
+import ArticleIcon from '@mui/icons-material/Article';
+import PollIcon from '@mui/icons-material/Poll';
+import SchoolIcon from '@mui/icons-material/School';
+import PeopleIcon from '@mui/icons-material/People';
+import BalanceIcon from '@mui/icons-material/Balance';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 
 const pollRegions = [
   { label: "Ανατολική Μακεδονία και Θράκη" },
@@ -18,6 +46,14 @@ const pollRegions = [
   { label: "Νότιο Αιγαίο" },
   { label: "Κρήτη" }
 ];
+
+const iconMap = {
+  'fa-newspaper': <NewspaperIcon />,
+  'fa-file-lines': <ArticleIcon />,
+  'fa-square-poll-vertical': <PollIcon />,
+  'fa-graduation-cap': <SchoolIcon />,
+  'fa-users': <PeopleIcon />,
+};
 
 const topMenu = [
   { label: "Ειδήσεις", to: "/news", icon: "fa-newspaper" },
@@ -43,31 +79,36 @@ const topMenu = [
 ];
 
 export default function MenuBars() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { user: authUser } = useAuth();
-  const [isMenuHidden, setIsMenuHidden] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEls, setAnchorEls] = useState({});
   const [openSubmenu, setOpenSubmenu] = useState(null);
+  const { user: authUser } = useAuth();
   const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [isMenuHidden, setIsMenuHidden] = useState(false);
 
-  const closeMenu = () => {
-    setIsOpen(false);
-    setOpenSubmenu(null);
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleMenuClick = (event, label) => {
+    setAnchorEls({ ...anchorEls, [label]: event.currentTarget });
+  };
+
+  const handleMenuClose = (label) => {
+    setAnchorEls({ ...anchorEls, [label]: null });
   };
 
   const toggleSubmenu = (label) => {
     setOpenSubmenu(openSubmenu === label ? null : label);
   };
 
-  const generateSubmenuId = (label) => {
-    // Sanitize label by removing special characters and normalizing spaces
-    return `submenu-${label.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}`;
-  };
-
   useEffect(() => {
     let lastScrollY = window.scrollY;
 
     const handleScroll = () => {
-      if (isOpen) {
+      if (mobileOpen) {
         setIsMenuHidden(false);
         lastScrollY = window.scrollY;
         return;
@@ -85,114 +126,221 @@ export default function MenuBars() {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isOpen]);
+  }, [mobileOpen]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setIsMenuHidden(false);
-    }
-  }, [isOpen]);
+  const drawer = (
+    <Box sx={{ width: 250, pt: 2 }}>
+      <List>
+        {topMenu
+          .filter((item) => !item.requireAuth || authUser)
+          .map((item) => (
+            <Box key={item.label}>
+              <ListItemButton
+                component={item.subItems ? 'div' : Link}
+                to={!item.subItems ? item.to : undefined}
+                onClick={() => item.subItems && toggleSubmenu(item.label)}
+                selected={location.pathname === item.to}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  {iconMap[item.icon]}
+                </ListItemIcon>
+                <ListItemText primary={item.label} />
+                {item.subItems && (openSubmenu === item.label ? <ExpandLess /> : <ExpandMore />)}
+              </ListItemButton>
+              {item.subItems && (
+                <Collapse in={openSubmenu === item.label} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {item.subItems.map((subItem) => (
+                      <ListItemButton
+                        key={subItem.label}
+                        component={subItem.to ? Link : 'div'}
+                        to={subItem.to}
+                        sx={{ pl: 4 }}
+                        selected={location.pathname === subItem.to}
+                        onClick={() => subItem.to && setMobileOpen(false)}
+                      >
+                        <ListItemText 
+                          primary={subItem.label} 
+                          primaryTypographyProps={{ variant: 'body2' }}
+                        />
+                      </ListItemButton>
+                    ))}
+                  </List>
+                </Collapse>
+              )}
+            </Box>
+          ))}
+      </List>
+      <Box sx={{ p: 2 }}>
+        <UserMenu user={authUser} />
+      </Box>
+    </Box>
+  );
 
   return (
-    <div className={`menu-shell${isMenuHidden ? " menu-hidden" : ""}`}>
-      <div className="menu-top">
-        <div className="menu-top-inner">
-          <div className="menu-left">
-            <div className="menu-brand">
-              <span className="brand-mark" aria-hidden>
-                <i className="fa-solid fa-scale-balanced" />
-              </span>
-              <Link to="/" className="brand-wordmark">
-                Apofasi
-              </Link>
-            </div>
-
-            <button
-              type="button"
-              className="menu-toggle"
-              aria-label="Εναλλαγή μενού"
-              aria-expanded={isOpen}
-              onClick={() => setIsOpen((prev) => !prev)}
+    <AppBar 
+      position="sticky" 
+      sx={{ 
+        transform: isMenuHidden ? 'translateY(-100%)' : 'translateY(0)',
+        transition: 'transform 360ms ease',
+        bgcolor: '#0b172a',
+      }}
+    >
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box 
+            component={Link} 
+            to="/" 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1, 
+              textDecoration: 'none',
+              color: 'inherit',
+            }}
+          >
+            <Box
+              sx={{
+                width: 30,
+                height: 30,
+                borderRadius: '10px',
+                bgcolor: '#1f2937',
+                color: '#ffd447',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 800,
+              }}
             >
-              <i
-                className={`fa-solid ${isOpen ? "fa-xmark" : "fa-bars"}`}
-                aria-hidden
-              />
-            </button>
-          </div>
+              <BalanceIcon fontSize="small" />
+            </Box>
+            <Box 
+              component="span" 
+              sx={{ 
+                fontSize: '1rem', 
+                color: '#facc15', 
+                fontWeight: 800,
+                letterSpacing: '0.01em',
+              }}
+            >
+              Apofasi
+            </Box>
+          </Box>
 
-          <nav className={`menu-links ${isOpen ? "open" : ""}`} aria-label="Top navigation">
-            {topMenu
-              .filter((item) => !item.requireAuth || authUser)
-              .map((item) =>
-                item.subItems ? (
-                  <div key={item.label} className="menu-link-group">
-                    <div className="menu-link-with-toggle">
-                      <Link
-                        to={item.to}
-                        className={`menu-link${location.pathname === item.to ? " active" : ""}`}
-                        onClick={closeMenu}
-                      >
-                        <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
-                        {item.label}
-                      </Link>
-                      <button
-                        type="button"
-                        className="menu-submenu-toggle"
-                        aria-label={`Toggle ${item.label} submenu`}
-                        aria-expanded={openSubmenu === item.label}
-                        aria-controls={generateSubmenuId(item.label)}
-                        onClick={() => toggleSubmenu(item.label)}
-                      >
-                        <i className={`fa-solid fa-chevron-${openSubmenu === item.label ? 'up' : 'down'}`} aria-hidden />
-                      </button>
-                    </div>
-                    <div 
-                      id={generateSubmenuId(item.label)}
-                      className={`menu-submenu${openSubmenu === item.label ? ' open' : ''}`}
+          {!isMobile && (
+            <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
+              {topMenu
+                .filter((item) => !item.requireAuth || authUser)
+                .map((item) => (
+                  <Box key={item.label}>
+                    <Button
+                      component={item.subItems ? undefined : Link}
+                      to={!item.subItems ? item.to : undefined}
+                      onClick={(e) => item.subItems && handleMenuClick(e, item.label)}
+                      startIcon={iconMap[item.icon]}
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '0.8rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        borderRadius: '9px',
+                        px: 1.5,
+                        py: 0.75,
+                        bgcolor: location.pathname === item.to ? '#facc15' : 'transparent',
+                        color: location.pathname === item.to ? '#0f172a' : '#e2e8f0',
+                        '&:hover': {
+                          bgcolor: location.pathname === item.to ? '#fbbf24' : 'rgba(255, 255, 255, 0.08)',
+                          color: location.pathname === item.to ? '#0f172a' : '#fff',
+                        },
+                      }}
                     >
-                      {item.subItems.map((subItem) =>
-                        subItem.to ? (
-                          <Link
+                      {item.label}
+                    </Button>
+                    {item.subItems && (
+                      <Menu
+                        anchorEl={anchorEls[item.label]}
+                        open={Boolean(anchorEls[item.label])}
+                        onClose={() => handleMenuClose(item.label)}
+                        PaperProps={{
+                          sx: {
+                            mt: 1,
+                            bgcolor: '#0b172a',
+                            border: '1px solid rgba(226, 232, 240, 0.12)',
+                          }
+                        }}
+                      >
+                        {item.subItems.map((subItem) => (
+                          <MenuItem
                             key={subItem.label}
+                            component={subItem.to ? Link : undefined}
                             to={subItem.to}
-                            className={`menu-subitem${location.pathname === subItem.to ? " active" : ""}`}
-                            onClick={closeMenu}
+                            onClick={() => handleMenuClose(item.label)}
+                            selected={location.pathname === subItem.to}
+                            sx={{
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              color: location.pathname === subItem.to ? '#0f172a' : '#e2e8f0',
+                              bgcolor: location.pathname === subItem.to ? '#facc15' : 'rgba(226, 232, 240, 0.08)',
+                              '&:hover': {
+                                bgcolor: location.pathname === subItem.to ? '#fbbf24' : 'rgba(255, 255, 255, 0.12)',
+                              },
+                              '&.Mui-selected': {
+                                bgcolor: '#facc15',
+                                color: '#0f172a',
+                                '&:hover': {
+                                  bgcolor: '#fbbf24',
+                                },
+                              },
+                            }}
                           >
                             {subItem.label}
-                          </Link>
-                        ) : (
-                          <span key={subItem.label} className="menu-subitem">
-                            {subItem.label}
-                          </span>
-                        )
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    key={item.label}
-                    to={item.to}
-                    className={`menu-link${location.pathname === item.to ? " active" : ""}`}
-                    onClick={closeMenu}
-                  >
-                    <i className={`fa-solid ${item.icon} menu-link-icon`} aria-hidden />
-                    {item.label}
-                  </Link>
-                )
-              )}
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    )}
+                  </Box>
+                ))}
+            </Box>
+          )}
+        </Box>
 
-            <div className="menu-actions menu-actions-mobile">
-              <UserMenu user={authUser} />
-            </div>
-          </nav>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {!isMobile && <UserMenu user={authUser} />}
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ 
+                color: '#f8fafc',
+                border: '1px solid rgba(255, 255, 255, 0.28)',
+                borderRadius: '9px',
+                width: 34,
+                height: 34,
+              }}
+            >
+              {mobileOpen ? <CloseIcon /> : <MenuIcon />}
+            </IconButton>
+          )}
+        </Box>
+      </Toolbar>
 
-          <div className="menu-actions menu-actions-desktop">
-            <UserMenu user={authUser} />
-          </div>
-        </div>
-      </div>
-
-    </div>
+      <Drawer
+        variant="temporary"
+        anchor="right"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 250 },
+        }}
+      >
+        {drawer}
+      </Drawer>
+    </AppBar>
   );
 }
