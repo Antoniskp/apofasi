@@ -25,8 +25,10 @@ export default function UserMenu({ user }) {
         if (isMobile) {
           const buttonRect = buttonRef.current.getBoundingClientRect();
           // Position dropdown below the button with proper spacing
+          // Use fixed positioning for better mobile experience
           setDropdownStyle({
             top: `${buttonRect.bottom + 8}px`,
+            right: `${window.innerWidth - buttonRect.right}px`,
           });
         } else {
           setDropdownStyle({});
