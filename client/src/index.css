@@ -424,20 +424,6 @@ button:focus-visible {
   color: var(--ink-strong);
 }
 
-.page-hero {
-  padding: 68px 20px 56px;
-  background: linear-gradient(135deg, #f9fbff 0%, #eef2f7 100%);
-  border-bottom: 1px solid var(--border);
-}
-
-.eyebrow {
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: 12px;
-}
-
 .hero {
   padding: 68px 20px 56px;
   background: linear-gradient(135deg, #f9fbff 0%, #eef2f7 100%);
@@ -611,6 +597,12 @@ button:focus-visible {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
+}
+
+.pill-soft {
+  background: #f5f7fb;
+  border-color: #d6dfef;
+  color: var(--accent-strong);
 }
 
 .section {
@@ -1193,6 +1185,16 @@ button:focus-visible {
   align-items: center;
   gap: 10px;
   padding: 6px 0;
+}
+
+.pill-ghost {
+  background: rgba(34, 55, 90, 0.08);
+  color: var(--accent-strong);
+  border: 1px dashed #a9b6cf;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.82rem;
 }
 
 .stack {
@@ -2820,6 +2822,11 @@ button:focus-visible {
   border-color: var(--accent-strong);
 }
 
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+}
+
 /* Pill variations */
 .pill-soft {
   background: var(--accent-soft);
@@ -2995,8 +3002,8 @@ button:focus-visible {
 }
 
 .user-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   padding: 1.5rem;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -3026,12 +3033,12 @@ button:focus-visible {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: var(--border);
+  background: var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  color: var(--ink-soft);
+  color: var(--color-text-muted);
 }
 
 .user-card-body {
@@ -3045,7 +3052,7 @@ button:focus-visible {
   font-size: 1.125rem;
   font-weight: 600;
   margin: 0;
-  color: var(--ink-strong);
+  color: var(--color-text);
 }
 
 .profile-checkbox-label {
