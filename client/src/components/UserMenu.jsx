@@ -19,22 +19,61 @@ export default function UserMenu({ user }) {
   // Calculate dropdown position on mobile
   useEffect(() => {
     const calculatePosition = () => {
-      if (isOpen && buttonRef.current) {
+      if (isOpen && buttonRef.current && menuRef.current) {
         const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
         
         if (isMobile) {
           const buttonRect = buttonRef.current.getBoundingClientRect();
-          // Position dropdown below the button with proper spacing
-          setDropdownStyle({
-            top: `${buttonRect.bottom + 8}px`,
-          });
+          const dropdown = menuRef.current.querySelector(".user-menu-dropdown");
+          
+          if (dropdown) {
+            const dropdownHeight = dropdown.offsetHeight;
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - buttonRect.bottom;
+            const spaceAbove = buttonRect.top;
+            const spacing = 8;
+            
+            // Check if dropdown fits below the button
+            if (spaceBelow >= dropdownHeight + spacing) {
+              // Position below the button
+              setDropdownStyle({
+                top: `${buttonRect.bottom + spacing}px`,
+                bottom: "auto",
+              });
+            } else if (spaceAbove >= dropdownHeight + spacing) {
+              // Position above the button
+              setDropdownStyle({
+                top: "auto",
+                bottom: `${viewportHeight - buttonRect.top + spacing}px`,
+              });
+            } else {
+              // Not enough space above or below, position to fit in viewport
+              // Prefer positioning from top if more space there
+              if (spaceAbove > spaceBelow) {
+                setDropdownStyle({
+                  top: `${Math.max(spacing, buttonRect.top - dropdownHeight - spacing)}px`,
+                  bottom: "auto",
+                });
+              } else {
+                setDropdownStyle({
+                  top: `${buttonRect.bottom + spacing}px`,
+                  bottom: "auto",
+                  maxHeight: `${spaceBelow - spacing * 2}px`,
+                  overflowY: "auto",
+                });
+              }
+            }
+          }
         } else {
           setDropdownStyle({});
         }
       }
     };
 
-    calculatePosition();
+    // Small delay to ensure dropdown is rendered before calculating position
+    if (isOpen) {
+      requestAnimationFrame(calculatePosition);
+    }
 
     // Recalculate on resize (e.g., screen rotation)
     if (isOpen) {
