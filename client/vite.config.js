@@ -15,8 +15,7 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          format: 'es',
-          manualChunks: undefined
+          format: 'es'
         }
       },
       target: 'esnext',

@@ -16,11 +16,14 @@
     <script>
       // Prevent Chrome extension errors from breaking the page
       window.addEventListener('error', function(e) {
-        // Ignore specific syntax errors from chrome-extension:// sources
-        // This prevents buggy extensions from cluttering the console
-        if (e.filename && e.filename.startsWith('chrome-extension://')) {
+        // Check for chrome extension errors using multiple methods for browser compatibility
+        var isExtensionError = (e.filename && e.filename.startsWith('chrome-extension://')) ||
+                               (e.error && e.error.stack && e.error.stack.includes('chrome-extension://')) ||
+                               (e.message && e.message.includes('chrome-extension://'));
+        
+        if (isExtensionError) {
           // Log to console for debugging but prevent error propagation
-          console.debug('Suppressed extension error:', e.message, 'from', e.filename);
+          console.debug('Suppressed extension error:', e.message || e.error);
           e.preventDefault();
           return true;
         }
