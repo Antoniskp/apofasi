@@ -3,10 +3,31 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../lib/AuthContext.jsx";
 import UserMenu from "./UserMenu.jsx";
 
+const pollRegions = [
+  { label: "Ανατολική Μακεδονία και Θράκη" },
+  { label: "Κεντρική Μακεδονία" },
+  { label: "Δυτική Μακεδονία" },
+  { label: "Ήπειρος" },
+  { label: "Θεσσαλία" },
+  { label: "Ιόνια Νησιά" },
+  { label: "Δυτική Ελλάδα" },
+  { label: "Στερεά Ελλάδα" },
+  { label: "Αττική" },
+  { label: "Πελοπόννησος" },
+  { label: "Βόρειο Αιγαίο" },
+  { label: "Νότιο Αιγαίο" },
+  { label: "Κρήτη" }
+];
+
 const topMenu = [
   { label: "Ειδήσεις", to: "/news", icon: "fa-newspaper" },
   { label: "Άρθρα", to: "/articles", icon: "fa-file-lines" },
-  { label: "Ψηφοφορίες", to: "/polls", icon: "fa-square-poll-vertical" },
+  {
+    label: "Ψηφοφορίες",
+    to: "/polls",
+    icon: "fa-square-poll-vertical",
+    subItems: pollRegions
+  },
   {
     label: "Εκπαίδευση",
     to: "/education",
@@ -39,7 +60,7 @@ export default function MenuBars() {
 
   const generateSubmenuId = (label) => {
     // Sanitize label by removing special characters and normalizing spaces
-    return `submenu-${label.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")}`;
+    return `submenu-${label.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')}`;
   };
 
   useEffect(() => {
@@ -123,12 +144,12 @@ export default function MenuBars() {
                         aria-controls={generateSubmenuId(item.label)}
                         onClick={() => toggleSubmenu(item.label)}
                       >
-                        <i className={`fa-solid fa-chevron-${openSubmenu === item.label ? "up" : "down"}`} aria-hidden />
+                        <i className={`fa-solid fa-chevron-${openSubmenu === item.label ? 'up' : 'down'}`} aria-hidden />
                       </button>
                     </div>
                     <div 
                       id={generateSubmenuId(item.label)}
-                      className={`menu-submenu${openSubmenu === item.label ? " open" : ""}`}
+                      className={`menu-submenu${openSubmenu === item.label ? ' open' : ''}`}
                     >
                       {item.subItems.map((subItem) =>
                         subItem.to ? (
