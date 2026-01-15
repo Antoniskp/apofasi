@@ -17,9 +17,7 @@ const footerSections = [
     title: "Επικοινωνία",
     titleLink: "/contact",
     links: [
-      { label: "Σελίδα επικοινωνίας", to: "/contact" },
-      { label: "Φόρμα επικοινωνίας", to: "/contact#contact-form" },
-      { label: "Υποστήριξη", to: "/contact#support" },
+      
       { label: "Συνεργασίες", to: "/contact#collaboration" },
       { label: "Discord", href: "https://discord.gg/pvJftR4T98" }
     ]
