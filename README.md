@@ -11,8 +11,6 @@ The idea is creating the core of a super application which will support news, ed
 - **[Voting Security Guide](VOTING_SECURITY.md)** - How voting integrity is protected and how multiple votes are prevented
 - **[Security Policy](SECURITY.md)** - Security best practices and vulnerability reporting
 - **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference
-- **[MUI Best Practices](client/MUI_BEST_PRACTICES.md)** - Material-UI performance optimization guide
-- **[MUI Migration Guide](client/MUI_MIGRATION_GUIDE.md)** - How to gradually adopt MUI in existing components
 
 ## Local setup overview
 
