@@ -12,6 +12,23 @@
       referrerpolicy="no-referrer"
     />
     <title>Απόφαση</title>
+    <!-- Suppress console errors from third-party extensions -->
+    <script>
+      // Prevent Chrome extension errors from breaking the page
+      window.addEventListener('error', function(e) {
+        // Check for chrome extension errors using multiple methods for browser compatibility
+        var isExtensionError = (e.filename && e.filename.startsWith('chrome-extension://')) ||
+                               (e.error && e.error.stack && e.error.stack.includes('chrome-extension://')) ||
+                               (e.message && e.message.includes('chrome-extension://'));
+        
+        if (isExtensionError) {
+          // Log to console for debugging but prevent error propagation
+          console.debug('Suppressed extension error:', e.message || e.error);
+          e.preventDefault();
+          return true;
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

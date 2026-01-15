@@ -12,6 +12,17 @@ export default defineConfig(({ mode }) => {
         jsxRuntime: "automatic"
       })
     ],
+    build: {
+      rollupOptions: {
+        output: {
+          format: 'es'
+        }
+      },
+      target: 'esnext',
+      modulePreload: {
+        polyfill: true
+      }
+    },
     server: {
       fs: {
         allow: [path.resolve(__dirname, "..")],
