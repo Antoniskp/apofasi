@@ -12,6 +12,17 @@
       referrerpolicy="no-referrer"
     />
     <title>Απόφαση</title>
+    <!-- Suppress console errors from third-party extensions -->
+    <script>
+      // Prevent Chrome extension errors from breaking the page
+      window.addEventListener('error', function(e) {
+        // Ignore errors from chrome-extension:// sources
+        if (e.filename && e.filename.startsWith('chrome-extension://')) {
+          e.preventDefault();
+          return true;
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
