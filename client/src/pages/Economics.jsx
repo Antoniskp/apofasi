@@ -227,7 +227,7 @@ export default function Economics() {
                 title="EURO STOXX 50 chart"
                 src="https://www.tradingview.com/widgetembed/?symbol=INDEX%3ASX5E&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&enabledetails=1&hidevolume=1"
                 loading="lazy"
-                allowTransparency
+                allow="transparency"
                 sandbox="allow-scripts allow-same-origin allow-popups"
               />
             </div>
@@ -242,7 +242,7 @@ export default function Economics() {
                 title="Bitcoin to EUR chart"
                 src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCEUR&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&enabledetails=1&hidevolume=1"
                 loading="lazy"
-                allowTransparency
+                allow="transparency"
                 sandbox="allow-scripts allow-same-origin allow-popups"
               />
             </div>
@@ -257,7 +257,7 @@ export default function Economics() {
                 title="Ethereum to EUR chart"
                 src="https://www.tradingview.com/widgetembed/?symbol=BINANCE%3AETHEUR&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%5D&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&enabledetails=1&hidevolume=1"
                 loading="lazy"
-                allowTransparency
+                allow="transparency"
                 sandbox="allow-scripts allow-same-origin allow-popups"
               />
             </div>
