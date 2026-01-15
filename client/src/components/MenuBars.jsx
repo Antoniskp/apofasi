@@ -71,15 +71,15 @@ export default function MenuBars() {
       setIsMenuHidden(false);
       // Prevent body scroll when mobile menu is open
       if (window.innerWidth <= 680) {
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow = "hidden";
       }
     } else {
       // Re-enable body scroll when menu closes
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
     
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
