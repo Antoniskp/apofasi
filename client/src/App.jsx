@@ -36,6 +36,7 @@ import GovernmentStatistics from "./pages/GovernmentStatistics.jsx";
 import GreekLawSystem from "./pages/GreekLawSystem.jsx";
 import Documentation from "./pages/Documentation.jsx";
 import CommunityGuidelines from "./pages/CommunityGuidelines.jsx";
+import MuiExamples from "./pages/MuiExamples.jsx";
 
 
 const withLayout = (page) => (
@@ -88,6 +89,7 @@ function App() {
         <Route path="/top-choices" element={withLayout(<TopChoices />)} />
         <Route path="/documentation" element={withLayout(<Documentation />)} />
         <Route path="/community-guidelines" element={withLayout(<CommunityGuidelines />)} />
+        <Route path="/mui-examples" element={withLayout(<MuiExamples />)} />
         <Route path="/auth" element={withLayout(<Auth />)} />
         <Route path="/register" element={withLayout(<Register />)} />
         <Route path="/profile" element={withLayout(<Profile />)} />
