@@ -23,7 +23,11 @@ import defaultPolls from "./data/defaultPolls.js";
 import { hashPassword, needsPasswordUpgrade, verifyPassword } from "./utils/crypto.js";
 import { isHttpsUrl, validatePhotoDataUrl } from "./utils/pollValidation.js";
 
-dotenv.config();
+// Get directory name for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, ".env") });
 connectDB();
 configurePassport();
 
@@ -65,10 +69,6 @@ const corsOptions = {
 
 const app = express();
 app.set("trust proxy", 1);
-
-// Get directory name for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // CORS must be the first middleware on the app
 app.use(cors(corsOptions));
