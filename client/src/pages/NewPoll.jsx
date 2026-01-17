@@ -527,6 +527,7 @@ export default function NewPoll() {
                   <input
                     type="checkbox"
                     checked={formState.restrictToLocation}
+                    disabled={formState.anonymousResponses}
                     onChange={(event) =>
                       setFormState((prev) => ({ ...prev, restrictToLocation: event.target.checked }))
                     }
@@ -535,7 +536,10 @@ export default function NewPoll() {
                 </div>
                 <div>
                   <p className="label">Περιορισμός ψηφοφορίας βάσει τοποθεσίας</p>
-                  <p className="muted small">Μόνο χρήστες από την επιλεγμένη τοποθεσία θα μπορούν να ψηφίσουν.</p>
+                  <p className="muted small">
+                    Μόνο χρήστες από την επιλεγμένη τοποθεσία θα μπορούν να ψηφίσουν.
+                    {formState.anonymousResponses && " (Μη διαθέσιμο με ανώνυμη συμμετοχή)"}
+                  </p>
                 </div>
               </label>
             )}
@@ -651,7 +655,12 @@ export default function NewPoll() {
                     type="checkbox"
                     checked={formState.anonymousResponses}
                     onChange={(event) =>
-                      setFormState((prev) => ({ ...prev, anonymousResponses: event.target.checked }))
+                      setFormState((prev) => ({ 
+                        ...prev, 
+                        anonymousResponses: event.target.checked,
+                        // Disable location restriction when anonymous responses is enabled
+                        restrictToLocation: event.target.checked ? false : prev.restrictToLocation
+                      }))
                     }
                   />
                   <span className="toggle-visual" aria-hidden />
