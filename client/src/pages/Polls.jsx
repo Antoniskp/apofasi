@@ -382,6 +382,19 @@ export default function Polls() {
                 {voteStatus.error && <p className="error-text">{voteStatus.error}</p>}
                 {cancelStatus.error && <p className="error-text">{cancelStatus.error}</p>}
                 
+                {poll.allowUserOptions && (
+                  <div className="poll-info-box">
+                    <p className="pill pill-soft" style={{ display: "inline-block", margin: 0 }}>
+                      ℹ️ Μπορείτε να προσθέσετε νέες επιλογές σε αυτή την ψηφοφορία
+                    </p>
+                    {!poll.anonymousResponses && !user && (
+                      <p className="muted small" style={{ marginTop: "8px", marginBottom: 0 }}>
+                        Απαιτείται σύνδεση για να προσθέσετε νέες επιλογές.
+                      </p>
+                    )}
+                  </div>
+                )}
+                
                 <Link to={`/polls/${poll.id}`} className="link-primary">
                   Προβολή λεπτομερειών και στατιστικών →
                 </Link>
