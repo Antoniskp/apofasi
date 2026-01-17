@@ -7,7 +7,7 @@ import { ThemeProvider } from "./lib/ThemeContext.jsx";
 import { AuthProvider } from "./lib/AuthContext.jsx";
 
 const shouldIgnoreExtensionError = (event) => {
-  const message = event?.message || "";
+  const message = event?.error?.message || event?.message || "";
   const filename = event?.filename || "";
   const isSyntaxError = event?.error instanceof SyntaxError;
   return filename.startsWith("chrome-extension://") && isSyntaxError && message.includes("Unexpected token 'export'");
@@ -15,15 +15,20 @@ const shouldIgnoreExtensionError = (event) => {
 
 const ExtensionErrorFilter = ({ children }) => {
   React.useEffect(() => {
-    const handleError = (event) => {
-      if (shouldIgnoreExtensionError(event)) {
-        event.preventDefault();
+    const existingOnError = window.onerror;
+
+    window.onerror = (message, source, _lineno, _colno, error) => {
+      if (shouldIgnoreExtensionError({ message, filename: source, error })) {
+        return true;
       }
+      if (typeof existingOnError === "function") {
+        return existingOnError(message, source, _lineno, _colno, error);
+      }
+      return false;
     };
 
-    window.addEventListener("error", handleError, true);
     return () => {
-      window.removeEventListener("error", handleError, true);
+      window.onerror = existingOnError;
     };
   }, []);
 
