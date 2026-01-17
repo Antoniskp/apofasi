@@ -17,7 +17,7 @@ const ExtensionErrorFilter = ({ children }) => {
   React.useEffect(() => {
     const handleError = (event) => {
       if (shouldIgnoreExtensionError(event)) {
-        event.stopImmediatePropagation();
+        event.preventDefault();
       }
     };
 
