@@ -9,30 +9,40 @@ import { AuthProvider } from "./lib/AuthContext.jsx";
 const shouldIgnoreExtensionError = (event) => {
   const message = event?.message || "";
   const filename = event?.filename || "";
-  return filename.startsWith("chrome-extension://") && message.includes("Unexpected token 'export'");
+  const isSyntaxError = event?.error instanceof SyntaxError || event?.error?.name === "SyntaxError";
+  return filename.startsWith("chrome-extension://") && isSyntaxError && message.includes("Unexpected token 'export'");
+};
+
+const ExtensionErrorFilter = ({ children }) => {
+  React.useEffect(() => {
+    const handleError = (event) => {
+      if (shouldIgnoreExtensionError(event)) {
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+        event.stopImmediatePropagation();
+      }
+    };
+
+    window.addEventListener("error", handleError, true);
+    return () => {
+      window.removeEventListener("error", handleError, true);
+    };
+  }, []);
+
+  return children;
 };
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <ThemeProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <ExtensionErrorFilter>
+      <ErrorBoundary>
+        <ThemeProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </ExtensionErrorFilter>
   </React.StrictMode>
-);
-
-window.addEventListener(
-  "error",
-  (event) => {
-    if (shouldIgnoreExtensionError(event)) {
-      if (event.cancelable) {
-        event.preventDefault();
-      }
-      event.stopImmediatePropagation();
-    }
-  },
-  true
 );
