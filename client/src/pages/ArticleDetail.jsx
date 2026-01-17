@@ -93,6 +93,16 @@ export default function ArticleDetail() {
     });
   };
 
+  const isSourceUrl = (value) => {
+    if (!value || typeof value !== "string") return false;
+    try {
+      const parsed = new URL(value);
+      return ["http:", "https:"].includes(parsed.protocol);
+    } catch {
+      return false;
+    }
+  };
+
   if (articleState.loading) {
     return (
       <div className="container">
@@ -118,12 +128,14 @@ export default function ArticleDetail() {
   const canEdit = isAuthor;
   const canDelete = isAuthor || isAdmin;
   const canTagAsNews = authState.user && (authState.user.role === "reporter" || authState.user.role === "editor" || authState.user.role === "admin");
+  const articlePhoto = article.photo || article.photoUrl;
 
   return (
     <div className="container">
       <div className="article-detail">
         <div className="article-header">
           <h1>{article.title}</h1>
+          {article.subtitle && <p className="article-subtitle">{article.subtitle}</p>}
 
           <div className="article-meta">
             <span>
@@ -138,6 +150,14 @@ export default function ArticleDetail() {
               </>
             )}
           </div>
+
+          {articlePhoto && (
+            <img
+              src={articlePhoto}
+              alt={article.title}
+              className="article-photo"
+            />
+          )}
 
           {article.isNews && (
             <div className="news-badge-large">
@@ -170,6 +190,25 @@ export default function ArticleDetail() {
         <div className="article-content">
           <p style={{ whiteSpace: "pre-wrap" }}>{article.content}</p>
         </div>
+
+        {article.sources && article.sources.length > 0 && (
+          <div className="article-sources">
+            <h3>Πηγές</h3>
+            <ul>
+              {article.sources.map((source, index) => (
+                <li key={`${source}-${index}`}>
+                  {isSourceUrl(source) ? (
+                    <a href={source} target="_blank" rel="noreferrer">
+                      {source}
+                    </a>
+                  ) : (
+                    source
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {(canEdit || canDelete || canTagAsNews) && (
           <div className="article-actions">
@@ -236,10 +275,25 @@ export default function ArticleDetail() {
           line-height: 1.3;
         }
 
+        .article-detail .article-subtitle {
+          margin: 0 0 1rem 0;
+          font-size: 1.1rem;
+          color: #546e7a;
+        }
+
         .article-meta {
           color: #666;
           font-size: 0.95rem;
           margin-bottom: 1rem;
+        }
+
+        .article-photo {
+          width: 100%;
+          max-height: 360px;
+          object-fit: cover;
+          border-radius: 12px;
+          border: 1px solid #e0e0e0;
+          margin: 1rem 0;
         }
 
         .news-badge-large {
@@ -296,6 +350,33 @@ export default function ArticleDetail() {
           margin: 2rem 0;
           padding-top: 2rem;
           border-top: 1px solid #e0e0e0;
+        }
+
+        .article-sources {
+          border-top: 1px solid #e0e0e0;
+          padding-top: 1.5rem;
+          margin-top: 1.5rem;
+        }
+
+        .article-sources h3 {
+          margin-top: 0;
+          margin-bottom: 0.75rem;
+          font-size: 1.1rem;
+        }
+
+        .article-sources ul {
+          margin: 0;
+          padding-left: 1.25rem;
+          line-height: 1.6;
+        }
+
+        .article-sources a {
+          color: #0066cc;
+          text-decoration: none;
+        }
+
+        .article-sources a:hover {
+          text-decoration: underline;
         }
 
         .button {
