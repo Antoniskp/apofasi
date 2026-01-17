@@ -483,7 +483,7 @@ export default function NewPoll() {
                     </option>
                   ))}
                 </select>
-                <p className="muted small">αν επιλέξετε τοποθεσία, μπορείτε να περιορίσετε τις ψήφους μόνο σε χρήστες από αυτή την περιοχή</p>
+                <p className="muted small">Αν επιλέξετε τοποθεσία, μπορείτε να περιορίσετε τις ψήφους μόνο σε χρήστες από αυτή την περιοχή</p>
               </div>
               {formState.locationCountry === "greece" && (
                 <div>

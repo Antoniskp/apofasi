@@ -1070,6 +1070,17 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
       });
     }
 
+    // Validate that location restriction requires location data
+    if (pollData.restrictToLocation) {
+      const hasLocation = pollData.locationCountry || pollData.locationJurisdiction || 
+                         pollData.locationCity || pollData.region || pollData.cityOrVillage;
+      if (!hasLocation) {
+        return res.status(400).json({ 
+          message: "Ο περιορισμός τοποθεσίας απαιτεί να ορίσετε τουλάχιστον μία τοποθεσία." 
+        });
+      }
+    }
+
     const createdPoll = await Poll.create(pollData);
 
     const populatedPoll = await createdPoll.populate("createdBy", "displayName username email");
