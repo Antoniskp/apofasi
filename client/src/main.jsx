@@ -12,12 +12,6 @@ const shouldIgnoreExtensionError = (event) => {
   return filename.startsWith("chrome-extension://") && message.includes("Unexpected token 'export'");
 };
 
-window.addEventListener("error", (event) => {
-  if (shouldIgnoreExtensionError(event)) {
-    event.preventDefault();
-  }
-});
-
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ErrorBoundary>
@@ -29,3 +23,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </ErrorBoundary>
   </React.StrictMode>
 );
+
+window.onerror = (message, source, _lineno, _colno, _error) => {
+  if (shouldIgnoreExtensionError({ message, filename: source })) {
+    return true;
+  }
+  return false;
+};
