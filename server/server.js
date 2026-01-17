@@ -26,17 +26,8 @@ import { isHttpsUrl, validatePhotoDataUrl } from "./utils/pollValidation.js";
 // Get directory name for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const envPathCandidates = [
-  path.join(__dirname, ".env"),
-  path.resolve(__dirname, "..", ".env")
-];
-const envPath = envPathCandidates.find((candidate) => fs.existsSync(candidate));
-
-if (envPath) {
-  dotenv.config({ path: envPath });
-} else {
-  dotenv.config();
-}
+dotenv.config({ path: path.join(__dirname, ".env") });
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
 connectDB();
 configurePassport();
 
