@@ -6,6 +6,18 @@ import ErrorBoundary from "./ErrorBoundary.jsx";
 import { ThemeProvider } from "./lib/ThemeContext.jsx";
 import { AuthProvider } from "./lib/AuthContext.jsx";
 
+const shouldIgnoreExtensionError = (event) => {
+  const message = event?.message || "";
+  const filename = event?.filename || "";
+  return filename.startsWith("chrome-extension://") && message.includes("Unexpected token 'export'");
+};
+
+window.addEventListener("error", (event) => {
+  if (shouldIgnoreExtensionError(event)) {
+    event.preventDefault();
+  }
+});
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ErrorBoundary>
@@ -17,4 +29,3 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </ErrorBoundary>
   </React.StrictMode>
 );
-
