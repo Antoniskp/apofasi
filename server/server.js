@@ -1127,25 +1127,25 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
       if (poll.locationCountry) {
         // New location hierarchy
         if (poll.locationCity) {
-          // All three levels specified - must match exactly (and must not be empty/null)
-          locationMatches = poll.locationCountry && user.locationCountry === poll.locationCountry &&
-                          poll.locationJurisdiction && user.locationJurisdiction === poll.locationJurisdiction &&
-                          poll.locationCity && user.locationCity === poll.locationCity;
+          // All three levels specified - must match exactly
+          locationMatches = user.locationCountry === poll.locationCountry &&
+                          user.locationJurisdiction === poll.locationJurisdiction &&
+                          user.locationCity === poll.locationCity;
         } else if (poll.locationJurisdiction) {
-          // Country and jurisdiction specified (and must not be empty/null)
-          locationMatches = poll.locationCountry && user.locationCountry === poll.locationCountry &&
-                          poll.locationJurisdiction && user.locationJurisdiction === poll.locationJurisdiction;
+          // Country and jurisdiction specified
+          locationMatches = user.locationCountry === poll.locationCountry &&
+                          user.locationJurisdiction === poll.locationJurisdiction;
         } else {
-          // Only country specified (and must not be empty/null)
-          locationMatches = poll.locationCountry && user.locationCountry === poll.locationCountry;
+          // Only country specified
+          locationMatches = user.locationCountry === poll.locationCountry;
         }
       } else if (poll.region) {
         // Legacy location fields
         if (poll.cityOrVillage) {
-          locationMatches = poll.region && user.region === poll.region && 
-                          poll.cityOrVillage && user.cityOrVillage === poll.cityOrVillage;
+          locationMatches = user.region === poll.region && 
+                          user.cityOrVillage === poll.cityOrVillage;
         } else {
-          locationMatches = poll.region && user.region === poll.region;
+          locationMatches = user.region === poll.region;
         }
       }
 
