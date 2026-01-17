@@ -32,6 +32,7 @@ export default function NewPoll() {
     linkPolicyMode: "any",
     linkPolicyDomains: "",
     voteClosingDate: "",
+    restrictToLocation: false,
   });
   const [submission, setSubmission] = useState({ submitting: false, success: null, error: null });
   const navigate = useNavigate();
@@ -286,6 +287,7 @@ export default function NewPoll() {
         optionsArePeople: formState.optionsArePeople,
         linkPolicy,
         voteClosingDate: formState.voteClosingDate || null,
+        restrictToLocation: formState.restrictToLocation,
       });
 
       setSubmission({ submitting: false, success: "Η ψηφοφορία δημοσιεύτηκε.", error: null });
@@ -304,6 +306,7 @@ export default function NewPoll() {
         linkPolicyMode: "any",
         linkPolicyDomains: "",
         voteClosingDate: "",
+        restrictToLocation: false,
       });
       if (response?.poll?.id) {
         navigate(`/polls/${response.poll.id}`);
@@ -480,6 +483,7 @@ export default function NewPoll() {
                     </option>
                   ))}
                 </select>
+                <p className="muted small">αν επιλέξετε τοποθεσία, μπορείτε να περιορίσετε τις ψήφους μόνο σε χρήστες από αυτή την περιοχή</p>
               </div>
               {formState.locationCountry === "greece" && (
                 <div>
@@ -516,6 +520,25 @@ export default function NewPoll() {
                 </div>
               )}
             </div>
+
+            {(formState.locationCountry || formState.locationJurisdiction || formState.locationCity) && (
+              <label className="privacy-tile">
+                <div className="privacy-toggle">
+                  <input
+                    type="checkbox"
+                    checked={formState.restrictToLocation}
+                    onChange={(event) =>
+                      setFormState((prev) => ({ ...prev, restrictToLocation: event.target.checked }))
+                    }
+                  />
+                  <span className="toggle-visual" aria-hidden />
+                </div>
+                <div>
+                  <p className="label">Περιορισμός ψηφοφορίας βάσει τοποθεσίας</p>
+                  <p className="muted small">Μόνο χρήστες από την επιλεγμένη τοποθεσία θα μπορούν να ψηφίσουν.</p>
+                </div>
+              </label>
+            )}
 
             <div className="privacy-grid">
               <label className="privacy-tile">

@@ -235,6 +235,7 @@ const serializePoll = async (poll, currentUser, session, req) => {
     optionsArePeople: Boolean(poll.optionsArePeople),
     linkPolicy: poll.linkPolicy || { mode: "any", allowedDomains: [] },
     voteClosingDate: poll.voteClosingDate || null,
+    restrictToLocation: Boolean(poll.restrictToLocation),
     createdAt: poll.createdAt,
     updatedAt: poll.updatedAt,
     totalVotes,
@@ -932,6 +933,7 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
     optionsArePeople,
     linkPolicy,
     voteClosingDate,
+    restrictToLocation,
   } = req.body || {};
   const trimmedQuestion = question?.trim();
 
@@ -1057,6 +1059,9 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
       }
       pollData.voteClosingDate = closingDate;
     }
+    if (restrictToLocation !== undefined) {
+      pollData.restrictToLocation = Boolean(restrictToLocation);
+    }
 
     const createdPoll = await Poll.create(pollData);
 
@@ -1088,6 +1093,76 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
 
     if (!poll) {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    // Check location restriction if enabled
+    if (poll.restrictToLocation) {
+      // For anonymous responses, we cannot check user location
+      if (poll.anonymousResponses) {
+        return res.status(400).json({ 
+          message: "Δεν είναι δυνατή η ψηφοφορία σε αυτή την ψηφοφορία με ανώνυμη συμμετοχή επειδή απαιτείται συγκεκριμένη τοποθεσία." 
+        });
+      }
+      
+      // For authenticated users, check their location
+      if (!req.user) {
+        return res.status(401).json({ message: "Χρειάζεται σύνδεση για να ψηφίσετε σε αυτή την ψηφοφορία." });
+      }
+
+      const user = await User.findById(req.user.id);
+      if (!user) {
+        return res.status(401).json({ message: "Ο χρήστης δεν βρέθηκε." });
+      }
+
+      // Check location hierarchy: country -> jurisdiction -> city
+      let locationMatches = false;
+      
+      if (poll.locationCountry) {
+        // New location hierarchy
+        if (poll.locationCity) {
+          // All three levels specified - must match exactly
+          locationMatches = user.locationCountry === poll.locationCountry &&
+                          user.locationJurisdiction === poll.locationJurisdiction &&
+                          user.locationCity === poll.locationCity;
+        } else if (poll.locationJurisdiction) {
+          // Country and jurisdiction specified
+          locationMatches = user.locationCountry === poll.locationCountry &&
+                          user.locationJurisdiction === poll.locationJurisdiction;
+        } else {
+          // Only country specified
+          locationMatches = user.locationCountry === poll.locationCountry;
+        }
+      } else if (poll.region) {
+        // Legacy location fields
+        if (poll.cityOrVillage) {
+          locationMatches = user.region === poll.region && user.cityOrVillage === poll.cityOrVillage;
+        } else {
+          locationMatches = user.region === poll.region;
+        }
+      }
+
+      if (!locationMatches) {
+        let locationDescription = "";
+        if (poll.locationCountry) {
+          const country = COUNTRIES.find(c => c.value === poll.locationCountry);
+          locationDescription = country?.label || poll.locationCountry;
+          if (poll.locationJurisdiction) {
+            locationDescription += `, ${poll.locationJurisdiction}`;
+            if (poll.locationCity) {
+              locationDescription += `, ${poll.locationCity}`;
+            }
+          }
+        } else if (poll.region) {
+          locationDescription = poll.region;
+          if (poll.cityOrVillage) {
+            locationDescription += `, ${poll.cityOrVillage}`;
+          }
+        }
+        
+        return res.status(403).json({ 
+          message: `Αυτή η ψηφοφορία είναι διαθέσιμη μόνο για χρήστες από ${locationDescription}.` 
+        });
+      }
     }
 
     // Check if option exists

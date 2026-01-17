@@ -132,6 +132,10 @@ const pollSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    restrictToLocation: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
