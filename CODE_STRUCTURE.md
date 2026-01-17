@@ -71,7 +71,7 @@ server/
 
 #### ESLint Configuration
 - Server: `.eslintrc.json` for Node.js/ES modules
-- Client: `.eslintrc.json` for React/JSX
+- Client: `eslint.config.js` (ESLint v9 flat config) for React/JSX
 
 #### New Scripts
 ```bash
