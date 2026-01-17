@@ -2759,6 +2759,16 @@ button:focus-visible {
   margin-bottom: 12px;
 }
 
+.poll-info-box .pill {
+  display: inline-block;
+  margin: 0;
+}
+
+.poll-info-box .info-message {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 /* Compact and Professional UI Styles - GitHub-like */
 
 /* Toolbar container for action buttons, search, and filters */

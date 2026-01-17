@@ -384,11 +384,11 @@ export default function Polls() {
                 
                 {poll.allowUserOptions && (
                   <div className="poll-info-box">
-                    <p className="pill pill-soft" style={{ display: "inline-block", margin: 0 }}>
+                    <p className="pill pill-soft">
                       ℹ️ Μπορείτε να προσθέσετε νέες επιλογές σε αυτή την ψηφοφορία
                     </p>
                     {!poll.anonymousResponses && !user && (
-                      <p className="muted small" style={{ marginTop: "8px", marginBottom: 0 }}>
+                      <p className="muted small info-message">
                         Απαιτείται σύνδεση για να προσθέσετε νέες επιλογές.
                       </p>
                     )}
