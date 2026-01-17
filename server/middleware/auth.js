@@ -36,7 +36,7 @@ export const ensureRole = (...roles) => (req, res, next) => {
 
 /**
  * Ensure OAuth provider is configured
- * @param {string} provider - Provider name (google, facebook, etc.)
+ * @param {string} provider - Provider name (google, facebook, github, etc.)
  * @returns {Function} Express middleware
  */
 export const ensureProviderConfigured = (provider) => (req, res, next) => {

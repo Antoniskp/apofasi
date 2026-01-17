@@ -1,6 +1,6 @@
 # Server setup for social login
 
-This backend is an Express + Passport server that issues session cookies after Google or Facebook OAuth.
+This backend is an Express + Passport server that issues session cookies after Google, Facebook, or GitHub OAuth.
 Follow these steps to get it running locally and configure the providers correctly.
 
 ## Database bootstrap
@@ -61,6 +61,7 @@ Key fields you must set:
 - `CLIENT_ORIGIN`: the base URL of the frontend that will initiate OAuth and receive redirects.
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: from the Google Cloud OAuth client.
 - `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET`: from your Facebook app.
+- `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`: from your GitHub OAuth app.
 - Callback URLs must match what you register with the providers; the defaults assume a local server on port 5000.
 
 Sessions are persisted in MongoDB via `connect-mongo`, so make sure the `MONGO_URI` points to a writable database.
@@ -82,6 +83,12 @@ Sessions are persisted in MongoDB via `connect-mongo`, so make sure the `MONGO_U
    - `http://localhost:5000/auth/facebook/callback`
 3. Make sure **email** is included in the permissions; the server already requests it.
 
+### GitHub
+1. In GitHub Developer Settings, create a new OAuth App.
+2. Set the Authorization callback URL to:
+   - `http://localhost:5000/auth/github/callback`
+3. Keep the application URL aligned with `CLIENT_ORIGIN`.
+
 ## 4) Run the server
 
 Use the provided scripts:
@@ -94,6 +101,7 @@ npm start     # production-style start
 The server will expose these endpoints:
 - `GET /auth/google` → starts Google OAuth.
 - `GET /auth/facebook` → starts Facebook OAuth.
+- `GET /auth/github` → starts GitHub OAuth.
 - `GET /auth/status` → returns whether the user is authenticated and the basic profile data.
 - `GET /auth/logout` → clears the session.
 

@@ -1466,6 +1466,11 @@ button:focus-visible {
   color: #1857d5;
 }
 
+.auth-btn.github {
+  background: #f3f4f6;
+  color: #111827;
+}
+
 .auth-status {
   background: #f8fafc;
   border: 1px dashed #cbd5e1;

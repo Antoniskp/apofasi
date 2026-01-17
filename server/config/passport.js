@@ -1,6 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
+import { Strategy as GitHubStrategy } from "passport-github2";
 import User from "../models/User.js";
 
 const createOrUpdateOAuthUser = async ({ provider, profile }) => {
@@ -34,6 +35,10 @@ const configurePassport = () => {
 
   const facebookEnabled = Boolean(
     process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET
+  );
+
+  const githubEnabled = Boolean(
+    process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
   );
 
   passport.serializeUser((user, done) => {
@@ -87,6 +92,30 @@ const configurePassport = () => {
           try {
             const user = await createOrUpdateOAuthUser({
               provider: "facebook",
+              profile
+            });
+            done(null, user);
+          } catch (error) {
+            done(error, null);
+          }
+        }
+      )
+    );
+  }
+
+  if (githubEnabled) {
+    passport.use(
+      new GitHubStrategy(
+        {
+          clientID: process.env.GITHUB_CLIENT_ID,
+          clientSecret: process.env.GITHUB_CLIENT_SECRET,
+          callbackURL:
+            process.env.GITHUB_CALLBACK_URL || "/auth/github/callback"
+        },
+        async (accessToken, refreshToken, profile, done) => {
+          try {
+            const user = await createOrUpdateOAuthUser({
+              provider: "github",
               profile
             });
             done(null, user);

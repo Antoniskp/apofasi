@@ -14,6 +14,12 @@ const providers = [
     label: "Σύνδεση με Facebook",
     className: "auth-btn facebook",
     iconClass: "fa-brands fa-facebook-f"
+  },
+  {
+    id: "github",
+    label: "Σύνδεση με GitHub",
+    className: "auth-btn github",
+    iconClass: "fa-brands fa-github"
   }
 ];
 
@@ -71,7 +77,7 @@ export default function AuthButtons() {
           <p className="label">Εναλλακτική σύνδεση</p>
           <h3>Είσοδος με κοινωνικούς λογαριασμούς</h3>
           <p className="muted">
-            Μπορείτε επίσης να συνδεθείτε με Google ή Facebook για να αποθηκεύσετε συμμετοχές και προτιμήσεις.
+            Μπορείτε επίσης να συνδεθείτε με Google, Facebook ή GitHub για να αποθηκεύσετε συμμετοχές και προτιμήσεις.
           </p>
           {!hasEnabledProviders && (
             <p className="muted small">Θα ενεργοποιηθεί μόλις προστεθούν τα κλειδιά OAuth.</p>
