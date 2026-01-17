@@ -78,6 +78,7 @@ const shouldLogRequests = process.env.REQUEST_LOGGING === "true";
 const oauthProviders = {
   google: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
   facebook: Boolean(process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET),
+  github: Boolean(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
 };
 
 const sanitizeUser = (user) =>
@@ -2037,6 +2038,23 @@ authRouter.get(
   "/facebook/callback",
   ensureProviderConfigured("facebook"),
   passport.authenticate("facebook", {
+    failureRedirect: `${CLIENT_ORIGIN}/auth/error`,
+  }),
+  (req, res) => {
+    res.redirect(`${CLIENT_ORIGIN}/auth/success`);
+  }
+);
+
+authRouter.get(
+  "/github",
+  ensureProviderConfigured("github"),
+  passport.authenticate("github", { scope: ["user:email"] })
+);
+
+authRouter.get(
+  "/github/callback",
+  ensureProviderConfigured("github"),
+  passport.authenticate("github", {
     failureRedirect: `${CLIENT_ORIGIN}/auth/error`,
   }),
   (req, res) => {

@@ -14,7 +14,8 @@ export const ALLOWED_ROLES = Object.values(USER_ROLES);
 export const AUTH_PROVIDERS = {
   LOCAL: 'local',
   GOOGLE: 'google',
-  FACEBOOK: 'facebook'
+  FACEBOOK: 'facebook',
+  GITHUB: 'github'
 };
 
 export const ALLOWED_PROVIDERS = Object.values(AUTH_PROVIDERS);

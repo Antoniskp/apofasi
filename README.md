@@ -77,9 +77,9 @@ server {
 }
 ```
 
-## Social login (Google & Facebook)
+## Social login (Google, Facebook, GitHub)
 
-The backend supports OAuth login with Google and Facebook. Social login is disabled by default and only turns on when you provide
+The backend supports OAuth login with Google, Facebook, and GitHub. Social login is disabled by default and only turns on when you provide
 provider keys in the environment. Configure the following environment variables before running the server:
 
 ```
@@ -92,6 +92,9 @@ GOOGLE_CALLBACK_URL=http://localhost:5000/auth/google/callback
 FACEBOOK_APP_ID=your-facebook-app-id
 FACEBOOK_APP_SECRET=your-facebook-app-secret
 FACEBOOK_CALLBACK_URL=http://localhost:5000/auth/facebook/callback
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+GITHUB_CALLBACK_URL=http://localhost:5000/auth/github/callback
 ```
 
 On the frontend, set `VITE_API_BASE_URL` to point to your running server (e.g. `http://localhost:5000`) so the login buttons redirect correctly.
