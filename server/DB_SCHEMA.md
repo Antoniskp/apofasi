@@ -70,9 +70,13 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
 
 ## Articles (`articles` collection)
 - **title** (`String`, required, trimmed)
+- **subtitle** (`String`, optional, trimmed)
 - **content** (`String`, required)
 - **author** (`ObjectId` referencing `users`, required)
 - **tags** (`Array<String>`, trimmed, unique per article, max 10)
+- **sources** (`Array<String>`, optional, trimmed, unique per article, max 10)
+- **photoUrl** (`String`, optional, trimmed; HTTPS URL)
+- **photo** (`String`, optional; base64 data URL)
 - **locationCountry** (`String`, optional) - New hierarchical location field (e.g., "greece", "international")
 - **locationJurisdiction** (`String`, optional) - New hierarchical location field for region/prefecture (only for Greece)
 - **locationCity** (`String`, optional) - New hierarchical location field for city or community

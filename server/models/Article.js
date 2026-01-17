@@ -7,6 +7,10 @@ const articleSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    subtitle: {
+      type: String,
+      trim: true
+    },
     content: {
       type: String,
       required: true
@@ -27,6 +31,25 @@ const articleSchema = new mongoose.Schema(
               .filter(Boolean)
           )
         ),
+    },
+    sources: {
+      type: [String],
+      default: [],
+      set: (sources) =>
+        Array.from(
+          new Set(
+            (Array.isArray(sources) ? sources : typeof sources === "string" ? sources.split(/\r?\n/) : [])
+              .map((source) => (typeof source === "string" ? source.trim() : ""))
+              .filter(Boolean)
+          )
+        ).slice(0, 10),
+    },
+    photoUrl: {
+      type: String,
+      trim: true
+    },
+    photo: {
+      type: String
     },
     // Location hierarchy
     locationCountry: {

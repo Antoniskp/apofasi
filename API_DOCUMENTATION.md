@@ -239,12 +239,16 @@ GET /api/articles
     {
       "id": "article_id",
       "title": "Article Title",
+      "subtitle": "Short subtitle",
       "content": "Article content...",
       "author": {
         "id": "user_id",
         "displayName": "Author Name"
       },
       "tags": ["tag1", "tag2"],
+      "sources": ["https://example.com/source"],
+      "photoUrl": "https://example.com/photo.jpg",
+      "photo": "data:image/jpeg;base64,...",
       "region": "Αττική",
       "cityOrVillage": "Αθήνα",
       "isNews": true,
@@ -278,8 +282,12 @@ POST /api/articles
 ```json
 {
   "title": "Article Title",
+  "subtitle": "Short subtitle",
   "content": "Article content...",
   "tags": ["tag1", "tag2"],
+  "sources": ["https://example.com/source"],
+  "photoUrl": "https://example.com/photo.jpg",
+  "photo": "data:image/jpeg;base64,...",
   "region": "Αττική",
   "cityOrVillage": "Αθήνα"
 }

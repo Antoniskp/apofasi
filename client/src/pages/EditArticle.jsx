@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { COUNTRIES, GREEK_JURISDICTION_NAMES, CITIES_BY_JURISDICTION } from "../../../shared/locations.js";
 import { API_BASE_URL, getArticle, updateArticle, getAuthStatus } from "../lib/api.js";
+import { handlePhotoFile } from "../lib/imageUtils.js";
 
 const uniqueTags = (rawTags = "") =>
   Array.from(
@@ -13,14 +14,28 @@ const uniqueTags = (rawTags = "") =>
     )
   ).slice(0, 10);
 
+const normalizeSources = (rawSources = "") =>
+  Array.from(
+    new Set(
+      rawSources
+        .split(/\r?\n/)
+        .map((source) => source.trim())
+        .filter(Boolean)
+    )
+  ).slice(0, 10);
+
 export default function EditArticle() {
   const { articleId } = useParams();
   const [authState, setAuthState] = useState({ loading: true, user: null, error: null });
   const [articleState, setArticleState] = useState({ loading: true, article: null, error: null });
   const [formState, setFormState] = useState({
     title: "",
+    subtitle: "",
     content: "",
     tags: "",
+    sources: "",
+    photoUrl: "",
+    photo: "",
     locationCountry: "",
     locationJurisdiction: "",
     locationCity: "",
@@ -63,8 +78,12 @@ export default function EditArticle() {
       setArticleState({ loading: false, article, error: null });
       setFormState({
         title: article.title || "",
+        subtitle: article.subtitle || "",
         content: article.content || "",
         tags: article.tags ? article.tags.join(", ") : "",
+        sources: article.sources ? article.sources.join("\n") : "",
+        photoUrl: article.photoUrl || "",
+        photo: article.photo || "",
         locationCountry: article.locationCountry || "",
         locationJurisdiction: article.locationJurisdiction || "",
         locationCity: article.locationCity || "",
@@ -102,6 +121,23 @@ export default function EditArticle() {
     }));
   };
 
+  const handlePhotoUpload = async (file) => {
+    if (!file) return;
+    const uploadResult = await handlePhotoFile(file);
+
+    if (!uploadResult.valid) {
+      setSubmission((prev) => ({ ...prev, error: uploadResult.error || "Σφάλμα επεξεργασίας φωτογραφίας." }));
+      return;
+    }
+
+    setFormState((prev) => ({ ...prev, photo: uploadResult.dataUrl, photoUrl: "" }));
+    setSubmission((prev) => ({ ...prev, error: null }));
+  };
+
+  const handleClearPhoto = () => {
+    setFormState((prev) => ({ ...prev, photoUrl: "", photo: "" }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -119,14 +155,19 @@ export default function EditArticle() {
     }
 
     const tags = uniqueTags(formState.tags);
+    const sources = normalizeSources(formState.sources);
 
     setSubmission({ submitting: true, success: null, error: null });
 
     try {
       await updateArticle(articleId, {
         title: trimmedTitle,
+        subtitle: formState.subtitle.trim(),
         content: trimmedContent,
         tags,
+        sources,
+        photoUrl: formState.photoUrl,
+        photo: formState.photo,
         locationCountry: formState.locationCountry,
         locationJurisdiction: formState.locationJurisdiction,
         locationCity: formState.locationCity,
@@ -214,6 +255,18 @@ export default function EditArticle() {
         </div>
 
         <div className="form-group">
+          <label htmlFor="subtitle">Υπότιτλος (προαιρετικό)</label>
+          <input
+            type="text"
+            id="subtitle"
+            value={formState.subtitle}
+            onChange={(e) => setFormState((prev) => ({ ...prev, subtitle: e.target.value }))}
+            placeholder="Μια σύντομη περίληψη ή προμετωπίδα"
+            maxLength={240}
+          />
+        </div>
+
+        <div className="form-group">
           <label htmlFor="content">Περιεχόμενο *</label>
           <textarea
             id="content"
@@ -226,6 +279,41 @@ export default function EditArticle() {
         </div>
 
         <div className="form-group">
+          <label htmlFor="photoUrl">Φωτογραφία (προαιρετικό)</label>
+          <input
+            type="url"
+            id="photoUrl"
+            value={formState.photoUrl}
+            onChange={(e) =>
+              setFormState((prev) => ({ ...prev, photoUrl: e.target.value, photo: e.target.value ? "" : prev.photo }))
+            }
+            placeholder="https://..."
+          />
+          <div className="photo-upload-row" style={{ marginTop: "0.75rem" }}>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => handlePhotoUpload(event.target.files?.[0])}
+            />
+            {(formState.photo || formState.photoUrl) && (
+              <span className="muted small">✓ Επιλεγμένη φωτογραφία</span>
+            )}
+          </div>
+          {(formState.photo || formState.photoUrl) && (
+            <div className="article-photo-preview">
+              <img
+                src={formState.photo || formState.photoUrl}
+                alt="Προεπισκόπηση φωτογραφίας άρθρου"
+              />
+              <button type="button" className="button secondary" onClick={handleClearPhoto}>
+                Αφαίρεση φωτογραφίας
+              </button>
+            </div>
+          )}
+          <small>Μπορείτε να χρησιμοποιήσετε URL HTTPS ή να ανεβάσετε αρχείο.</small>
+        </div>
+
+        <div className="form-group">
           <label htmlFor="tags">Ετικέτες (χωρισμένες με κόμμα)</label>
           <input
             type="text"
@@ -235,6 +323,18 @@ export default function EditArticle() {
             placeholder="πχ. πολιτική, οικονομία, τεχνολογία"
           />
           <small>Μέχρι 10 ετικέτες</small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="sources">Πηγές (προαιρετικό)</label>
+          <textarea
+            id="sources"
+            value={formState.sources}
+            onChange={(e) => setFormState((prev) => ({ ...prev, sources: e.target.value }))}
+            placeholder={"https://example.com\nhttps://another-source.gr"}
+            rows={4}
+          />
+          <small>Μία πηγή ανά γραμμή (μέχρι 10)</small>
         </div>
 
         <div className="form-group">
@@ -337,6 +437,21 @@ export default function EditArticle() {
 
         .form-group textarea {
           resize: vertical;
+        }
+
+        .article-photo-preview {
+          margin-top: 0.75rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .article-photo-preview img {
+          max-width: 100%;
+          max-height: 280px;
+          border-radius: 8px;
+          object-fit: cover;
+          border: 1px solid #ddd;
         }
 
         .form-group small {

@@ -124,6 +124,13 @@ export default function MyArticles() {
             <div className="responsive-card-grid">
               {articlesState.articles.map((article) => (
                 <div key={article.id} className="card compact-card">
+                  {article.photo || article.photoUrl ? (
+                    <img
+                      src={article.photo || article.photoUrl}
+                      alt={article.title}
+                      className="article-cover"
+                    />
+                  ) : null}
                   <div className="article-header-row">
                     <div className="pill pill-soft">Άρθρο</div>
                     <div className="muted small">{formatDate(article.createdAt)}</div>
@@ -132,6 +139,10 @@ export default function MyArticles() {
                   <h3 className="article-title">
                     <Link to={`/articles/${article.id}`}>{article.title}</Link>
                   </h3>
+
+                  {article.subtitle && (
+                    <p className="article-subtitle">{article.subtitle}</p>
+                  )}
 
                   <div className="article-meta-row">
                     {article.isNews && (

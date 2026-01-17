@@ -110,6 +110,13 @@ export default function News() {
         <div className="responsive-card-grid">
           {newsFeed.news.map((article) => (
             <div key={article.id} className="card compact-card">
+              {article.photo || article.photoUrl ? (
+                <img
+                  src={article.photo || article.photoUrl}
+                  alt={article.title}
+                  className="article-cover"
+                />
+              ) : null}
               <div className="story-header">
                 <div>
                   <div className="story-title">
@@ -121,6 +128,7 @@ export default function News() {
                   {article.author?.displayName && <div className="pill pill-soft">{article.author.displayName}</div>}
                 </div>
               </div>
+              {article.subtitle && <p className="article-subtitle">{article.subtitle}</p>}
               <p>{article.content.substring(0, 300)}{article.content.length > 300 ? "..." : ""}</p>
               <Link to={`/articles/${article.id}`} style={{ color: "#0066cc", textDecoration: "none" }}>
                 Διαβάστε περισσότερα →

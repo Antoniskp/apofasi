@@ -21,6 +21,7 @@ import Article from "./models/Article.js";
 import { CITIES_BY_REGION, REGION_NAMES, COUNTRIES, GREEK_JURISDICTION_NAMES, CITIES_BY_JURISDICTION } from "../shared/locations.js";
 import defaultPolls from "./data/defaultPolls.js";
 import { hashPassword, needsPasswordUpgrade, verifyPassword } from "./utils/crypto.js";
+import { isHttpsUrl, validatePhotoDataUrl } from "./utils/pollValidation.js";
 
 dotenv.config();
 connectDB();
@@ -136,9 +137,13 @@ const serializeNews = (news) => ({
 const serializeArticle = (article) => ({
   id: article.id,
   title: article.title,
+  subtitle: article.subtitle,
   content: article.content,
   author: serializeAuthor(article.author),
   tags: article.tags || [],
+  sources: article.sources || [],
+  photoUrl: article.photoUrl,
+  photo: article.photo,
   // New location hierarchy
   locationCountry: article.locationCountry,
   locationJurisdiction: article.locationJurisdiction,
@@ -436,6 +441,38 @@ const normalizeArticleTags = (tags) => {
   ).slice(0, 10);
 };
 
+const normalizeArticleSources = (sources) => {
+  return Array.from(
+    new Set(
+      (Array.isArray(sources) ? sources : typeof sources === "string" ? sources.split(/\r?\n/) : [])
+        .map((source) => (typeof source === "string" ? source.trim() : ""))
+        .filter(Boolean)
+    )
+  ).slice(0, 10);
+};
+
+const normalizeArticlePhoto = (photoUrl, photo) => {
+  const trimmedPhotoUrl = typeof photoUrl === "string" ? photoUrl.trim() : "";
+  const trimmedPhoto = typeof photo === "string" ? photo.trim() : "";
+
+  if (trimmedPhotoUrl && !isHttpsUrl(trimmedPhotoUrl)) {
+    return { valid: false, error: "Το URL φωτογραφίας πρέπει να είναι HTTPS." };
+  }
+
+  if (trimmedPhoto) {
+    const photoValidation = validatePhotoDataUrl(trimmedPhoto);
+    if (!photoValidation.valid) {
+      return photoValidation;
+    }
+  }
+
+  return {
+    valid: true,
+    photoUrl: trimmedPhotoUrl || undefined,
+    photo: trimmedPhoto || undefined,
+  };
+};
+
 const validateArticleLocation = (region, cityOrVillage) => {
   const trimmedRegion = region?.trim();
   const trimmedCity = cityOrVillage?.trim();
@@ -604,8 +641,9 @@ articlesRouter.get("/:articleId", async (req, res) => {
 });
 
 articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
-  const { title, content, tags } = req.body || {};
+  const { title, subtitle, content, tags, sources, photoUrl, photo } = req.body || {};
   const trimmedTitle = title?.trim();
+  const trimmedSubtitle = subtitle?.trim();
   const trimmedContent = content?.trim();
 
   if (!trimmedTitle || !trimmedContent) {
@@ -613,6 +651,12 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
   }
 
   const normalizedTags = normalizeArticleTags(tags);
+  const normalizedSources = normalizeArticleSources(sources);
+  const photoResult = normalizeArticlePhoto(photoUrl, photo);
+
+  if (!photoResult.valid) {
+    return res.status(400).json({ message: photoResult.error || "Μη έγκυρη φωτογραφία άρθρου." });
+  }
   
   const locationResult = processLocationFields(req);
   if (locationResult.error) {
@@ -622,9 +666,13 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
   try {
     const articleData = {
       title: trimmedTitle,
+      subtitle: trimmedSubtitle || undefined,
       content: trimmedContent,
       author: req.user._id,
       tags: normalizedTags,
+      sources: normalizedSources,
+      photoUrl: photoResult.photoUrl,
+      photo: photoResult.photo,
       ...locationResult.data,
     };
 
@@ -643,8 +691,12 @@ articlesRouter.post("/", ensureAuthenticated, async (req, res) => {
 
 articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
   const { articleId } = req.params;
-  const { title, content, tags } = req.body || {};
+  const { title, subtitle, content, tags, sources, photoUrl, photo } = req.body || {};
   const userId = req.user?.id;
+  const hasSubtitle = Object.prototype.hasOwnProperty.call(req.body || {}, "subtitle");
+  const hasSources = Object.prototype.hasOwnProperty.call(req.body || {}, "sources");
+  const hasPhotoFields = Object.prototype.hasOwnProperty.call(req.body || {}, "photoUrl")
+    || Object.prototype.hasOwnProperty.call(req.body || {}, "photo");
 
   if (!mongoose.Types.ObjectId.isValid(articleId)) {
     return res.status(400).json({ message: "Μη έγκυρο άρθρο." });
@@ -658,6 +710,13 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
   }
 
   const normalizedTags = normalizeArticleTags(tags);
+  const normalizedSources = hasSources ? normalizeArticleSources(sources) : null;
+  const trimmedSubtitle = hasSubtitle ? subtitle?.trim() : null;
+  const photoResult = hasPhotoFields ? normalizeArticlePhoto(photoUrl, photo) : null;
+
+  if (photoResult && !photoResult.valid) {
+    return res.status(400).json({ message: photoResult.error || "Μη έγκυρη φωτογραφία άρθρου." });
+  }
   
   const locationResult = processLocationFields(req);
   if (locationResult.error) {
@@ -677,8 +736,18 @@ articlesRouter.put("/:articleId", ensureAuthenticated, async (req, res) => {
     }
 
     article.title = trimmedTitle;
+    if (hasSubtitle) {
+      article.subtitle = trimmedSubtitle || undefined;
+    }
     article.content = trimmedContent;
     article.tags = normalizedTags;
+    if (hasSources) {
+      article.sources = normalizedSources;
+    }
+    if (photoResult) {
+      article.photoUrl = photoResult.photoUrl;
+      article.photo = photoResult.photo;
+    }
     
     // Update location fields
     Object.assign(article, locationResult.data);
