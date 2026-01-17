@@ -24,14 +24,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   </React.StrictMode>
 );
 
-const existingOnError = window.onerror;
-
-window.onerror = (message, source, _lineno, _colno, _error) => {
-  if (shouldIgnoreExtensionError({ message, filename: source })) {
-    return true;
-  }
-  if (typeof existingOnError === "function") {
-    return existingOnError(message, source, _lineno, _colno, _error);
-  }
-  return false;
-};
+window.addEventListener(
+  "error",
+  (event) => {
+    if (shouldIgnoreExtensionError(event)) {
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+      event.stopImmediatePropagation();
+    }
+  },
+  true
+);
