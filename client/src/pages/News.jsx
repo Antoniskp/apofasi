@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { API_BASE_URL, getAuthStatus, listArticles } from "../lib/api.js";
 
@@ -65,19 +65,19 @@ export default function News() {
 
   const { user } = status;
   const canManageNews = hasEditorAccess(user);
-  const normalizedSearch = searchTerm.trim().toLowerCase();
-  const availableRegions = Array.from(
-    new Set(newsFeed.news.map((article) => article.region).filter(Boolean)),
-  ).sort((a, b) => a.localeCompare(b, "el-GR"));
-  const availableCities = Array.from(
-    new Set(
-      newsFeed.news
-        .filter((article) => !selectedRegion || article.region === selectedRegion)
-        .map((article) => article.cityOrVillage)
-        .filter(Boolean),
-    ),
-  ).sort((a, b) => a.localeCompare(b, "el-GR"));
-  const filteredNews = newsFeed.news.filter((article) => {
+  const normalizedSearch = useMemo(() => searchTerm.trim().toLowerCase(), [searchTerm]);
+  const availableRegions = useMemo(() => {
+    const regions = new Set(newsFeed.news.map((article) => article.region).filter(Boolean));
+    return Array.from(regions).sort((a, b) => a.localeCompare(b, "el-GR"));
+  }, [newsFeed.news]);
+  const availableCities = useMemo(() => {
+    const cities = newsFeed.news
+      .filter((article) => !selectedRegion || article.region === selectedRegion)
+      .map((article) => article.cityOrVillage)
+      .filter(Boolean);
+    return Array.from(new Set(cities)).sort((a, b) => a.localeCompare(b, "el-GR"));
+  }, [newsFeed.news, selectedRegion]);
+  const filteredNews = useMemo(() => newsFeed.news.filter((article) => {
     const matchesRegion = !selectedRegion || article.region === selectedRegion;
     const matchesCity = !selectedCity || article.cityOrVillage === selectedCity;
     const searchTarget = [
@@ -94,7 +94,7 @@ export default function News() {
 
     const matchesSearch = !normalizedSearch || searchTarget.includes(normalizedSearch);
     return matchesRegion && matchesCity && matchesSearch;
-  });
+  }), [newsFeed.news, normalizedSearch, selectedCity, selectedRegion]);
 
   return (
     <div className="section">
@@ -134,7 +134,7 @@ export default function News() {
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="🔍 Αναζήτηση σε τίτλο, σύνοψη ή περιεχόμενο..."
+              placeholder="🔍 Αναζήτηση ειδήσεων..."
             />
             <select
               className="input-modern compact"
