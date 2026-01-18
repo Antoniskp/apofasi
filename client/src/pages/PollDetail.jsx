@@ -352,10 +352,19 @@ export default function PollDetail() {
             </div>
           )}
 
-          {(poll.region || poll.cityOrVillage) && (
+          {(poll.region || poll.cityOrVillage || poll.locationCountry) && (
             <p className="muted small">
-              Τοποθεσία: {[poll.region, poll.cityOrVillage].filter(Boolean).join(" • ")}
+              Τοποθεσία: {[
+                poll.locationCountry && (poll.locationCountry === "greece" ? "Ελλάδα" : poll.locationCountry),
+                poll.locationJurisdiction || poll.region,
+                poll.locationCity || poll.cityOrVillage
+              ].filter(Boolean).join(" • ")}
+              {poll.restrictToLocation && " (περιορισμένη ψηφοφορία)"}
             </p>
+          )}
+
+          {poll.restrictToLocation && (
+            <p className="muted small">Μόνο χρήστες από την επιλεγμένη τοποθεσία μπορούν να ψηφίσουν σε αυτή την ψηφοφορία.</p>
           )}
 
           {poll.anonymousResponses && (
