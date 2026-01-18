@@ -227,4 +227,4 @@ When adding new features:
 See also:
 - `/server/README.md` - Server setup guide
 - `/README.md` - Main project README
-- `/server/DB_SCHEMA.md` - Database schema documentation
+- `/docs/DB_SCHEMA.md` - Database schema documentation

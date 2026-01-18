@@ -14,7 +14,7 @@ const documentationContent = {
     {
       title: "Backend (server)",
       body:
-        "Τα endpoints ορίζονται στο server/server.js, ενώ τα data models είναι στον φάκελο server/models. Το αρχείο server/DB_SCHEMA.md είναι η ανθρώπινη περιγραφή του schema."
+        "Τα endpoints ορίζονται στο server/server.js, ενώ τα data models είναι στον φάκελο server/models. Το αρχείο docs/DB_SCHEMA.md είναι η ανθρώπινη περιγραφή του schema."
     },
     {
       title: "Shared",
@@ -220,7 +220,7 @@ export default function Documentation() {
         <div className="section-header">
           <h2 className="section-title">DB schema (σύνοψη)</h2>
           <p className="section-lead">
-            Η πλήρης περιγραφή βρίσκεται στο server/DB_SCHEMA.md και στα server/models.
+            Η πλήρης περιγραφή βρίσκεται στο docs/DB_SCHEMA.md και στα server/models.
           </p>
         </div>
         <div className="grid-2">
@@ -239,7 +239,7 @@ export default function Documentation() {
         </div>
         <div className="card">
           <ul className="list">
-            <li>Το MongoDB schema περιγράφεται στο server/DB_SCHEMA.md.</li>
+            <li>Το MongoDB schema περιγράφεται στο docs/DB_SCHEMA.md.</li>
             <li>Τα μοντέλα Mongoose είναι στο server/models.</li>
             <li>Οι φόρμες περιεχομένου επικοινωνούν με τα endpoints στο server/server.js.</li>
           </ul>
