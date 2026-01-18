@@ -233,6 +233,22 @@ export const deletePoll = async (pollId) =>
     )
   );
 
+export const tagPollAsFeatured = async (pollId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/polls/${pollId}/tag-as-featured`,
+      buildJsonRequest({}, "PUT")
+    )
+  );
+
+export const untagPollAsFeatured = async (pollId) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/polls/${pollId}/untag-as-featured`,
+      buildJsonRequest({}, "PUT")
+    )
+  );
+
 export const addOptionToPoll = async (pollId, option) =>
   handleResponse(
     await fetch(

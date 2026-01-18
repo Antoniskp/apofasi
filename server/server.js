@@ -222,6 +222,9 @@ const serializePoll = async (poll, currentUser, session, req) => {
       profileUrl: option.profileUrl,
     })),
     tags: poll.tags || [],
+    isFeatured: Boolean(poll.isFeatured),
+    featuredBy: poll.featuredBy ? serializeAuthor(poll.featuredBy) : null,
+    featuredAt: poll.featuredAt || null,
     // New location hierarchy
     locationCountry: poll.locationCountry,
     locationJurisdiction: poll.locationJurisdiction,
@@ -864,7 +867,8 @@ pollsRouter.get("/", async (req, res) => {
     const polls = await Poll.find()
       .sort({ createdAt: -1 })
       .limit(100)
-      .populate("createdBy", "displayName username email");
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     const serializedPolls = await Promise.all(
       polls.map((poll) => serializePoll(poll, req.user, req.session, req))
@@ -884,7 +888,8 @@ pollsRouter.get("/my-polls", ensureAuthenticated, async (req, res) => {
   try {
     const polls = await Poll.find({ createdBy: userId })
       .sort({ createdAt: -1 })
-      .populate("createdBy", "displayName username email");
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     const serializedPolls = await Promise.all(
       polls.map((poll) => serializePoll(poll, req.user, req.session, req))
@@ -905,7 +910,9 @@ pollsRouter.get("/:pollId", async (req, res) => {
   }
 
   try {
-    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+    const poll = await Poll.findById(pollId)
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     if (!poll) {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
@@ -915,6 +922,66 @@ pollsRouter.get("/:pollId", async (req, res) => {
   } catch (error) {
     console.error("[polls-detail-error]", error);
     return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάκτηση της ψηφοφορίας." });
+  }
+});
+
+pollsRouter.put("/:pollId/tag-as-featured", ensureAuthenticated, ensureRole("editor", "admin"), async (req, res) => {
+  const { pollId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(pollId)) {
+    return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId);
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    poll.isFeatured = true;
+    poll.featuredBy = req.user._id;
+    poll.featuredAt = new Date();
+
+    await poll.save();
+    await poll
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
+
+    return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
+  } catch (error) {
+    console.error("[polls-tag-as-featured-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η επισήμανση της ψηφοφορίας ως προτεινόμενη." });
+  }
+});
+
+pollsRouter.put("/:pollId/untag-as-featured", ensureAuthenticated, ensureRole("editor", "admin"), async (req, res) => {
+  const { pollId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(pollId)) {
+    return res.status(400).json({ message: "Μη έγκυρη ψηφοφορία." });
+  }
+
+  try {
+    const poll = await Poll.findById(pollId);
+
+    if (!poll) {
+      return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
+    }
+
+    poll.isFeatured = false;
+    poll.featuredBy = undefined;
+    poll.featuredAt = undefined;
+
+    await poll.save();
+    await poll
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
+
+    return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
+  } catch (error) {
+    console.error("[polls-untag-as-featured-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η αφαίρεση της επισήμανσης της ψηφοφορίας." });
   }
 });
 
@@ -1085,7 +1152,9 @@ pollsRouter.post("/", ensureAuthenticated, async (req, res) => {
 
     const createdPoll = await Poll.create(pollData);
 
-    const populatedPoll = await createdPoll.populate("createdBy", "displayName username email");
+    const populatedPoll = await createdPoll
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     return res.status(201).json({ poll: await serializePoll(populatedPoll, req.user, req.session, req) });
   } catch (error) {
@@ -1109,7 +1178,9 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
   }
 
   try {
-    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+    const poll = await Poll.findById(pollId)
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     if (!poll) {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
@@ -1323,7 +1394,9 @@ pollsRouter.delete("/:pollId/vote", async (req, res) => {
   }
 
   try {
-    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+    const poll = await Poll.findById(pollId)
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     if (!poll) {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
@@ -1415,7 +1488,9 @@ pollsRouter.get("/:pollId/statistics", async (req, res) => {
   }
 
   try {
-    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+    const poll = await Poll.findById(pollId)
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     if (!poll) {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
@@ -1596,7 +1671,9 @@ pollsRouter.post("/:pollId/options", async (req, res) => {
     await poll.save();
 
     // Populate and serialize
-    await poll.populate("createdBy", "displayName username email");
+    await poll
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
     const serialized = await serializePoll(poll, req.user, req.session, req);
 
     return res.status(201).json({ 
@@ -1620,7 +1697,9 @@ pollsRouter.get("/:pollId/options/pending", ensureAuthenticated, async (req, res
   }
 
   try {
-    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+    const poll = await Poll.findById(pollId)
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     if (!poll) {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
@@ -1661,7 +1740,9 @@ pollsRouter.post("/:pollId/options/:optionId/approve", ensureAuthenticated, asyn
   }
 
   try {
-    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+    const poll = await Poll.findById(pollId)
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     if (!poll) {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
@@ -1704,7 +1785,9 @@ pollsRouter.delete("/:pollId/options/:optionId", ensureAuthenticated, async (req
   }
 
   try {
-    const poll = await Poll.findById(pollId).populate("createdBy", "displayName username email");
+    const poll = await Poll.findById(pollId)
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     if (!poll) {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });

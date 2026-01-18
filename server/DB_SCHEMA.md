@@ -45,6 +45,9 @@ This project uses MongoDB via Mongoose. Collections and their fields are documen
   - **optionId** (`ObjectId`, required)
 - **createdBy** (`ObjectId` referencing `users`)
 - **tags** (`Array<String>`, trimmed, unique per poll)
+- **isFeatured** (`Boolean`, default `false`; marks poll as featured)
+- **featuredBy** (`ObjectId` referencing `users`, optional; user who featured the poll)
+- **featuredAt** (`Date`, optional; timestamp when featured)
 - **locationCountry** (`String`, optional) - New hierarchical location field (e.g., "greece", "international")
 - **locationJurisdiction** (`String`, optional) - New hierarchical location field for region/prefecture (only for Greece)
 - **locationCity** (`String`, optional) - New hierarchical location field for city or community
