@@ -179,6 +179,7 @@ const serializePoll = async (poll, currentUser, session, req) => {
   let hasVoted = false;
   let votedOptionId = null;
   
+  // Authenticated users always use account-based voting, even on anonymous polls.
   if (currentUser) {
     const userVote = poll.userVotes?.find((uv) => uv.userId.toString() === currentUser.id);
     if (userVote) {
@@ -187,7 +188,7 @@ const serializePoll = async (poll, currentUser, session, req) => {
     }
   }
   
-  // For anonymous polls, check both session and IP (requires BOTH to match for security)
+  // For anonymous polls, only fall back to session/IP tracking when no user vote exists.
   if (!hasVoted && poll.anonymousResponses) {
     const sessionId = session?.id;
     const ipAddress = req?.ip;
