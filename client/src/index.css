@@ -2750,6 +2750,25 @@ button:focus-visible {
   font-weight: 600;
 }
 
+.poll-info-box {
+  padding: 12px;
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.poll-info-box .pill {
+  display: inline-block;
+  margin: 0;
+}
+
+.poll-info-box .info-message {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 /* Compact and Professional UI Styles - GitHub-like */
 
 /* Toolbar container for action buttons, search, and filters */
