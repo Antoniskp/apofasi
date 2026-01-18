@@ -98,33 +98,11 @@ export default function News() {
 
   return (
     <div className="section">
-      <p className="pill">Ειδήσεις</p>
       <h1 className="section-title">Ειδήσεις</h1>
       <p className="muted">
         Οι συντάκτες και οι διαχειριστές μπορούν να επισημαίνουν άρθρα ως ειδήσεις.
         {canManageNews && " Επισκεφθείτε τη σελίδα άρθρων για να δημιουργήσετε νέα άρθρα."}
       </p>
-
-      {canManageNews && (
-        <div className="card auth-card stack" style={{ marginTop: "1rem" }}>
-          <div className="stack">
-            <p className="muted">Έχετε συνδεθεί ως {user.displayName || "χρήστης"}.</p>
-            <p>Για να προσθέσετε νέα είδηση:</p>
-            <ol style={{ marginLeft: "1.5rem", lineHeight: "1.8" }}>
-              <li>Δημιουργήστε ένα νέο άρθρο στη σελίδα <Link to="/articles">Άρθρα</Link></li>
-              <li>Ανοίξτε το άρθρο και επιλέξτε &quot;Επισήμανση ως Είδηση&quot;</li>
-            </ol>
-            <div className="cta-row">
-              <Link className="btn" to="/articles/new">
-                ✚ Δημιουργία Νέου Άρθρου
-              </Link>
-              <Link className="btn btn-outline" to="/articles">
-                Προβολή Όλων των Άρθρων
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="section">
         <div className="toolbar-container">
