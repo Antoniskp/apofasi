@@ -179,7 +179,8 @@ const serializePoll = async (poll, currentUser, session, req) => {
   let hasVoted = false;
   let votedOptionId = null;
   
-  if (currentUser && !poll.anonymousResponses) {
+  // Authenticated users always use account-based voting, even on anonymous polls.
+  if (currentUser) {
     const userVote = poll.userVotes?.find((uv) => uv.userId.toString() === currentUser.id);
     if (userVote) {
       hasVoted = true;
@@ -187,8 +188,8 @@ const serializePoll = async (poll, currentUser, session, req) => {
     }
   }
   
-  // For anonymous polls, check both session and IP (requires BOTH to match for security)
-  if (poll.anonymousResponses) {
+  // For anonymous polls, only fall back to session/IP tracking when no user vote exists.
+  if (!hasVoted && poll.anonymousResponses) {
     const sessionId = session?.id;
     const ipAddress = req?.ip;
     
@@ -1193,7 +1194,7 @@ pollsRouter.post("/:pollId/vote", async (req, res) => {
       return res.status(400).json({ message: "Μη έγκυρη επιλογή ψηφοφορίας." });
     }
 
-    if (poll.anonymousResponses) {
+    if (poll.anonymousResponses && !userId) {
       // Anonymous voting logic - requires BOTH sessionId AND ipAddress for security
       const sessionId = req.session?.id;
       const ipAddress = req.ip;
@@ -1328,7 +1329,7 @@ pollsRouter.delete("/:pollId/vote", async (req, res) => {
       return res.status(404).json({ message: "Η ψηφοφορία δεν βρέθηκε." });
     }
 
-    if (poll.anonymousResponses) {
+    if (poll.anonymousResponses && !userId) {
       // Anonymous vote cancellation - requires BOTH sessionId AND ipAddress
       const sessionId = req.session?.id;
       const ipAddress = req.ip;
