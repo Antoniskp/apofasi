@@ -12,6 +12,9 @@ const formatDateTime = (value) => {
 export default function News() {
   const [status, setStatus] = useState({ loading: true, user: null, error: null });
   const [newsFeed, setNewsFeed] = useState({ loading: true, news: [], error: null });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
   const loadSession = async () => {
     setStatus((prev) => ({ ...prev, loading: true }));
@@ -62,6 +65,36 @@ export default function News() {
 
   const { user } = status;
   const canManageNews = hasEditorAccess(user);
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const availableRegions = Array.from(
+    new Set(newsFeed.news.map((article) => article.region).filter(Boolean)),
+  ).sort((a, b) => a.localeCompare(b, "el-GR"));
+  const availableCities = Array.from(
+    new Set(
+      newsFeed.news
+        .filter((article) => !selectedRegion || article.region === selectedRegion)
+        .map((article) => article.cityOrVillage)
+        .filter(Boolean),
+    ),
+  ).sort((a, b) => a.localeCompare(b, "el-GR"));
+  const filteredNews = newsFeed.news.filter((article) => {
+    const matchesRegion = !selectedRegion || article.region === selectedRegion;
+    const matchesCity = !selectedCity || article.cityOrVillage === selectedCity;
+    const searchTarget = [
+      article.title,
+      article.subtitle,
+      article.content,
+      article.author?.displayName,
+      article.region,
+      article.cityOrVillage,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const matchesSearch = !normalizedSearch || searchTarget.includes(normalizedSearch);
+    return matchesRegion && matchesCity && matchesSearch;
+  });
 
   return (
     <div className="section">
@@ -94,8 +127,43 @@ export default function News() {
       )}
 
       <div className="section">
-        <div className="section-header">
-          <h2 className="section-title">Πρόσφατες ειδήσεις</h2>
+        <div className="toolbar-container">
+          <div className="toolbar-left">
+            <input
+              className="input-modern compact"
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="🔍 Αναζήτηση σε τίτλο, σύνοψη ή περιεχόμενο..."
+            />
+            <select
+              className="input-modern compact"
+              value={selectedRegion}
+              onChange={(event) => {
+                setSelectedRegion(event.target.value);
+                setSelectedCity("");
+              }}
+            >
+              <option value="">Όλες οι περιφέρειες</option>
+              {availableRegions.map((region) => (
+                <option key={region} value={region}>
+                  {region}
+                </option>
+              ))}
+            </select>
+            <select
+              className="input-modern compact"
+              value={selectedCity}
+              onChange={(event) => setSelectedCity(event.target.value)}
+            >
+              <option value="">Όλες οι πόλεις / χωριά</option>
+              {availableCities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {newsFeed.loading && <p className="muted">Φόρτωση ειδήσεων...</p>}
@@ -107,8 +175,14 @@ export default function News() {
           </div>
         )}
 
+        {!newsFeed.loading && !newsFeed.error && newsFeed.news.length > 0 && filteredNews.length === 0 && (
+          <div className="card muted-border">
+            <p className="muted">Δεν βρέθηκαν ειδήσεις με τα επιλεγμένα φίλτρα.</p>
+          </div>
+        )}
+
         <div className="responsive-card-grid">
-          {newsFeed.news.map((article) => (
+          {filteredNews.map((article) => (
             <div key={article.id} className="card compact-card">
               {article.photo || article.photoUrl ? (
                 <img
