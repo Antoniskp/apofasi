@@ -29,7 +29,6 @@ const footerSections = [
     links: [
       { label: "Αποστολή", to: "/mission" },
       { label: "Πώς δουλεύουμε", to: "/how-we-do-it" },
-      { label: "Η ιστορία μας", to: "/about" },
       { label: "Συνεισφέρετε", to: "/contribute" },
       { label: "Bounties", to: "/bounties" }
     ]
@@ -48,12 +47,10 @@ const footerSections = [
     title: "Κοινότητα",
     titleLink: "/social",
     links: [
-      { label: "Κοινωνικά δίκτυα", to: "/social" },
       { label: "Κανόνες κοινότητας", to: "/community-guidelines" },
       { label: "Συμμετοχή στην ανάπτυξη", to: "/contribute" },
       { label: "Προφίλ χρήστη", to: "/profile" },
       { label: "Σύνδεση", to: "/auth" },
-      { label: "Εγγραφή με email", to: "/register" }
     ]
   }
 ];
@@ -120,7 +117,7 @@ export default function Footer() {
                 </Box>
                 <Box>
                   <Typography variant="overline" sx={{ fontWeight: 700, lineHeight: 1 }}>
-                    Apofasi
+                    Απόφαση
                   </Typography>
                   <Typography variant="h6" component="h2" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
                     Καλύτερες αποφάσεις, μαζί.
@@ -156,10 +153,10 @@ export default function Footer() {
                   />
                   <Box>
                     <Typography variant="overline" sx={{ fontWeight: 700, lineHeight: 1 }}>
-                      24/7 ενημέρωση
+                      24/7 ενημέρωση από εσένα
                     </Typography>
                     <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
-                      Η πλατφόρμα βρίσκεται σε beta λειτουργία με συνεχή ανανεώσεις περιεχομένου.
+                      Η πλατφόρμα βρίσκεται σε δοκιμαστική λειτουργία με συνεχείς ανανεώσεις περιεχομένου.
                     </Typography>
                   </Box>
                 </Box>
@@ -272,7 +269,7 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            © {new Date().getFullYear()} Apofasi
+            © {new Date().getFullYear()} Aπofasi
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Typography variant="body2" color="text.secondary">
