@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { API_BASE_URL, getAuthStatus, getPoll, voteOnPoll, cancelVoteOnPoll, deletePoll, addOptionToPoll, listPendingOptions, approveOption, deleteOption } from "../lib/api.js";
+import { API_BASE_URL, getAuthStatus, getPoll, voteOnPoll, cancelVoteOnPoll, deletePoll, tagPollAsFeatured, untagPollAsFeatured, addOptionToPoll, listPendingOptions, approveOption, deleteOption } from "../lib/api.js";
 
 const formatDateTime = (value) => {
   if (!value) return "";
@@ -36,6 +36,7 @@ export default function PollDetail() {
   const [voteState, setVoteState] = useState({ submitting: false, error: null });
   const [cancelState, setCancelState] = useState({ cancelling: false, error: null });
   const [deleteState, setDeleteState] = useState({ deleting: false, error: null });
+  const [featureState, setFeatureState] = useState({ toggling: false, error: null });
   const [addOptionState, setAddOptionState] = useState({ adding: false, error: null, success: null });
   const [newOption, setNewOption] = useState({ text: "", photoUrl: "", photo: "", profileUrl: "" });
   const [showAddOption, setShowAddOption] = useState(false);
@@ -144,6 +145,25 @@ export default function PollDetail() {
       setDeleteState({
         deleting: false,
         error: error.message || "Η διαγραφή απέτυχε.",
+      });
+    }
+  };
+
+  const handleToggleFeatured = async () => {
+    if (!pollState.poll) return;
+
+    setFeatureState({ toggling: true, error: null });
+
+    try {
+      const response = pollState.poll.isFeatured
+        ? await untagPollAsFeatured(pollId)
+        : await tagPollAsFeatured(pollId);
+      setPollState((prev) => ({ ...prev, poll: response.poll }));
+      setFeatureState({ toggling: false, error: null });
+    } catch (error) {
+      setFeatureState({
+        toggling: false,
+        error: error.message || "Δεν ήταν δυνατή η ενημέρωση της επισήμανσης.",
       });
     }
   };
@@ -296,6 +316,7 @@ export default function PollDetail() {
 
   const { loading: authLoading, user, error: authError } = authState;
   const { loading: pollLoading, poll, error: pollError } = pollState;
+  const canTagAsFeatured = user && (user.role === "editor" || user.role === "admin");
 
   return (
     <div className="section narrow">
@@ -337,6 +358,17 @@ export default function PollDetail() {
               {poll.voteClosingDate && (
                 <span className="pill pill-ghost">
                   Λήξη: {formatDateTime(poll.voteClosingDate)}
+                </span>
+              )}
+            </div>
+          )}
+
+          {poll.isFeatured && (
+            <div className="poll-meta-row">
+              <span className="pill pill-soft">⭐ Προτεινόμενη ψηφοφορία</span>
+              {poll.featuredBy && poll.featuredAt && (
+                <span className="muted small">
+                  Επισήμανση από {poll.featuredBy.displayName} στις {formatDateTime(poll.featuredAt)}
                 </span>
               )}
             </div>
@@ -611,6 +643,20 @@ export default function PollDetail() {
             <Link className="btn btn-outline" to={`/polls/${pollId}/statistics`}>
               Στατιστικά
             </Link>
+            {canTagAsFeatured && (
+              <button
+                className="btn btn-outline"
+                type="button"
+                disabled={featureState.toggling}
+                onClick={handleToggleFeatured}
+              >
+                {featureState.toggling
+                  ? "Ενημέρωση..."
+                  : poll.isFeatured
+                    ? "Αφαίρεση Προτεινόμενης"
+                    : "Επισήμανση ως Προτεινόμενη"}
+              </button>
+            )}
             {user && poll.createdBy && poll.createdBy.email === user.email && (
               <button
                 className="btn btn-subtle"
@@ -623,6 +669,7 @@ export default function PollDetail() {
             )}
           </div>
           {deleteState.error && <p className="error-text">{deleteState.error}</p>}
+          {featureState.error && <p className="error-text">{featureState.error}</p>}
         </div>
       )}
     </div>

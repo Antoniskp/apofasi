@@ -408,6 +408,12 @@ GET /api/polls
         }
       ],
       "tags": ["tag1", "tag2"],
+      "isFeatured": true,
+      "featuredBy": {
+        "id": "editor_id",
+        "displayName": "Editor Name"
+      },
+      "featuredAt": "2024-01-20T12:00:00.000Z",
       "region": "Αττική",
       "cityOrVillage": "Αθήνα",
       "createdBy": {
@@ -449,6 +455,28 @@ GET /api/polls/:pollId
   "poll": { /* poll object */ }
 }
 ```
+
+#### Tag Poll as Featured
+```
+PUT /api/polls/:pollId/tag-as-featured
+```
+**Authentication Required**: Yes  
+**Required Role**: `editor` or `admin`
+
+Marks a poll as featured.
+
+**Response:** `200 OK` - Returns updated poll object
+
+#### Untag Poll as Featured
+```
+PUT /api/polls/:pollId/untag-as-featured
+```
+**Authentication Required**: Yes  
+**Required Role**: `editor` or `admin`
+
+Removes the featured flag from a poll.
+
+**Response:** `200 OK` - Returns updated poll object
 
 #### Create Poll
 ```

@@ -74,6 +74,17 @@ const pollSchema = new mongoose.Schema(
           )
         ),
     },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
+    featuredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    featuredAt: {
+      type: Date,
+    },
     // Location hierarchy
     locationCountry: {
       type: String,
