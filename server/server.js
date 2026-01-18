@@ -944,7 +944,9 @@ pollsRouter.put("/:pollId/tag-as-featured", ensureAuthenticated, ensureRole("edi
     poll.featuredAt = new Date();
 
     await poll.save();
-    await poll.populate("createdBy", "displayName username email");
+    await poll
+      .populate("createdBy", "displayName username email")
+      .populate("featuredBy", "displayName username email");
 
     return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
   } catch (error) {
@@ -972,9 +974,7 @@ pollsRouter.put("/:pollId/untag-as-featured", ensureAuthenticated, ensureRole("e
     poll.featuredAt = undefined;
 
     await poll.save();
-    await poll
-      .populate("createdBy", "displayName username email")
-      .populate("featuredBy", "displayName username email");
+    await poll.populate("createdBy", "displayName username email");
 
     return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
   } catch (error) {
