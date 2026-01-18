@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { API_BASE_URL, getAuthStatus, listArticles } from "../lib/api.js";
 
@@ -12,6 +12,9 @@ const formatDateTime = (value) => {
 export default function News() {
   const [status, setStatus] = useState({ loading: true, user: null, error: null });
   const [newsFeed, setNewsFeed] = useState({ loading: true, news: [], error: null });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
   const loadSession = async () => {
     setStatus((prev) => ({ ...prev, loading: true }));
@@ -62,6 +65,36 @@ export default function News() {
 
   const { user } = status;
   const canManageNews = hasEditorAccess(user);
+  const normalizedSearch = useMemo(() => searchTerm.trim().toLowerCase(), [searchTerm]);
+  const availableRegions = useMemo(() => {
+    const regions = new Set(newsFeed.news.map((article) => article.region).filter(Boolean));
+    return Array.from(regions).sort((a, b) => a.localeCompare(b, "el-GR"));
+  }, [newsFeed.news]);
+  const availableCities = useMemo(() => {
+    const cities = newsFeed.news
+      .filter((article) => !selectedRegion || article.region === selectedRegion)
+      .map((article) => article.cityOrVillage)
+      .filter(Boolean);
+    return Array.from(new Set(cities)).sort((a, b) => a.localeCompare(b, "el-GR"));
+  }, [newsFeed.news, selectedRegion]);
+  const filteredNews = useMemo(() => newsFeed.news.filter((article) => {
+    const matchesRegion = !selectedRegion || article.region === selectedRegion;
+    const matchesCity = !selectedCity || article.cityOrVillage === selectedCity;
+    const searchTarget = [
+      article.title,
+      article.subtitle,
+      article.content,
+      article.author?.displayName,
+      article.region,
+      article.cityOrVillage,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const matchesSearch = !normalizedSearch || searchTarget.includes(normalizedSearch);
+    return matchesRegion && matchesCity && matchesSearch;
+  }), [newsFeed.news, normalizedSearch, selectedCity, selectedRegion]);
 
   return (
     <div className="section">
@@ -94,8 +127,43 @@ export default function News() {
       )}
 
       <div className="section">
-        <div className="section-header">
-          <h2 className="section-title">Πρόσφατες ειδήσεις</h2>
+        <div className="toolbar-container">
+          <div className="toolbar-left">
+            <input
+              className="input-modern compact"
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="🔍 Αναζήτηση ειδήσεων..."
+            />
+            <select
+              className="input-modern compact"
+              value={selectedRegion}
+              onChange={(event) => {
+                setSelectedRegion(event.target.value);
+                setSelectedCity("");
+              }}
+            >
+              <option value="">Όλες οι περιφέρειες</option>
+              {availableRegions.map((region) => (
+                <option key={region} value={region}>
+                  {region}
+                </option>
+              ))}
+            </select>
+            <select
+              className="input-modern compact"
+              value={selectedCity}
+              onChange={(event) => setSelectedCity(event.target.value)}
+            >
+              <option value="">Όλες οι πόλεις / χωριά</option>
+              {availableCities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {newsFeed.loading && <p className="muted">Φόρτωση ειδήσεων...</p>}
@@ -107,8 +175,14 @@ export default function News() {
           </div>
         )}
 
+        {!newsFeed.loading && !newsFeed.error && newsFeed.news.length > 0 && filteredNews.length === 0 && (
+          <div className="card muted-border">
+            <p className="muted">Δεν βρέθηκαν ειδήσεις με τα επιλεγμένα φίλτρα.</p>
+          </div>
+        )}
+
         <div className="responsive-card-grid">
-          {newsFeed.news.map((article) => (
+          {filteredNews.map((article) => (
             <div key={article.id} className="card compact-card">
               {article.photo || article.photoUrl ? (
                 <img
