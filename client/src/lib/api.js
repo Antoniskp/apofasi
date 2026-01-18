@@ -163,12 +163,17 @@ export const createPoll = async (payload) =>
         tags: payload.tags,
         region: payload.region?.trim(),
         cityOrVillage: payload.cityOrVillage?.trim(),
+        locationCountry: payload.locationCountry?.trim(),
+        locationJurisdiction: payload.locationJurisdiction?.trim(),
+        locationCity: payload.locationCity?.trim(),
         isAnonymousCreator: Boolean(payload.isAnonymousCreator),
         anonymousResponses: Boolean(payload.anonymousResponses),
         allowUserOptions: Boolean(payload.allowUserOptions),
         userOptionApproval: payload.userOptionApproval,
         optionsArePeople: Boolean(payload.optionsArePeople),
         linkPolicy: payload.linkPolicy,
+        voteClosingDate: payload.voteClosingDate || null,
+        restrictToLocation: Boolean(payload.restrictToLocation),
       })
     )
   );
