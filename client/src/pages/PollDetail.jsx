@@ -366,7 +366,7 @@ export default function PollDetail() {
           {poll.isFeatured && (
             <div className="poll-meta-row">
               <span className="pill pill-soft">⭐ Προτεινόμενη ψηφοφορία</span>
-              {poll.featuredBy?.displayName && poll.featuredAt && (
+              {poll.featuredBy && poll.featuredAt && (
                 <span className="muted small">
                   Επισήμανση από {poll.featuredBy.displayName} στις {formatDateTime(poll.featuredAt)}
                 </span>
