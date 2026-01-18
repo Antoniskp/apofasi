@@ -976,9 +976,6 @@ pollsRouter.put("/:pollId/untag-as-featured", ensureAuthenticated, ensureRole("e
 
     await poll.save();
     await poll.populate({ path: "createdBy", select: "displayName username email" });
-    if (poll.featuredBy) {
-      await poll.populate({ path: "featuredBy", select: "displayName username email" });
-    }
 
     return res.json({ poll: await serializePoll(poll, req.user, req.session, req) });
   } catch (error) {
