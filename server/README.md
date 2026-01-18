@@ -27,7 +27,7 @@ npm --prefix server run seed:user
 
 It hashes the provided password with the same algorithm used by the server and skips creation when the email already exists.
 
-Need a quick reference for the database? See [`DB_SCHEMA.md`](./DB_SCHEMA.md).
+Need a quick reference for the database? See [`DB_SCHEMA.md`](../docs/DB_SCHEMA.md).
 
 ## 1) Install dependencies and start MongoDB
 

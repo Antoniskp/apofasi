@@ -8,9 +8,9 @@ The idea is creating the core of a super application which will support news, ed
 
 ## Documentation
 
-- **[Voting Security Guide](VOTING_SECURITY.md)** - How voting integrity is protected and how multiple votes are prevented
-- **[Security Policy](SECURITY.md)** - Security best practices and vulnerability reporting
-- **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference
+- **[Voting Security Guide](docs/VOTING_SECURITY.md)** - How voting integrity is protected and how multiple votes are prevented
+- **[Security Policy](docs/SECURITY.md)** - Security best practices and vulnerability reporting
+- **[API Documentation](docs/API_DOCUMENTATION.md)** - Complete API reference
 
 ## Local setup overview
 
