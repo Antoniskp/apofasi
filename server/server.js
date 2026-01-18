@@ -26,8 +26,9 @@ import { isHttpsUrl, validatePhotoDataUrl } from "./utils/pollValidation.js";
 // Get directory name for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+// Load server .env first, then fall back to repo root without overriding existing values.
 dotenv.config({ path: path.join(__dirname, ".env") });
+dotenv.config({ path: path.resolve(__dirname, "..", ".env"), override: false });
 connectDB();
 configurePassport();
 
