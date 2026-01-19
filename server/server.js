@@ -212,7 +212,7 @@ const serializePoll = async (poll, currentUser, session, req) => {
       
       if (anonymousVote) {
         hasVoted = true;
-        votedOptionId = anonymousVote.optionId.toString();
+        votedOptionId = anonymousVote.optionId?.toString?.() || null;
       }
     }
   }
