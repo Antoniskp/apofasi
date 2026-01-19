@@ -161,16 +161,23 @@ const serializeArticle = (article) => ({
 });
 
 const serializePoll = async (poll, currentUser, session, req) => {
+  const pollOptions = Array.isArray(poll.options) ? poll.options : [];
+  const pollCreatorId =
+    poll.createdBy?._id?.toString?.() ||
+    poll.createdBy?.id ||
+    poll.createdBy?.toString?.();
+  const currentUserId = currentUser?.id || currentUser?._id?.toString?.();
   // Check if current user is the poll creator or admin
-  const isCreatorOrAdmin = currentUser && (
-    (poll.createdBy && poll.createdBy.toString() === currentUser.id) ||
-    currentUser.role === "admin"
+  const isCreatorOrAdmin = Boolean(
+    currentUser &&
+    ((pollCreatorId && currentUserId && pollCreatorId === currentUserId) ||
+      currentUser.role === "admin")
   );
 
   // Filter options based on status
-  const visibleOptions = isCreatorOrAdmin 
-    ? poll.options 
-    : poll.options?.filter(opt => opt.status === "approved") || [];
+  const visibleOptions = isCreatorOrAdmin
+    ? pollOptions
+    : pollOptions.filter((opt) => opt.status === "approved");
 
   const totalVotes =
     visibleOptions.reduce((sum, option) => sum + (option.votes || 0), 0) || 0;
@@ -180,11 +187,13 @@ const serializePoll = async (poll, currentUser, session, req) => {
   let votedOptionId = null;
   
   // Authenticated users always use account-based voting, even on anonymous polls.
-  if (currentUser) {
-    const userVote = poll.userVotes?.find((uv) => uv.userId.toString() === currentUser.id);
+  if (currentUserId) {
+    const userVote = poll.userVotes?.find(
+      (uv) => uv?.userId?.toString?.() === currentUserId
+    );
     if (userVote) {
       hasVoted = true;
-      votedOptionId = userVote.optionId.toString();
+      votedOptionId = userVote.optionId?.toString?.() || null;
     }
   }
   
