@@ -55,7 +55,6 @@ const Home = () => {
         if (settings.backgroundImageUrl) {
           const img = new Image();
           img.onload = () => { if (isMounted) setHeroImageLoaded(true); };
-          img.onerror = () => { if (isMounted) setHeroImageLoaded(false); };
           img.src = settings.backgroundImageUrl;
         }
       } catch (error) {

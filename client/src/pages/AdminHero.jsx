@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { API_BASE_URL, getAuthStatus, getHeroSettings, updateHeroSettings } from "../lib/api.js";
 
+const isValidImageUrl = (url) => {
+  if (!url) return true;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+};
+
 export default function AdminHero() {
   const [session, setSession] = useState({ loading: true, user: null, error: null });
   const [settings, setSettings] = useState({ backgroundImageUrl: "", backgroundColor: "#1a2a3a" });
@@ -38,6 +48,10 @@ export default function AdminHero() {
   }, []);
 
   const handleSave = async () => {
+    if (settings.backgroundImageUrl && !isValidImageUrl(settings.backgroundImageUrl)) {
+      setSaveState({ saving: false, success: null, error: "Το URL εικόνας πρέπει να ξεκινά με https:// ή http://" });
+      return;
+    }
     setSaveState({ saving: true, success: null, error: null });
     try {
       const data = await updateHeroSettings(settings);

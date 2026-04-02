@@ -2256,9 +2256,9 @@ authRouter.get("/logout", (req, res, next) => {
 const heroSettingsPath = path.join(__dirname, "data", "hero-settings.json");
 const heroSettingsRouter = express.Router();
 
-heroSettingsRouter.get("/", (req, res) => {
+heroSettingsRouter.get("/", async (req, res) => {
   try {
-    const raw = fs.readFileSync(heroSettingsPath, "utf8");
+    const raw = await fs.promises.readFile(heroSettingsPath, "utf8");
     return res.json(JSON.parse(raw));
   } catch (error) {
     console.error("[hero-settings-get-error]", error);
@@ -2266,14 +2266,14 @@ heroSettingsRouter.get("/", (req, res) => {
   }
 });
 
-heroSettingsRouter.put("/", ensureAuthenticated, ensureRole("admin"), (req, res) => {
+heroSettingsRouter.put("/", ensureAuthenticated, ensureRole("admin"), async (req, res) => {
   const { backgroundImageUrl, backgroundColor } = req.body || {};
   const settings = {
     backgroundImageUrl: typeof backgroundImageUrl === "string" ? backgroundImageUrl.trim() : "",
     backgroundColor: typeof backgroundColor === "string" ? backgroundColor.trim() : "#1a2a3a",
   };
   try {
-    fs.writeFileSync(heroSettingsPath, JSON.stringify(settings, null, 2), "utf8");
+    await fs.promises.writeFile(heroSettingsPath, JSON.stringify(settings, null, 2), "utf8");
     return res.json(settings);
   } catch (error) {
     console.error("[hero-settings-put-error]", error);
