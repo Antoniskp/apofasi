@@ -2261,8 +2261,11 @@ heroSettingsRouter.get("/", async (req, res) => {
     const raw = await fs.promises.readFile(heroSettingsPath, "utf8");
     return res.json(JSON.parse(raw));
   } catch (error) {
+    if (error.code === "ENOENT") {
+      return res.json({ backgroundImageUrl: "", backgroundColor: "#1a2a3a" });
+    }
     console.error("[hero-settings-get-error]", error);
-    return res.json({ backgroundImageUrl: "", backgroundColor: "#1a2a3a" });
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η ανάγνωση ρυθμίσεων." });
   }
 });
 

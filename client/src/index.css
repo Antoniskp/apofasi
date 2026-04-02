@@ -633,7 +633,7 @@ button:focus-visible {
 
 .hero-features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
 }
 
@@ -2127,6 +2127,10 @@ button:focus-visible {
   .hero {
     padding: 72px 20px 60px;
     min-height: 45vh;
+  }
+
+  .hero-features-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .menu-top {
