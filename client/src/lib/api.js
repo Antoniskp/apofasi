@@ -377,4 +377,19 @@ export const untagArticleAsNews = async (articleId) =>
     )
   );
 
+export const getHeroSettings = async () =>
+  handleResponse(
+    await fetch(`${API_BASE_URL}/hero-settings`, {
+      credentials: "include",
+    })
+  );
+
+export const updateHeroSettings = async (settings) =>
+  handleResponse(
+    await fetch(
+      `${API_BASE_URL}/hero-settings`,
+      buildJsonRequest(settings, "PUT")
+    )
+  );
+
 export { API_BASE_URL };

@@ -2253,6 +2253,34 @@ authRouter.get("/logout", (req, res, next) => {
   });
 });
 
+const heroSettingsPath = path.join(__dirname, "data", "hero-settings.json");
+const heroSettingsRouter = express.Router();
+
+heroSettingsRouter.get("/", (req, res) => {
+  try {
+    const raw = fs.readFileSync(heroSettingsPath, "utf8");
+    return res.json(JSON.parse(raw));
+  } catch (error) {
+    console.error("[hero-settings-get-error]", error);
+    return res.json({ backgroundImageUrl: "", backgroundColor: "#1a2a3a" });
+  }
+});
+
+heroSettingsRouter.put("/", ensureAuthenticated, ensureRole("admin"), (req, res) => {
+  const { backgroundImageUrl, backgroundColor } = req.body || {};
+  const settings = {
+    backgroundImageUrl: typeof backgroundImageUrl === "string" ? backgroundImageUrl.trim() : "",
+    backgroundColor: typeof backgroundColor === "string" ? backgroundColor.trim() : "#1a2a3a",
+  };
+  try {
+    fs.writeFileSync(heroSettingsPath, JSON.stringify(settings, null, 2), "utf8");
+    return res.json(settings);
+  } catch (error) {
+    console.error("[hero-settings-put-error]", error);
+    return res.status(500).json({ message: "Δεν ήταν δυνατή η αποθήκευση ρυθμίσεων." });
+  }
+});
+
 app.use("/auth", authRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/news", newsRouter);
@@ -2260,6 +2288,7 @@ app.use("/api/articles", articlesRouter);
 app.use("/api/polls", pollsRouter);
 app.use("/api/public-users", publicUsersRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/hero-settings", heroSettingsRouter);
 app.use("/contact", contactRouter);
 app.use("/api/contact", contactRouter);
 
