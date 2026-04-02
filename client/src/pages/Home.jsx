@@ -1,23 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import NewspaperIcon from "@mui/icons-material/Newspaper";
-import HowToVoteIcon from "@mui/icons-material/HowToVote";
-import ArticleIcon from "@mui/icons-material/Article";
-import SchoolIcon from "@mui/icons-material/School";
-import FlagIcon from "@mui/icons-material/Flag";
-import GroupsIcon from "@mui/icons-material/Groups";
-import HandshakeIcon from "@mui/icons-material/Handshake";
-import { getAuthStatus, getHeroSettings, listPolls, voteOnPoll, cancelVoteOnPoll } from "../lib/api";
-
-const navCards = [
-  { icon: NewspaperIcon, title: "Ειδήσεις", description: "Όλα τα media σε ένα σημείο", to: "/news" },
-  { icon: HowToVoteIcon, title: "Ψηφοφορίες", description: "Ψηφίστε & δείτε τάσεις", to: "/polls" },
-  { icon: ArticleIcon, title: "Άρθρα", description: "Αναλύσεις & απόψεις πολιτών", to: "/articles" },
-  { icon: SchoolIcon, title: "Εκπαίδευση", description: "Μάθε πώς λειτουργεί το κράτος", to: "/education" },
-  { icon: FlagIcon, title: "Αποστολή", description: "Τι επιδιώκουμε", to: "/mission" },
-  { icon: GroupsIcon, title: "Dream Team", description: "Η ομάδα πίσω από την Απόφαση", to: "/about" },
-  { icon: HandshakeIcon, title: "Συνεισφορά", description: "Βοήθησε το project", to: "/contribute" },
-];
+import { getAuthStatus, listPolls, voteOnPoll, cancelVoteOnPoll } from "../lib/api";
 
 const getTotalVotes = (poll) => {
   if (typeof poll.totalVotes === "number") return poll.totalVotes;
@@ -29,35 +12,16 @@ const Home = () => {
   const [pollsState, setPollsState] = useState({ loading: true, polls: [], error: null });
   const [voteState, setVoteState] = useState({});
   const [cancelState, setCancelState] = useState({});
-  const [heroSettings, setHeroSettings] = useState({ backgroundImageUrl: "", backgroundColor: "#1a2a3a" });
-  const [heroImageLoaded, setHeroImageLoaded] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
     const loadData = async () => {
       try {
-        const [authData, pollsData, heroData] = await Promise.all([
-          getAuthStatus(),
-          listPolls(),
-          getHeroSettings(),
-        ]);
+        const [authData, pollsData] = await Promise.all([getAuthStatus(), listPolls()]);
         if (!isMounted) return;
         setAuthState({ loading: false, user: authData.user, error: null });
         setPollsState({ loading: false, polls: pollsData.polls || [], error: null });
-
-        const settings = heroData || {};
-        setHeroSettings({
-          backgroundImageUrl: settings.backgroundImageUrl || "",
-          backgroundColor: settings.backgroundColor || "#1a2a3a",
-        });
-
-        if (settings.backgroundImageUrl) {
-          const img = new Image();
-          img.onload = () => { if (isMounted) setHeroImageLoaded(true); };
-          img.onerror = () => { if (isMounted) setHeroImageLoaded(false); };
-          img.src = settings.backgroundImageUrl;
-        }
       } catch (error) {
         if (!isMounted) return;
         setAuthState({ loading: false, user: null, error: error.message || "Η φόρτωση απέτυχε." });
@@ -132,39 +96,89 @@ const Home = () => {
     }
   };
 
-  const heroStyle = heroSettings.backgroundImageUrl && heroImageLoaded
-    ? { backgroundImage: `url(${heroSettings.backgroundImageUrl})` }
-    : { backgroundColor: heroSettings.backgroundColor };
-
   return (
     <div className="home">
-      <section className="hero" style={heroStyle}>
-        {heroSettings.backgroundImageUrl && heroImageLoaded && <div className="hero-overlay" />}
-        <div className="hero-content">
-          <div className="hero-kicker">Απόφαση • Δημόσιο αίσθημα για την επικαιρότητα</div>
-          <h1>Καθαρή εικόνα από όλα τα ελληνικά media και μια ψήφος κάτω από κάθε ιστορία.</h1>
-          <p className="hero-sub">
-            Η «Απόφαση» ομαδοποιεί τίτλους από διαφορετικές πηγές, δείχνει πώς καλύπτουν το ίδιο
-            θέμα και καταγράφει τη στάση των αναγνωστών με μικρές, διαφανείς ψηφοφορίες.
-          </p>
-          <Link to="/news" className="btn hero-cta">
-            Ξεκινήστε τώρα
-          </Link>
-        </div>
-      </section>
-
-      <section className="hero-features">
+      <section className="hero">
         <div className="hero-inner">
-          <div className="hero-features-grid">
-            {navCards.map(({ icon: Icon, title, description, to }) => (
-              <Link key={to} to={to} className="hero-feature-card">
-                <div className="hero-feature-icon">
-                  <Icon fontSize="inherit" />
+          <div className="hero-grid">
+            <div className="hero-copy">
+              <div className="hero-kicker">Απόφαση • Δημόσιο αίσθημα για την επικαιρότητα</div>
+
+              <h1>Καθαρή εικόνα από όλα τα ελληνικά media και μια ψήφος κάτω από κάθε ιστορία.</h1>
+
+              <p className="hero-sub">
+                Η «Απόφαση» ομαδοποιεί τίτλους από διαφορετικές πηγές, δείχνει πώς καλύπτουν το ίδιο θέμα και
+                καταγράφει τη στάση των αναγνωστών με μικρές, διαφανείς ψηφοφορίες.
+              </p>
+
+              <ul className="hero-points">
+                <li>
+                  <span className="point-dot" aria-hidden>
+                    •
+                  </span>
+                  Ομαδοποιούμε τίτλους από εφημερίδες, ενημερωτικά sites και δημόσια ΜΜΕ.
+                </li>
+                <li>
+                  <span className="point-dot" aria-hidden>
+                    •
+                  </span>
+                  Προβάλλουμε πώς πλαισιώνεται η ίδια ιστορία με μια ματιά.
+                </li>
+                <li>
+                  <span className="point-dot" aria-hidden>
+                    •
+                  </span>
+                  Προσθέτουμε μια απλή ψηφοφορία για να φαίνεται η τάση σε πραγματικό χρόνο.
+                </li>
+              </ul>
+
+              <div className="hero-buttons">
+                <Link to="/news" className="btn">
+                  Δείτε τις ιστορίες
+                </Link>
+                <Link to="/polls" className="btn btn-outline">
+                  Ψηφίστε σε μια ιστορία
+                </Link>
+                <Link to="/mission" className="btn btn-subtle">
+                  Μάθετε τι επιδιώκουμε
+                </Link>
+              </div>
+
+              <div className="hero-meta">
+                <span className="pill pill-soft">Ανοιχτός κώδικας</span>
+                <span className="pill pill-soft">Χωρίς paywall</span>
+                <span className="pill pill-soft">Εστίαση στην Ελλάδα</span>
+              </div>
+
+              <p className="hero-disclaimer">
+                Διαφάνεια: Οι ψηφοφορίες είναι ενδεικτικές και δεν αποτελούν στατιστικά αντιπροσωπευτικό δείγμα.
+              </p>
+            </div>
+
+            <aside className="hero-panel">
+              <div className="hero-panel-header">
+                <span className="pill pill-soft">Σήμερα στην Απόφαση</span>
+                <h2>Συνοπτική εικόνα σε μία κάρτα.</h2>
+                <p className="muted">
+                  Οργανώνουμε την επικαιρότητα με σαφήνεια, ώστε να βλέπετε γρήγορα τις τάσεις και τις πηγές.
+                </p>
+              </div>
+
+              <div className="hero-panel-list">
+                <div className="hero-panel-item">
+                  <span className="hero-panel-number">Πολλαπλές</span>
+                  <span className="muted">πηγές & τίτλοι ανά ιστορία</span>
                 </div>
-                <div className="hero-feature-title">{title}</div>
-                <div className="hero-feature-desc">{description}</div>
-              </Link>
-            ))}
+                <div className="hero-panel-item">
+                  <span className="hero-panel-number">Ανοιχτές</span>
+                  <span className="muted">ψηφοφορίες με άμεση τάση</span>
+                </div>
+                <div className="hero-panel-item">
+                  <span className="hero-panel-number">Καθαρή</span>
+                  <span className="muted">ανάγνωση χωρίς clickbait</span>
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
       </section>
