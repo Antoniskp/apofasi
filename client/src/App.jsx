@@ -21,7 +21,6 @@ import Contribute from "./pages/Contribute.jsx";
 import Register from "./pages/Register.jsx";
 import Profile from "./pages/Profile.jsx";
 import AdminUsers from "./pages/AdminUsers.jsx";
-import AdminHero from "./pages/AdminHero.jsx";
 import Users from "./pages/Users.jsx";
 import Contact from "./pages/Contact.jsx";
 import About from "./pages/About.jsx";
@@ -94,7 +93,6 @@ function App() {
         <Route path="/profile" element={withLayout(<Profile />)} />
         <Route path="/users" element={withLayout(<Users />)} />
         <Route path="/admin/users" element={withLayout(<AdminUsers />)} />
-        <Route path="/admin/hero" element={withLayout(<AdminHero />)} />
         <Route path="/auth/success" element={withLayout(<AuthStatus type="success" />)} />
         <Route path="/auth/error" element={withLayout(<AuthStatus type="error" />)} />
       </Routes>
